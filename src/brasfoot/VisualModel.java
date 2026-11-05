@@ -76,14 +76,18 @@ public final class VisualModel {
     }
     @SuppressWarnings("unchecked")
     public void update(Map<String,Object> state)throws Exception{
-        updateClubs(Data.map(state.get("game")));
-        for(I match:matches) {
-            for(ah club:new ah[]{match.hc(),match.hd()}){
-                List<F> all=club==match.hc()?match.hl():match.hm(),active=club==match.hc()?match.hp():match.hq(),bench=club==match.hc()?match.hn():match.ho();
-                club.kY().clear();club.kZ().clear();all.clear();active.clear();bench.clear();
-                for(Object raw:club.kc()){F p=(F)raw;if(p.fT()>=1 && p.fT()<=25){all.add(p);active.add(p);club.kY().add(p);}else if(p.fT()>=26 && p.fT()<=36){bench.add(p);club.kZ().add(p);}}
-            }
+        Map<String,Object> game=Data.map(state.get("game"));updateClubs(game);
+        for(Object raw:Data.list(game.get("matches"))){Map<String,Object> row=Data.map(raw);I match=findMatch(Data.number(row.get("homeId")),Data.number(row.get("awayId")));if(match==null)continue;
+            projectSide(match,true,Data.list(row.get("homeStarters")),Data.list(row.get("homeBench")));
+            projectSide(match,false,Data.list(row.get("awayStarters")),Data.list(row.get("awayBench")));
         }
+    }
+    private I findMatch(int home,int away){for(I match:matches)if(match.hc().lk()==home && match.hd().lk()==away)return match;return null;}
+    private void projectSide(I match,boolean home,List<Object> starters,List<Object> bench){
+        ah club=home?match.hc():match.hd();List<F> all=home?match.hl():match.hm(),active=home?match.hp():match.hq(),reserves=home?match.hn():match.ho();
+        all.clear();active.clear();reserves.clear();club.kY().clear();club.kZ().clear();Map<Integer,F> roster=new HashMap<Integer,F>();for(Object raw:club.kc()){F player=(F)raw;roster.put(player.gD(),player);}
+        for(Object raw:starters){int id=Data.number(Data.map(raw).get("playerId"));F player=roster.get(id);if(player==null)throw new IllegalStateException("Live lineup contains an unknown starter");all.add(player);active.add(player);club.kY().add(player);}
+        for(Object raw:bench){int id=Data.number(Data.map(raw).get("playerId"));F player=roster.get(id);if(player==null)throw new IllegalStateException("Live lineup contains an unknown substitute");reserves.add(player);club.kZ().add(player);}
     }
     public I ownMatch(int coach){al owner=coaches.get(coach);if(owner==null)return null;for(I match:matches)if(match.hc()==owner.fg() || match.hd()==owner.fg())return match;return null;}
     public I preparationMatch(int coach){I current=ownMatch(coach);return current==null?upcoming.get(coach):current;}

@@ -10,23 +10,34 @@ public final class NativeLineup {
     private NativeLineup() { }
     public interface Submit { void send(Map<String,String> form,Runnable success); }
     public static JDialog open(JFrame owner,ah club,I match,Submit submit){
+        return open(owner,club,match,submit,true);
+    }
+    public static JDialog open(JFrame owner,ah club,I match,Submit submit,boolean editable){
         JDialog dialog=new JDialog(owner,"Escalação online — "+club.getNome(),false);
         a.bz original=new a.bz(dialog,club,match,false);
-        seed(original,club);
+        seed(original,club,match);
         Runnable save=()->{try{submit.send(extract(original,club),dialog::dispose);}catch(Exception error){JOptionPane.showMessageDialog(dialog,error.getMessage(),"Escalação",JOptionPane.WARNING_MESSAGE);}};
-        JButton play=(JButton)Data.get(original,"Bn");for(java.awt.event.ActionListener listener:play.getActionListeners())play.removeActionListener(listener);play.setText("Enviar escalação");play.addActionListener(e->save.run());
-        JButton back=(JButton)Data.get(original,"Bo");for(java.awt.event.ActionListener listener:back.getActionListeners())back.removeActionListener(listener);back.setText("Cancelar");back.addActionListener(e->dialog.dispose());
+        JButton play=(JButton)Data.get(original,"Bn");for(java.awt.event.ActionListener listener:play.getActionListeners())play.removeActionListener(listener);play.setText(editable?"Aplicar alterações":"Somente leitura");if(editable)play.addActionListener(e->save.run());else play.setEnabled(false);
+        JButton back=(JButton)Data.get(original,"Bo");for(java.awt.event.ActionListener listener:back.getActionListeners())back.removeActionListener(listener);back.setText("Fechar");back.addActionListener(e->dialog.dispose());
         for(Object key:new Object[]{"AW"})for(Component item:((JPopupMenu)Data.get(original,(String)key)).getComponents())if(item instanceof JMenuItem){item.setEnabled(false);((JMenuItem)item).setToolTipText("Batedores e capitão ainda não configuráveis no online");}
-        routeKeyboard(original,save);
+        if(editable)routeKeyboard(original,save);else{makeReadOnly(original);back.setEnabled(true);}
         dialog.add(new JScrollPane(original));dialog.setSize(1080,800);dialog.setMinimumSize(new Dimension(850,600));dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);return dialog;
     }
     @SuppressWarnings("unchecked")
-    public static void seed(a.bz original,ah club){
+    public static void seed(a.bz original,ah club){seed(original,club,null);}
+    @SuppressWarnings("unchecked")
+    public static void seed(a.bz original,ah club,I match){
         components.ag saved=new components.ag();Set<Integer> occupied=new HashSet<Integer>();
-        for(Object value:club.kc()){F player=(F)value;if(player.fT()>=1 && player.fT()<=36){saved.uH().add(player);saved.uI().add(player.fT());occupied.add(player.fT());}}
+        java.util.List<F> selected=new ArrayList<F>();if(match!=null){selected.addAll(match.hc()==club?match.hp():match.hq());selected.addAll(match.hc()==club?match.hn():match.ho());}else selected.addAll((java.util.List<F>)(java.util.List<?>)club.kc());
+        for(F player:selected)if(player.fT()>=1 && player.fT()<=36){saved.uH().add(player);saved.uI().add(player.fT());occupied.add(player.fT());}
         if(saved.uH().isEmpty())return;
         for(int slot=26;slot<=36;slot++)if(!occupied.contains(slot)){saved.uH().add(null);saved.uI().add(slot);}
         original.a(saved,false);
+    }
+    private static void makeReadOnly(Component component){
+        if(component instanceof JButton || component instanceof JComboBox || component instanceof JCheckBox || component instanceof JTextField || component instanceof JTable)component.setEnabled(false);
+        for(java.awt.event.MouseListener listener:component.getMouseListeners())component.removeMouseListener(listener);
+        if(component instanceof Container)for(Component child:((Container)component).getComponents())makeReadOnly(child);
     }
     private static void routeKeyboard(Component component,Runnable save){
         if(component instanceof JComponent){JComponent c=(JComponent)component;c.getActionMap().put("st",new AbstractAction(){private static final long serialVersionUID=1L;public void actionPerformed(java.awt.event.ActionEvent e){save.run();}});}

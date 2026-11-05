@@ -2,6 +2,7 @@ package brasfoot;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.function.Consumer;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import best.I;
@@ -20,6 +21,7 @@ public final class NativeMatchPanel extends a.dV {
     private boolean first=true;
     private boolean intervalSounded;
     private final java.util.List<Integer> sounds=new ArrayList<Integer>();
+    private Consumer<I> lineupOpener;
     public NativeMatchPanel(JFrame frame,java.util.List<I> matches) {
         super(frame,720);this.matches=matches;
         ArrayList<best.at> competitions=new ArrayList<best.at>();
@@ -27,7 +29,10 @@ public final class NativeMatchPanel extends a.dV {
         Y(competitions);
         if(GO!=null)GO.stop();
         disableLocalActions(this);
+        for(String key:new String[]{"Hp","Ho"}){JLabel team=(JLabel)Data.get(this,key);team.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));team.setToolTipText("Abrir escalação");team.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(!matches.isEmpty() && lineupOpener!=null)lineupOpener.accept(matches.get(0));}});}
+        JTable table=(JTable)Data.get(this,"Hs");table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){int row=table.rowAtPoint(event.getPoint());if(row<0 || row>=qi().size() || lineupOpener==null)return;I selected=((components.v)qi().get(row)).tR();if(selected!=null)lineupOpener.accept(selected);}});
     }
+    public void lineupOpener(Consumer<I> opener){lineupOpener=opener;}
     @Override public void oR(){if(GO!=null)GO.stop();}
     @Override public void qa(){ }
     @Override public void aa(boolean value){ }

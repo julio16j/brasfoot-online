@@ -107,7 +107,7 @@ public final class SessionHost {
         try {
             boolean finished=playback.tick();
             if(finished) { ticking=false;round.engineFinished();persist(); }
-            else if(playback.snapshot().get("status").equals("HALF_TIME"))persist();
+            else if(playback.status().equals("HALF_TIME")){ticking=false;round.engineHalfTime();persist();}
         } catch(Throwable error) {
             ticking=false;playback.fail(error);round.engineFailed();
             try {persist();} catch(IOException saveError) {saveError.printStackTrace();}
@@ -212,6 +212,27 @@ public final class SessionHost {
                 });
                 persist();Map<String,Object> response=state(coach);response.put("command",result[0]);reply(exchange,200,response);return;
             }
+            if(path.equals("/halftime-ready") && method.equals("POST")){
+                if(storageFailed)throw new IllegalStateException("Host storage unavailable");
+                Map<String,String> data=form(exchange);String value=required(data,"ready");
+                if(!value.equals("true") && !value.equals("false"))throw new IllegalArgumentException("ready must be true or false");
+                round.halftimeReady(coach,Long.parseLong(required(data,"round")),Long.parseLong(required(data,"revision")),Boolean.parseBoolean(value),()->{playback.resumeSecondHalf();ticking=true;});
+                persist();reply(exchange,200,state(coach));return;
+            }
+            if(path.equals("/substitute") && method.equals("POST")){
+                if(storageFailed)throw new IllegalStateException("Host storage unavailable");
+                Map<String,String> data=form(exchange);long expectedRound=Long.parseLong(required(data,"round")),revision=Long.parseLong(required(data,"revision"));
+                final Map<String,Object>[] result=new Map[1];
+                round.liveCommand(coach,expectedRound,revision,()->result[0]=game.substitute(coach,Integer.parseInt(required(data,"outgoingPlayerId")),Integer.parseInt(required(data,"incomingPlayerId")),playback));
+                persist();Map<String,Object> response=state(coach);response.put("command",result[0]);reply(exchange,200,response);return;
+            }
+            if(path.equals("/live-lineup") && method.equals("POST")){
+                if(storageFailed)throw new IllegalStateException("Host storage unavailable");
+                Map<String,String> data=form(exchange);long expectedRound=Long.parseLong(required(data,"round")),revision=Long.parseLong(required(data,"revision"));
+                final Map<String,Object>[] result=new Map[1];
+                round.liveCommand(coach,expectedRound,revision,()->result[0]=game.liveLineup(coach,indices(required(data,"starters")),indices(data.get("bench")),indices(required(data,"slots")),indices(data.get("tactics")),playback));
+                persist();Map<String,Object> response=state(coach);response.put("command",result[0]);reply(exchange,200,response);return;
+            }
             if(path.equals("/advance") && method.equals("POST")) {
                 if(storageFailed)throw new IllegalStateException("Host storage unavailable");
                 if(!game.isCareer())throw new IllegalStateException("Friendly session has no career calendar");
@@ -263,16 +284,22 @@ public final class SessionHost {
             Path previous=Paths.get(options.get("--resume")).toAbsolutePath().normalize();
             Map<String,Object> manifest=Data.parse(new String(Files.readAllBytes(previous.resolve("session.json")),StandardCharsets.UTF_8));
             String phase=(String)Data.map(manifest.get("round")).get("phase");
-            String save=(String)manifest.get((phase.equals("RUNNING") || phase.equals("FAILED") || phase.equals("WAITING_FOR_ENGINE"))?"roundStartSave":"save");
+            String save=(String)manifest.get((phase.equals("RUNNING") || phase.equals("HALF_TIME") || phase.equals("FAILED") || phase.equals("WAITING_FOR_ENGINE"))?"roundStartSave":"save");
             if(save==null || !save.matches("career-[0-9]+\\.s22"))throw new IllegalArgumentException("Session has no valid recovery checkpoint");
             options.put("--save",previous.resolve(save).toString());
             recoveredRound=Data.map(manifest.get("round"));
-            Object managementState=manifest.get((phase.equals("RUNNING") || phase.equals("FAILED") || phase.equals("WAITING_FOR_ENGINE"))?"roundStartManagement":"management");
+            Object managementState=manifest.get((phase.equals("RUNNING") || phase.equals("HALF_TIME") || phase.equals("FAILED") || phase.equals("WAITING_FOR_ENGINE"))?"roundStartManagement":"management");
             if(managementState instanceof Map)recoveredManagement=Data.map(managementState);
             resumedDemo=Boolean.TRUE.equals(manifest.get("demo"));
             System.out.println("Resuming saved career; interrupted matches restart from preparation.");
         }
-        GameAdapter game = career?CareerEngine.create(root.toFile(),options.getOrDefault("--clubs","Corinthians,Palmeiras,Santos,São Paulo").split(",")):demo ? Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(), root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile()) : GameAdapter.readLocalSave(new File(options.get("--save")));
+        GameAdapter game;
+        if(career){
+            String[] names=options.containsKey("--coach-names")?new String(Base64.getUrlDecoder().decode(options.get("--coach-names")),StandardCharsets.UTF_8).split("\n",-1):null;
+            if(options.containsKey("--club-ids"))game=CareerEngine.create(root.toFile(),indices(options.get("--club-ids")),names);
+            else game=CareerEngine.create(root.toFile(),options.getOrDefault("--clubs","Corinthians,Palmeiras,Santos,São Paulo").split(","),names);
+        } else if(demo)game=Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(),root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile());
+        else game=GameAdapter.readLocalSave(new File(options.get("--save")));
         if(game.isCareer()){
             if(!Boolean.getBoolean("brasfoot.host.ui.disabled"))throw new IllegalStateException("Career host requires -javaagent:host-ui-agent.jar");
             c.a.SR.bs=false;
