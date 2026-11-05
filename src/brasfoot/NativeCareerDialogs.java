@@ -71,7 +71,7 @@ public final class NativeCareerDialogs {
     }
 
     private static void selectRequested(JComboBox<Choice> choices,String requested){
-        if(requested==null)return;String value=requested.toLowerCase(Locale.ROOT);String action=value.startsWith("renov")?"renew":value.startsWith("colocar")||value.startsWith("retirar")?"list":null;
+        if(requested==null)return;String value=requested.toLowerCase(Locale.ROOT);String action=value.startsWith("renov")?"renew":value.startsWith("promover")?"promote":value.startsWith("colocar")||value.startsWith("retirar")?"list":value.contains("transfer")||value.contains("procura")?"offer":null;
         if(action!=null)for(int i=0;i<choices.getItemCount();i++)if(choices.getItemAt(i).id.equals(action))choices.setSelectedIndex(i);
     }
     private static JFrame ownerOf(JDialog dialog){return (JFrame)SwingUtilities.getWindowAncestor(dialog.getOwner());}

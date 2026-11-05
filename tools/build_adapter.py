@@ -4,6 +4,7 @@ ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser()
 p.add_argument('--java', default=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe')
 p.add_argument('--test', action='store_true')
+p.add_argument('--test-transfer', action='store_true')
 a = p.parse_args()
 compiler = ROOT / 'tools/ecj-3.26.0.jar'
 expected = 'ac0ba5876eaf7ebb47749a0d1be179c51f194b9dd0b875d1c09e1b530f5a2db5'
@@ -27,3 +28,7 @@ with zipfile.ZipFile(ROOT/'build/host-ui-agent.jar','w') as agent:
         agent.write(file,file.relative_to(out).as_posix())
 if a.test:
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.AdapterTest', str(ROOT)], check=True, cwd=ROOT)
+if a.test or a.test_transfer:
+    subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.NativeTransferSearchTest'], check=True, cwd=ROOT)
+    subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.NativeTransferMarketTest'], check=True, cwd=ROOT)
+    subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.CareerManagementOfferTest'], check=True, cwd=ROOT)

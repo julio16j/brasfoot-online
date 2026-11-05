@@ -1,7 +1,7 @@
 """Four authenticated users, original Swing panels, repeated rounds and restart recovery."""
 from pathlib import Path
 import concurrent.futures, json, os, re, socket, subprocess, time, urllib.request, urllib.parse, urllib.error
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
 CP=os.pathsep.join(map(str,[ROOT/'build/classes',ROOT/'analysis/brasfoot.jar',*sorted((ROOT/'analysis/lib').glob('*.jar'))]))
 processes=[]
@@ -42,9 +42,12 @@ def prepare(base,tokens):
     state=request(base,'/state',token=tokens[0]);assert state['round']['phase']=='PREPARING','Started without the fourth user'
     request(base,'/ready',{**fields(state,3),'ready':'true'},tokens[3])
 def finish(base,tokens):
-    deadline=time.monotonic()+30
+    deadline=time.monotonic()+30;halftime_confirmed=False
     while True:
         state=request(base,'/state',token=tokens[0]);assert state['round']['phase']!='FAILED',state['playback']['failure']
+        if state['round']['phase']=='HALF_TIME' and not halftime_confirmed:
+            for token,coach in zip(tokens,state['round']['coaches']):request(base,'/halftime-ready',{'round':state['round']['round'],'revision':coach['revision'],'ready':'true'},token)
+            halftime_confirmed=True
         if state['round']['phase']=='FINISHED':break
         assert time.monotonic()<deadline,'Round stalled'
         time.sleep(.1)

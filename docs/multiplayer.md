@@ -39,4 +39,4 @@ Só estão disponíveis na interface online as ações de carreira que possuem c
 
 ## Cobertura automatizada
 
-`tools/test_career_session.py` cobre quatro clientes, telas originais de preparação e escalação, barreira do quarto técnico, resultados compartilhados, avanço de datas, retomada de checkpoint e recuperação de rodada interrompida. `tools/test_career.py` cobre o avanço do calendário do motor original por várias temporadas.
+`tools/tests/test_career_session.py` cobre quatro clientes, telas originais de preparação e escalação, barreira do quarto técnico, resultados compartilhados, avanço de datas, retomada de checkpoint e recuperação de rodada interrompida. `tools/tests/test_career.py` cobre o avanço do calendário do motor original por várias temporadas.

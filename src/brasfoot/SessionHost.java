@@ -94,7 +94,20 @@ public final class SessionHost {
     private void kickoffIfReady() throws IOException {
         if(!round.snapshot().get("phase").equals("WAITING_FOR_ENGINE"))return;
         try {
-            playback.begin();round.engineStarted();persist();ticking=true;
+            playback.begin();round.engineStarted();
+            if(game.isCareer() && !game.hasHumanMatch()){
+                // There are no human decisions in this date. Fast-forward both halves
+                // immediately and skip the halftime ready barrier, while keeping the
+                // same calendar date for the host's normal advance action.
+                persist();int ticks=0;
+                while(!playback.status().equals("FINISHED") && ticks++<200){
+                    if(playback.status().equals("HALF_TIME"))playback.resumeSecondHalf();
+                    else playback.tick();
+                }
+                if(!playback.status().equals("FINISHED"))throw new IllegalStateException("Unattended match did not finish");
+                ticking=false;round.engineFinished();persist();return;
+            }
+            persist();ticking=true;
             if(!clockScheduled){clock.scheduleWithFixedDelay(this::tick,tickMillis,tickMillis,TimeUnit.MILLISECONDS);clockScheduled=true;}
         } catch(Exception error) {
             playback.fail(error);round.engineFailed();persist();

@@ -2,7 +2,7 @@
 from pathlib import Path
 import subprocess
 
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
 out=ROOT/'build/protocol-test'
 out.mkdir(parents=True,exist_ok=True)

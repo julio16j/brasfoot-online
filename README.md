@@ -1,6 +1,17 @@
 # Brasfoot Online
 
-## Estado atual do projeto
+## Estado verificado das telas de preparação
+
+**Revisado em 5 de novembro de 2026.** O fluxo multiplayer de carreira roda em uma instância autoritativa no host. A criação da sessão, a preparação, as partidas, o calendário e as ações de gestão usam o estado do host para manter os clientes sincronizados.
+
+- A seleção de clubes e as telas de preparação reutilizam os menus nativos do Brasfoot.
+- A tela nativa de escalação permite ajustar titulares e opções táticas; o host valida e aplica as alterações.
+- Durante as partidas, os clientes veem o mesmo placar e os mesmos eventos. O relógio pausa no intervalo e só continua quando todos os técnicos confirmam o segundo tempo.
+- A tela nativa **Times** encaminha compras e propostas ao host. Negociações com clubes da IA usam as regras nativas, incluindo contrapropostas. Propostas a clubes controlados por outros jogadores ficam pendentes para resposta do técnico vendedor.
+- Empréstimos ainda não estão integrados à sessão online e ficam desabilitados.
+- A expansão do estádio ainda precisa de validação completa; não conte com a obra nem com o débito do custo até essa correção ser confirmada.
+
+## Estado atual (revisado)
 
 O fluxo multiplayer de carreira roda em uma instância autoritativa no host. A seleção de clubes usa os seletores nativos do Brasfoot e a configuração atual aceita de 1 a 16 técnicos. O host executa as partidas, mantém o calendário e compartilha os dados com os clientes.
 
@@ -34,14 +45,16 @@ Requer Java 8. Os comandos abaixo compilam o adaptador contra o bytecode origina
 
 ```powershell
 python tools/build_adapter.py --test
-python tools/test_session.py
-python tools/test_native_session.py
-python tools/test_native_create.py
-python tools/test_career.py
-python tools/test_career_session.py
+python tools/build_adapter.py --test-transfer
+python tools/tests/test_coordinator.py
+python tools/tests/test_session.py
+python tools/tests/test_native_session.py
+python tools/tests/test_native_create.py
+python tools/tests/test_career.py
+python tools/tests/test_career_session.py
 python tools/package_client.py
 ```
 
-`src/brasfoot/` contém host, protocolo, motor de carreira e interfaces online. `tests/brasfoot/` contém verificações do adaptador e da interface. `tools/` compila, executa os fluxos automatizados e empacota o cliente. `docs/multiplayer.md` descreve o funcionamento e os limites atuais.
+Os testes Python ficam em `tools/tests/`. Os testes Java ficam em `tests/brasfoot/`. `src/brasfoot/` contém o host, o protocolo, o motor de carreira e as interfaces online. `docs/multiplayer.md` descreve o funcionamento e os limites atuais.
 
 O jogo original não é recompilado nem alterado. O pacote distribuível é produzido em `dist/` pelo script de empacotamento.

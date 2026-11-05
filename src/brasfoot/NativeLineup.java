@@ -13,10 +13,11 @@ public final class NativeLineup {
         return open(owner,club,match,submit,true);
     }
     public static JDialog open(JFrame owner,ah club,I match,Submit submit,boolean editable){
+        java.util.List<F> roster=new ArrayList<F>((java.util.List<F>)(java.util.List<?>)club.kc());
         JDialog dialog=new JDialog(owner,"Escalação online — "+club.getNome(),false);
         a.bz original=new a.bz(dialog,club,match,false);
         seed(original,club,match);
-        Runnable save=()->{try{submit.send(extract(original,club),dialog::dispose);}catch(Exception error){JOptionPane.showMessageDialog(dialog,error.getMessage(),"Escalação",JOptionPane.WARNING_MESSAGE);}};
+        Runnable save=()->{try{submit.send(extract(original,club,roster),dialog::dispose);}catch(Exception error){JOptionPane.showMessageDialog(dialog,error.getMessage(),"Escalação",JOptionPane.WARNING_MESSAGE);}};
         JButton play=(JButton)Data.get(original,"Bn");for(java.awt.event.ActionListener listener:play.getActionListeners())play.removeActionListener(listener);play.setText(editable?"Aplicar alterações":"Somente leitura");if(editable)play.addActionListener(e->save.run());else play.setEnabled(false);
         JButton back=(JButton)Data.get(original,"Bo");for(java.awt.event.ActionListener listener:back.getActionListeners())back.removeActionListener(listener);back.setText("Fechar");back.addActionListener(e->dialog.dispose());
         for(Object key:new Object[]{"AW"})for(Component item:((JPopupMenu)Data.get(original,(String)key)).getComponents())if(item instanceof JMenuItem){item.setEnabled(false);((JMenuItem)item).setToolTipText("Batedores e capitão ainda não configuráveis no online");}
@@ -45,14 +46,21 @@ public final class NativeLineup {
         if(component instanceof Container)for(Component child:((Container)component).getComponents())routeKeyboard(child,save);
     }
     public static Map<String,String> extract(a.bz original,ah club){
+        return extract(original,club,new ArrayList<F>((java.util.List<F>)(java.util.List<?>)club.kc()));
+    }
+    private static Map<String,String> extract(a.bz original,ah club,java.util.List<F> roster){
         java.util.List<Object> cells=Data.list(Data.get(original,"AE"));
         java.util.List<Integer> starters=new ArrayList<Integer>(),bench=new ArrayList<Integer>(),slots=new ArrayList<Integer>();
         for(int slot=1;slot<=36 && slot<cells.size();slot++){
             F player=((components.ao)cells.get(slot)).x();if(player==null)continue;
-            int index=club.kc().indexOf(player);if(index<0)throw new IllegalArgumentException("Use apenas jogadores do elenco principal");
+            int index=roster.indexOf(player);if(index<0)throw new IllegalArgumentException("Use apenas jogadores do elenco principal");
             if(slot<=25){starters.add(index);slots.add(slot);}else bench.add(index);
         }
         if(starters.size()!=11)throw new IllegalArgumentException("Selecione 11 titulares no campo");
+        int goalkeeper=-1;for(int i=0;i<starters.size();i++)if(roster.get(starters.get(i)).getPosicao()==0){if(goalkeeper>=0)throw new IllegalArgumentException("Selecione apenas um goleiro titular");goalkeeper=i;}
+        if(goalkeeper<0)throw new IllegalArgumentException("O goleiro precisa estar entre os titulares");
+        if(goalkeeper!=0){Integer player=starters.remove(goalkeeper),slot=slots.remove(goalkeeper);starters.add(0,player);slots.add(0,slot);}
+        if(slots.get(0)!=1){int goalkeeperSlot=slots.get(0);for(int i=0;i<slots.size();i++)if(slots.get(i)==1){slots.set(i,goalkeeperSlot);break;}slots.set(0,1);}
         java.util.List<Integer> tactics=new ArrayList<Integer>();for(int value:club.kj())tactics.add(value);
         Map<String,String> result=new LinkedHashMap<String,String>();result.put("starters",Data.csv(starters));result.put("bench",Data.csv(bench));result.put("slots",Data.csv(slots));result.put("tactics",Data.csv(tactics));return result;
     }

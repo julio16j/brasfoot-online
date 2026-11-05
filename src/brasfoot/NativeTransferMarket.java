@@ -1,0 +1,57 @@
+package brasfoot;
+
+import best.F;
+import best.ah;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.util.Map;
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
+
+/** Original Brasfoot "Times" market panel with purchases committed by the host. */
+public final class NativeTransferMarket {
+    private NativeTransferMarket() { }
+
+    public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit){
+        if(buyer==null)throw new IllegalStateException("Club is unavailable");
+        JDialog dialog=new JDialog(owner,"Times",true);a.iA panel=new a.iA(dialog,buyer,buyer,false);
+        JButton buy=(JButton)Data.get(panel,"FN"),offer=(JButton)Data.get(panel,"MK"),loan=(JButton)Data.get(panel,"MJ");
+        replaceLocalHandler(buy,(event)->purchase(owner,dialog,panel,buyer,buy,submit));
+        replaceLocalHandler(offer,(event)->makeOffer(owner,dialog,panel,buyer,submit));
+        replaceLocalHandler(loan,null);loan.setEnabled(false);loan.setToolTipText("Empréstimos ainda não estão integrados à sessão online.");
+        Dimension size=marketSize();dialog.add(panel);dialog.setSize(size);dialog.setPreferredSize(size);dialog.setResizable(false);
+        dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
+    }
+
+    private static Dimension marketSize(){
+        java.awt.Rectangle bounds=java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        return new Dimension(bounds.width>=1366?1200:1024,bounds.height>=768?740:718);
+    }
+
+    private static void purchase(JFrame owner,JDialog dialog,a.iA panel,ah buyer,JButton button,NativeTransferSearch.Submit submit){
+        F player=panel.sE();if(player==null)return;ah seller=player.fg();
+        if(seller==null || seller==buyer){JOptionPane.showMessageDialog(dialog,"Selecione um jogador de outro clube.","Compra",JOptionPane.INFORMATION_MESSAGE);return;}
+        int amount=Math.max(1,player.fl()>0?player.fl():player.fk());
+        Map<String,String> request=NativeTransferSearch.offerRequest(player.gD(),seller.lk(),amount);
+        button.setEnabled(false);submit.send(request,dialog::dispose,()->button.setEnabled(true));
+    }
+
+    private static void makeOffer(JFrame owner,JDialog dialog,a.iA panel,ah buyer,NativeTransferSearch.Submit submit){
+        F player=panel.sE();if(player==null)return;
+        if(player.fg()==null || player.fg()==buyer){JOptionPane.showMessageDialog(dialog,"Selecione um jogador de outro clube.","Proposta",JOptionPane.INFORMATION_MESSAGE);return;}
+        NativeTransferSearch.showOffer(owner,dialog,player,buyer,submit);
+    }
+
+    static void replaceLocalHandler(AbstractButton button,ActionListener hostAction){
+        for(ActionListener listener:button.getActionListeners())button.removeActionListener(listener);
+        if(hostAction!=null)button.addActionListener(hostAction);
+    }
+
+    static Map<String,String> purchaseRequest(int playerId,int sellerClubId,int askingPrice){
+        return NativeTransferSearch.offerRequest(playerId,sellerClubId,askingPrice);
+    }
+}

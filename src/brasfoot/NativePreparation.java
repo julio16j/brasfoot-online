@@ -24,10 +24,20 @@ public final class NativePreparation {
         JTable table=(JTable)Data.get(original,"Iy");
         Data.set(table.getModel(),"vp",new ArrayList<F>(club.kc()));
         club.kc().clear();club.kc().addAll(order);
+        String[] fields={"HR","HS","HT","HV","HW","HX","yY","HY","HZ","Ia","Ib","Ic","Id","Ie"};
+        Map<String,ActionListener[]> nativeActions=new LinkedHashMap<String,ActionListener[]>();
+        for(String field:fields)nativeActions.put(field,((JButton)Data.get(original,field)).getActionListeners());
         disconnect(original);
         JButton scale=(JButton)Data.get(original,"HU");scale.setEnabled(true);scale.addActionListener(e->lineup.run());
-        String[] fields={"HR","HS","HT","HV","HW","HX","yY","HY","HZ","Ia","Ib","Ic","Id","Ie"};
-        for(String field:fields){JButton button=(JButton)Data.get(original,field);button.setEnabled(true);button.addActionListener(e->menu.accept(button.getText().isEmpty()?field:button.getText()));}
+        for(String field:fields){JButton button=(JButton)Data.get(original,field);button.setEnabled(true);button.setToolTipText(null);
+            if(field.equals("HV"))button.addActionListener(e->menu.accept("Estádio"));
+            else if(field.equals("yY"))button.addActionListener(e->menu.accept("Procura"));
+            else if(field.equals("Ib"))button.addActionListener(e->menu.accept("Times"));
+            else if(field.equals("HW"))
+                for(ActionListener action:nativeActions.get(field))button.addActionListener(action);
+            else if(field.equals("Id"))button.addActionListener(e->menu.accept("Treino"));
+            else for(ActionListener action:nativeActions.get(field))button.addActionListener(action);
+        }
         JPopupMenu actions=new JPopupMenu();
         for(String action:new String[]{"Renovar contrato","Colocar à venda","Retirar da lista de transferências"}){JMenuItem item=new JMenuItem(action);item.addActionListener(e->{int selected=table.getSelectedRow();if(selected>=0){F player=(F)table.getValueAt(table.convertRowIndexToModel(selected),0);menu.accept(action+":"+player.gD());}});actions.add(item);}
         table.setComponentPopupMenu(actions);

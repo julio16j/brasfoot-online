@@ -173,12 +173,56 @@ public final class NativeClient {
     }
     private void openCareerMenu(String action){
         if(latest==null)return;
+        if("Procura".equalsIgnoreCase(action)){openNativeTransferSearch();return;}
+        if("Times".equalsIgnoreCase(action)){openNativeTransferMarket();return;}
+        if("Estádio".equalsIgnoreCase(action)){openNativeStadium();return;}
+        if("Treino".equalsIgnoreCase(action)){openNativeTraining();return;}
         boolean career=Boolean.TRUE.equals(Data.map(latest.get("game")).get("career"));
         work(()->{
             Map<String,Object> overview=api.call("/overview",null);
             Map<String,Object> management=career?api.call("/management",null):new LinkedHashMap<String,Object>();
-            SwingUtilities.invokeLater(()->NativeCareerDialogs.open(frame,action,overview,management,(fields,success)->command("/management",fields,success)));
+            SwingUtilities.invokeLater(()->NativeCareerDialogs.open(frame,action,overview,management,(fields,success)->command("/management",fields,()->{
+                if(success!=null)success.run();Map<String,Object> result=Data.map(latest.get("command"));String operation=fields.get("action"),outcome=String.valueOf(result.get("status"));
+                if("offer".equals(operation) && "PENDING".equals(outcome))status.setText("Proposta enviada; a transferência aguarda a resposta do técnico vendedor.");
+                else if("COMPLETED".equals(outcome) || "ACCEPTED".equals(outcome))status.setText("Transferência concluída; jogador e saldo atualizados.");
+            })));
         },null);
+    }
+    private void openNativeStadium(){
+        al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;I fixture=visual.preparationMatch(coachId);
+        int competitionType=fixture==null?0:fixture.hy().b();
+        NativeStadium.open(frame,owner.fg(),competitionType,(fields,success)->command("/management",fields,success));
+    }
+    private void openNativeTraining(){al owner=visual.coach(coachId);if(owner!=null && owner.fg()!=null)NativeTraining.open(frame,owner.fg(),(fields,success)->command("/management",fields,success));}
+    private void openNativeTransferSearch(){
+        al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
+        int mode=c.a.SR.isHabilidadeIndividual()?2:1;
+        NativeTransferSearch.open(frame,owner.fg(),mode,this::submitNativeTransfer);
+    }
+    private void openNativeTransferMarket(){
+        al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
+        NativeTransferMarket.open(frame,owner.fg(),this::submitNativeTransfer);
+    }
+    private void submitNativeTransfer(Map<String,String> fields,Runnable success,Runnable onFailure){
+        command("/management",fields,()->{
+            Map<String,Object> result=Data.map(latest.get("command"));String outcome=String.valueOf(result.get("status"));
+            if("COUNTEROFFER".equals(outcome)){
+                int price=Data.number(result.get("counterPrice")),salary=Data.number(result.get("counterSalary"));
+                String prompt=counterofferText(price,salary);
+                if(JOptionPane.showConfirmDialog(frame,prompt,"Contraproposta da IA",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+                    Map<String,String> counter=new LinkedHashMap<String,String>(fields);counter.put("acceptCounter","true");counter.put("offerAmount",String.valueOf(result.get("offerAmount")));
+                    counter.put("price",String.valueOf(price));counter.put("counterSalary",String.valueOf(salary));submitNativeTransfer(counter,success,onFailure);return;
+                }
+                status.setText("Contraproposta recusada; você pode ajustar o valor e enviar outra oferta.");if(onFailure!=null)onFailure.run();return;
+            }
+            if("PENDING".equals(outcome))status.setText("Proposta enviada; aguardando a resposta do técnico vendedor.");
+            else status.setText("Transferência concluída; elenco e saldo atualizados pelo host.");
+            if(success!=null)success.run();
+        },onFailure);
+    }
+    static String counterofferText(int price,int salary){
+        String salaryText=salary>0?best.C.c(salary):"manter o salário atual (sem reajuste)";
+        return "O clube fez uma contraproposta:\n\nValor do passe: "+best.C.c(price)+"\nSalário: "+salaryText+"\n\nDeseja aceitar?";
     }
     private void openSubstitution(){
         if(latest==null)return;Map<String,Object> current=own(latest),lineupState=Data.map(current.get("liveLineup"));
@@ -220,7 +264,7 @@ public final class NativeClient {
             else if(phase.equals("FAILED"))status.setText("Partida interrompida: "+live.get("failure"));
             else if(halftime){int halftimeReady=0;for(Object raw:Data.list(Data.map(snapshot.get("round")).get("coaches")))if(Boolean.TRUE.equals(Data.map(raw).get("ready")))halftimeReady++;status.setText("Intervalo — ajustes de escalação liberados; "+halftimeReady+"/"+Data.list(Data.map(snapshot.get("round")).get("coaches")).size()+" prontos para o segundo tempo.");}
             if(!halftime)halftimeDialogRound=-1;
-            else if(halftimeDialogRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) && (editor==null || !editor.isDisplayable())){halftimeDialogRound=Data.longNumber(Data.map(snapshot.get("round")).get("round"));I intervalMatch=visual.ownMatch(coachId);if(intervalMatch!=null)openMatchDetail(intervalMatch);}
+            else if(halftimeDialogRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) && (editor==null || !editor.isDisplayable())){halftimeDialogRound=Data.longNumber(Data.map(snapshot.get("round")).get("round"));if(testing && autoTest)setReady(true);else{I intervalMatch=visual.ownMatch(coachId);if(intervalMatch!=null)openMatchDetail(intervalMatch);}}
             if(testing && phase.equals("FINISHED"))finishTest(snapshot);
         }catch(Throwable error){showError(error);}
     }
@@ -238,8 +282,12 @@ public final class NativeClient {
         }
     }
     private void command(String path,Map<String,String> fields,Runnable success){
+        command(path,fields,success,null);
+    }
+    private void command(String path,Map<String,String> fields,Runnable success,Runnable onFailure){
         Map<String,Object> round=Data.map(latest.get("round"));fields.put("round",String.valueOf(Data.longNumber(round.get("round"))));fields.put("revision",String.valueOf(Data.longNumber(ownRound().get("revision"))));
-        work(()->{Map<String,Object> snapshot=api.call(path,fields);SwingUtilities.invokeLater(()->{accept(snapshot);if(success!=null)success.run();});},null);
+        network.execute(()->{try{Map<String,Object> snapshot=api.call(path,fields);SwingUtilities.invokeLater(()->{accept(snapshot);if(success!=null)success.run();});}
+            catch(Throwable error){failure=error;SwingUtilities.invokeLater(()->{showError(error);if(onFailure!=null)onFailure.run();});}});
     }
     private void autoLineup(){Map<String,Object> suggestion=Data.map(own(latest).get("suggestion"));Map<String,String> data=new LinkedHashMap<String,String>();data.put("starters",Data.csv(Data.list(suggestion.get("starters"))));data.put("bench",Data.csv(Data.list(suggestion.get("bench"))));command("/lineup",data,()->{status.setText("Escalação enviada. Você pode ajustar na tela original antes do Pronto.");if(autoTest && !testReady){testReady=true;if(testNativeEditor)openLineup();else setReady(true);}});}
     private void setReady(boolean value){Map<String,String> data=new LinkedHashMap<String,String>();data.put("ready",String.valueOf(value));String path=Data.map(latest.get("round")).get("phase").equals("HALF_TIME")?"/halftime-ready":"/ready";command(path,data,null);}

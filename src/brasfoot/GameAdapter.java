@@ -152,6 +152,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         for(Object value: state.S()) result.add((I)value);
         return result;
     }
+    /** Whether this date contains a fixture managed by any human coach. */
+    public boolean hasHumanMatch(){for(I fixture:currentMatches())if(fixture.hc().jZ() || fixture.hd().jZ())return true;return false;}
     private Map<String,Object> suggestion(ah club, I match) {
         List<Integer> starters=new ArrayList<Integer>(), bench=new ArrayList<Integer>();
         if (club!=null && match!=null) {
@@ -228,6 +230,10 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             next.put("phaseLabel",fixture.hG());
         }
         result.put("upcoming",upcoming);
+        List<Object> stadiumExpansions=new ArrayList<Object>();
+        for(Object raw:state.bw()){best.B project=(best.B)raw;int owner=-1;for(Object value:state.P()){ah candidate=(ah)value;if(candidate.ev()==project.ev()){owner=candidate.lk();break;}}
+            if(owner<0)continue;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("clubId",owner);row.put("endMillis",project.ew().getTimeInMillis());row.put("seats",integers(projectSeats(project)));stadiumExpansions.add(row);}
+        result.put("stadiumExpansions",stadiumExpansions);
         for(I fixture:currentMatches()){visible.add(fixture.hc());visible.add(fixture.hd());}
         List<Object> visual=new ArrayList<Object>();
         for(ah club:visible)visual.add(visualClub(club));
@@ -236,7 +242,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
     private Map<String,Object> visualClub(ah club){
         Map<String,Object> row=new LinkedHashMap<String,Object>();
         row.put("clubId",club.lk());row.put("club",club.getNome());row.put("asset",club.jY());row.put("country",club.getPais());
-        row.put("balance",club.kb());row.put("division",club.getDivisao());
+        row.put("balance",club.kb());row.put("division",club.getDivisao());row.put("trainingFocus",club.lm());
+        if(club.ev()!=null){Map<String,Object> stadium=new LinkedHashMap<String,Object>();stadium.put("name",club.ev().dS());stadium.put("seats",integers(club.ev().dT()));stadium.put("prices",integers(club.ev().dU()));stadium.put("suggestedPrices",club.ev().dV());row.put("stadium",stadium);}
         row.put("confidence",club.ka()==null?null:scalarFields(club.ka(),new String[]{"oe","of"}));
         List<Integer> tactics=new ArrayList<Integer>();for(int value:club.kj())tactics.add(value);row.put("tactics",tactics);
         List<Object> players=new ArrayList<Object>();I fixture=match(club);int index=0;
@@ -254,6 +261,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
     }
     private Map<String,Object> liveLineup(I match,int side){Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("starters",livePlayers(side==0?match.hp():match.hq()));result.put("bench",livePlayers(side==0?match.hn():match.ho()));result.put("substitutionsRemaining",match.aR(side));return result;}
     private static List<Object> livePlayers(List<?> players){List<Object> result=new ArrayList<Object>();for(Object raw:players){F player=(F)raw;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("slot",player.fT());result.add(row);}return result;}
+    private static int[] projectSeats(best.B project){return (int[])Data.get(project,"dJ");}
+    private static List<Integer> integers(int[] values){List<Integer> result=new ArrayList<Integer>();for(int value:values)result.add(value);return result;}
     private Map<String,Object> scalarFields(Object target,String[] fields){
         Map<String,Object> result=new LinkedHashMap<String,Object>();
         for(String field:fields)try{result.put(field,Data.get(target,field));}catch(IllegalStateException ignored){ }

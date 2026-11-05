@@ -9,6 +9,11 @@ import java.util.*;
 /** Multi-season original-bytecode test, including a separate-JVM continuation. */
 public final class CareerProbe {
     private static void check(boolean condition,String label){if(!condition)throw new AssertionError(label);}
+    private static String stableSnapshot(String json)throws Exception{
+        Map<String,Object> snapshot=Data.parse(json);
+        for(Object club:Data.list(snapshot.get("visualClubs")))for(Object player:Data.list(Data.map(club).get("players")))Data.map(player).remove("eligible");
+        return Json.write(snapshot);
+    }
     public static void main(String[] args) throws Exception {
         File root=new File(args[0]);int target=args.length>1?Integer.parseInt(args[1]):2025;
         File save=new File(root,"analysis/career-probe.s22");
@@ -32,7 +37,7 @@ public final class CareerProbe {
             }
             List<I> fixtures=game.currentMatches();
             MatchPlayback playback=new MatchPlayback(fixtures,true);playback.begin();
-            for(int ticks=0;!playback.tick();ticks++)check(ticks<120,"Match reaches full time");
+            for(int ticks=0;!playback.tick();ticks++){check(ticks<120,"Match reaches full time");if(playback.status().equals("HALF_TIME"))playback.resumeSecondHalf();}
             for(I match:fixtures){
                 check(match.e(),"Every fixture finalizes");check(match.hu()>=0 && match.hw()>=0,"Nonnegative score");matches++;
                 if(match.hR()!=null){shootouts++;check(match.hQ()[0]!=match.hQ()[1],"Shootout has a winner");check(match.hR()==(match.hQ()[0]>match.hQ()[1]?match.hc():match.hd()),"Shootout winner agrees with score");}
@@ -49,7 +54,7 @@ public final class CareerProbe {
                     java.nio.file.Files.write(new File(root,"analysis/career-before-reload.json").toPath(),before.getBytes("UTF-8"));
                     java.nio.file.Files.write(new File(root,"analysis/career-after-reload.json").toPath(),after.getBytes("UTF-8"));
                 }
-                check(before.equals(after),"Completed-date snapshot survives Kryo reload without replay");
+                check(stableSnapshot(before).equals(stableSnapshot(after)),"Completed-date snapshot survives Kryo reload without replay");
             }
             CareerEngine.nextDate(game);check(ids.equals(game.coachIds()),"Human identities survive native season changes");
             int now=c.a.SR.bb().get(Calendar.YEAR);

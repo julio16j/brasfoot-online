@@ -135,6 +135,7 @@ public final class MatchPlayback {
             row.put("id",index);row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
             row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());
             row.put("competition",match.hy()==null?"Partida":match.hy().getNome());
+            row.put("competitionType",match.hy()==null?0:match.hy().b());
             row.put("phaseLabel",match.hG());row.put("stadium",match.ev()!=null?match.ev().dS():match.ik());
             row.put("attendance",match.hU());row.put("attendanceBySection",integers(match.hT()));row.put("revenue",match.hN());
             row.put("homePenalties",match.hQ()[0]);row.put("awayPenalties",match.hQ()[1]);
