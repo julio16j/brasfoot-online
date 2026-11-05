@@ -78,7 +78,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             for(int i=0;i<4;i++)if(tactics[i]<0 || tactics[i]>=limits[i])throw new IllegalArgumentException("Invalid tactic");
         }
         List<F> roster = new ArrayList<F>(club.kc());
-        if (roster.size() > 36) throw new IllegalStateException("Roster above supported 36 slots");
+        if (roster.size() > 64) throw new IllegalStateException("Roster above supported 64 slots");
         Set<Integer> selected = new HashSet<Integer>();
         List<F> chosen = new ArrayList<F>();
         for (int[] group : new int[][] {starters, bench}) {

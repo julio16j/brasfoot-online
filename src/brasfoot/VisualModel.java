@@ -52,7 +52,7 @@ public final class VisualModel {
     private void updateClubs(Map<String,Object> game)throws Exception{
         for(Object raw:Data.list(game.get("visualClubs"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("clubId"));ah club=clubs.get(id);
             if(club==null){
-                String asset=(String)row.get("asset");if(asset==null || !asset.matches("[A-Za-z0-9_\\-]+"))throw new IOException("Invalid club asset");
+                String asset=(String)row.get("asset");if(asset==null || asset.isEmpty() || asset.contains("/") || asset.contains("\\") || asset.contains(".."))throw new IOException("Invalid club asset");
                 File file=new File(root,"game/Brasfoot22-23/teams/"+asset+".ban");
                 if(file.isFile())try(ObjectInputStream input=new ObjectInputStream(new FileInputStream(file))){club=new ah((e.t)input.readObject());}
                 else {club=new ah();Data.set(club,"dm",row.get("club"));Data.set(club,"mV",asset);}
