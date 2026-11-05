@@ -1,5 +1,5 @@
 ﻿from pathlib import Path
-import argparse, hashlib, os, subprocess, urllib.request
+import argparse, hashlib, os, subprocess, urllib.request, zipfile
 ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser()
 p.add_argument('--java', default=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe')
@@ -21,5 +21,9 @@ out = ROOT / 'build/classes'
 out.mkdir(parents=True, exist_ok=True)
 sources = sorted((ROOT / 'src').rglob('*.java')) + sorted((ROOT / 'tests').rglob('*.java'))
 subprocess.run([a.java, '-jar', str(compiler), '-1.8', '-encoding', 'UTF-8', '-proc:none', '-warn:none', '-classpath', os.pathsep.join(map(str, libs)), '-d', str(out), *map(str, sources)], check=True, cwd=ROOT)
+with zipfile.ZipFile(ROOT/'build/host-ui-agent.jar','w') as agent:
+    agent.writestr('META-INF/MANIFEST.MF','Manifest-Version: 1.0\nPremain-Class: brasfoot.HostUiAgent\n\n')
+    for file in out.glob('brasfoot/HostUiAgent*.class'):
+        agent.write(file,file.relative_to(out).as_posix())
 if a.test:
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.AdapterTest', str(ROOT)], check=True, cwd=ROOT)

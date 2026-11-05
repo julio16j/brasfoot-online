@@ -13,7 +13,13 @@ public final class MatchPlayback {
     private int firstExtra, secondExtra;
     private long sequence;
     private String failure;
+    private final boolean career;
+    private final List<I> liveMatches=new ArrayList<I>();
     public MatchPlayback(List<I> matches) {
+        this(matches,false);
+    }
+    public MatchPlayback(List<I> matches,boolean career) {
+        this.career=career;
         this.matches=matches;
         if(!matches.isEmpty()) { boolean all=true;for(I match:matches)all &= match.e();
             if(all) {status="FINISHED";half=2;minute=45+matches.get(0).ib()[1];}
@@ -25,11 +31,16 @@ public final class MatchPlayback {
         for(I match:matches) {
             if(match.e())throw new IllegalStateException("Match already played");
             if(match.hu()!=0 || match.hw()!=0 || !match.hE().isEmpty())throw new IllegalStateException("Resuming an in-progress match is not supported yet");
-            if(match.hy()==null || match.hy().b()!=0)throw new IllegalStateException("Prototype currently supports friendly matches only");
-            if(match.hl().size()!=11 || match.hm().size()!=11)throw new IllegalStateException("Each side needs exactly 11 starters");
+            if(!career && (match.hy()==null || match.hy().b()!=0))throw new IllegalStateException("Prototype currently supports friendly matches only");
         }
+        if(career)best.ah.kh();
+        for(I match:matches)if((!career && (match.hl().size()!=11 || match.hm().size()!=11)) || match.hl().isEmpty() || match.hm().isEmpty())throw new IllegalStateException("Invalid lineup: "+match.hc().getNome()+"="+match.hl().size()+", "+match.hd().getNome()+"="+match.hm().size());
         firstExtra=random.nextInt(3); secondExtra=random.nextInt(5)+1;
-        for(I match:matches) { match.ib()[0]=firstExtra;match.ib()[1]=secondExtra;match.V(); }
+        for(I match:matches) {
+            match.o(match.hG());match.ib()[0]=firstExtra;match.ib()[1]=secondExtra;match.V();
+            if(match.hc().jZ() || match.hd().jZ())liveMatches.add(match);
+            else match.a(true);
+        }
         status="FIRST_HALF";sequence++;
     }
     @SuppressWarnings("unchecked")
@@ -38,10 +49,10 @@ public final class MatchPlayback {
         if(status.equals("NOT_STARTED") || status.equals("FAILED"))throw new IllegalStateException("Match is not running");
         if(status.equals("HALF_TIME")) {
             half=2;minute=0;
-            for(I match:matches) match.m(2,0);
+            for(I match:liveMatches) match.m(2,0);
             status="SECOND_HALF";sequence++;return false;
         }
-        for(I match:matches) {
+        for(I match:liveMatches) {
             int previous=match.hE().size();
             match.q(minute,half);
             for(int i=previous;i<match.hE().size();i++) {
@@ -54,7 +65,15 @@ public final class MatchPlayback {
         if(minute>=duration) {
             if(half==1)status="HALF_TIME";
             else {
-                for(I match:matches) { match.a(true); match.hc().I(false);match.hd().I(false); }
+                for(I match:liveMatches) {
+                    if(career && match.hS() && match.hP() && match.hk()) {
+                        int home=random.nextInt(7)+2,comparison=random.nextInt(7)+2;
+                        int away=home>=comparison?home-1:home+1;
+                        match.i(new int[]{home,away});match.u(home>away?match.hc():match.hd());
+                    }
+                    match.a(true); match.hc().I(false);match.hd().I(false);
+                }
+                if(career)CareerEngine.completeDate();
                 status="FINISHED";
             }
         }
@@ -94,9 +113,16 @@ public final class MatchPlayback {
             I match=matches.get(index);
             Map<String,Object> row=new LinkedHashMap<String,Object>();
             row.put("id",index);row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
+            row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());
+            row.put("competition",match.hy()==null?"Partida":match.hy().getNome());
+            row.put("phaseLabel",match.hG());row.put("stadium",match.ev()!=null?match.ev().dS():match.ik());
+            row.put("attendance",match.hU());row.put("attendanceBySection",integers(match.hT()));row.put("revenue",match.hN());
+            row.put("homePenalties",match.hQ()[0]);row.put("awayPenalties",match.hQ()[1]);
             row.put("homeGoals",match.hu());row.put("awayGoals",match.hw());row.put("played",match.e());
             row.put("shots",Arrays.asList(match.hA()[0],match.hA()[1]));
             row.put("possession",Arrays.asList(match.hz()[0],match.hz()[1]));
+            row.put("shotsOnTarget",integers(match.hZ()));row.put("shotsOffTarget",integers(match.ia()));
+            row.put("tackles",integers(match.hB()));row.put("passErrors",integers(match.hC()));row.put("fouls",integers(match.hD()));
             List<Object> events=new ArrayList<Object>();
             for(int i=0;i<match.hE().size();i++) {
                 A event=(A)match.hE().get(i);
@@ -111,4 +137,5 @@ public final class MatchPlayback {
         }
         result.put("matches",rows);return result;
     }
+    private static List<Integer> integers(int[] values){List<Integer> result=new ArrayList<Integer>();for(int value:values)result.add(value);return result;}
 }

@@ -7,6 +7,7 @@ DIST=ROOT/'dist';DIST.mkdir(exist_ok=True)
 LIB=DIST/'lib';LIB.mkdir(exist_ok=True)
 libraries=[ROOT/'analysis/brasfoot.jar',*sorted((ROOT/'analysis/lib').glob('*.jar'))]
 for library in libraries:(LIB/library.name).write_bytes(library.read_bytes())
+(DIST/'host-ui-agent.jar').write_bytes((ROOT/'build/host-ui-agent.jar').read_bytes())
 manifest='Manifest-Version: 1.0\r\nMain-Class: brasfoot.NativeClient\r\nClass-Path: '+ ' '.join('lib/'+p.name for p in libraries)+'\r\n\r\n'
 # JAR manifest physical lines are limited to 72 bytes; continuation starts with a space.
 physical=[]
@@ -40,6 +41,7 @@ zip_path=DIST/'Brasfoot-Online-Teste.zip'
 prefix='Brasfoot-Online/'
 with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED) as archive:
     archive.write(jar,prefix+jar.name)
+    archive.write(ROOT/'build/host-ui-agent.jar',prefix+'host-ui-agent.jar')
     for library in libraries:archive.write(library,prefix+'lib/'+library.name)
     archive.writestr(prefix+'Iniciar.cmd',CMD.replace('\n','\r\n').encode('ascii'))
     archive.writestr(prefix+'LEIA-ME.txt',readme)

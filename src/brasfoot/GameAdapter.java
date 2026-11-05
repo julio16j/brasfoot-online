@@ -27,6 +27,9 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         }
     }
     public Set<Integer> coachIds() { return new LinkedHashSet<Integer>(coaches.keySet()); }
+    public boolean isCareer(){return !state.N().isEmpty();}
+    public void resetPreparation(){submitted.clear();for(al coach:coaches.values())if(coach.fg()!=null)coach.fg().I(false);}
+    public void invalidateLineups(Collection<Integer> ids){for(Integer id:ids){submitted.remove(id);al coach=coaches.get(id);if(coach!=null && coach.fg()!=null)coach.fg().I(false);}}
     private void checkGlobal() {
         if (c.a.SR != state) throw new IllegalStateException("A different game replaced the global state");
     }
@@ -47,6 +50,13 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             }
         }
         return found;
+    }
+    private I upcoming(ah club){
+        if(club==null)return null;
+        for(int day=state.J();day<state.R().size();day++)for(Object raw:state.m(day)){
+            I fixture=(I)raw;if(!fixture.e() && (fixture.hc()==club || fixture.hd()==club))return fixture;
+        }
+        return match(club);
     }
     @SuppressWarnings("unchecked")
     public void lineup(int coach, int[] starters, int[] bench) {
@@ -135,6 +145,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         checkGlobal();
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("calendarIndex", state.J());
+        result.put("career",isCareer());result.put("season",state.H());
+        result.put("year",state.bb().get(Calendar.YEAR));result.put("date",state.T());
         result.put("dateMillis", state.bb().getTimeInMillis());
         List<Object> list = new ArrayList<Object>();
         for (Map.Entry<Integer, al> entry : coaches.entrySet()) {
@@ -168,7 +180,45 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             m.put("home",match.hc().getNome());m.put("away",match.hd().getNome());
             m.put("homeGoals",match.hu());m.put("awayGoals",match.hw());m.put("played",match.e());matches.add(m);
         }
-        result.put("matches",matches);return result;
+        result.put("matches",matches);
+        Set<ah> visible=new LinkedHashSet<ah>();
+        for(al coach:coaches.values())if(coach.fg()!=null)visible.add(coach.fg());
+        List<Object> upcoming=new ArrayList<Object>();
+        for(Map.Entry<Integer,al> entry:coaches.entrySet()){
+            I fixture=upcoming(entry.getValue().fg());if(fixture==null)continue;
+            visible.add(fixture.hc());visible.add(fixture.hd());Map<String,Object> next=new LinkedHashMap<String,Object>();
+            next.put("coachId",entry.getKey());next.put("homeId",fixture.hc().lk());next.put("awayId",fixture.hd().lk());next.put("competition",fixture.hy().getNome());upcoming.add(next);
+            next.put("phaseLabel",fixture.hG());
+        }
+        result.put("upcoming",upcoming);
+        for(I fixture:currentMatches()){visible.add(fixture.hc());visible.add(fixture.hd());}
+        List<Object> visual=new ArrayList<Object>();
+        for(ah club:visible)visual.add(visualClub(club));
+        result.put("visualClubs",visual);return result;
+    }
+    private Map<String,Object> visualClub(ah club){
+        Map<String,Object> row=new LinkedHashMap<String,Object>();
+        row.put("clubId",club.lk());row.put("club",club.getNome());row.put("asset",club.jY());row.put("country",club.getPais());
+        row.put("balance",club.kb());row.put("division",club.getDivisao());
+        row.put("confidence",club.ka()==null?null:scalarFields(club.ka(),new String[]{"oe","of"}));
+        List<Integer> tactics=new ArrayList<Integer>();for(int value:club.kj())tactics.add(value);row.put("tactics",tactics);
+        List<Object> players=new ArrayList<Object>();I fixture=match(club);int index=0;
+        for(Object raw:club.kc()){
+            F p=(F)raw;Map<String,Object> player=new LinkedHashMap<String,Object>();
+            player.put("index",index++);player.put("name",p.getNome());player.put("position",p.getPosicao());player.put("slot",p.fT());
+            player.put("age",p.getIdade());player.put("strength",p.fi());player.put("fitness",p.fp());player.put("side",p.getLado());
+            player.put("skill1",p.getCr1());player.put("skill2",p.getCr2());player.put("status",p.getStatus());player.put("star",p.ff());player.put("worldClass",p.gm());
+            player.put("salary",p.fj());player.put("value",p.fk());player.put("contractDays",p.fR());
+            player.put("playerId",p.gD());player.put("country",p.getPais());
+            player.put("seasonStats",scalarFields(p,new String[]{"fh","fi"}));
+            player.put("eligible",fixture!=null && p.a(fixture,false));players.add(player);
+        }
+        row.put("players",players);return row;
+    }
+    private Map<String,Object> scalarFields(Object target,String[] fields){
+        Map<String,Object> result=new LinkedHashMap<String,Object>();
+        for(String field:fields)try{result.put(field,Data.get(target,field));}catch(IllegalStateException ignored){ }
+        return result;
     }
     public void saveLocal(File destination) throws IOException {
         checkGlobal();

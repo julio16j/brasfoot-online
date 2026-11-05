@@ -13,7 +13,8 @@ import java.util.concurrent.*;
 public final class SessionHost {
     private final GameAdapter game;
     private final RoundCoordinator round;
-    private final MatchPlayback playback;
+    private final CareerManagement management;
+    private MatchPlayback playback;
     private final ScheduledExecutorService clock=Executors.newSingleThreadScheduledExecutor();
     private final long tickMillis;
     private boolean ticking;
@@ -25,13 +26,25 @@ public final class SessionHost {
     private final boolean demo;
     private long checkpoint;
     private boolean storageFailed;
+    private String roundStartSave;
+    private Map<String,Object> roundStartManagement;
 
     public SessionHost(GameAdapter game, Path root, int hostCoach, boolean demo, long tickMillis) throws IOException {
+        this(game,root,hostCoach,demo,tickMillis,null);
+    }
+    public SessionHost(GameAdapter game, Path root, int hostCoach, boolean demo, long tickMillis,Map<String,Object> recoveredRound) throws IOException {
+        this(game,root,hostCoach,demo,tickMillis,recoveredRound,null);
+    }
+    public SessionHost(GameAdapter game, Path root, int hostCoach, boolean demo, long tickMillis,Map<String,Object> recoveredRound,Map<String,Object> recoveredManagement) throws IOException {
         if (!game.coachIds().contains(hostCoach)) throw new IllegalArgumentException("Host coach must be a human in this career");
         if(tickMillis<5 || tickMillis>10000)throw new IllegalArgumentException("tick-ms must be between 5 and 10000");
         this.game = game; this.round = new RoundCoordinator(game.coachIds(), game); this.demo = demo;
-        this.tickMillis=tickMillis;this.playback=new MatchPlayback(game.currentMatches());
+        this.management=new CareerManagement(game);
+        if(recoveredManagement!=null)management.restoreState(recoveredManagement);
+        this.tickMillis=tickMillis;this.playback=new MatchPlayback(game.currentMatches(),game.isCareer());
         if(playback.snapshot().get("status").equals("FINISHED"))round.restoreFinished();
+        else for(best.I fixture:game.currentMatches())if(fixture.e() || fixture.hu()!=0 || fixture.hw()!=0 || !fixture.hE().isEmpty())throw new IllegalArgumentException("Checkpoint contains an interrupted date; use --resume with the session directory");
+        if(recoveredRound!=null)round.restoreMetadata(recoveredRound);
         directory = root.resolve(sessionId); Files.createDirectories(directory);
         hostToken = claim(hostCoach);
         persist();
@@ -49,11 +62,20 @@ public final class SessionHost {
         Path temporary = directory.resolve(saveName + ".tmp");
         try {
             game.saveLocal(temporary.toFile());
+            try(java.nio.channels.FileChannel saved=java.nio.channels.FileChannel.open(temporary,StandardOpenOption.WRITE)){saved.force(true);}
             Files.move(temporary, directory.resolve(saveName), StandardCopyOption.ATOMIC_MOVE);
             Map<String, Object> meta = new LinkedHashMap<String, Object>();
             meta.put("sessionId", sessionId); meta.put("demo", demo); meta.put("save", saveName);
             meta.put("round", round.snapshot()); meta.put("playback", playback.snapshot());
+            Map<String,Object> managementState=management.exportState();
+            if(round.snapshot().get("phase").equals("PREPARING")){
+                roundStartSave=saveName;
+                try{roundStartManagement=Data.parse(Json.write(managementState));}catch(javax.script.ScriptException error){throw new IOException("Could not snapshot management state",error);}
+            }
+            meta.put("management",managementState);meta.put("roundStartManagement",roundStartManagement);
+            meta.put("roundStartSave",roundStartSave);
             Files.write(directory.resolve("session.json.tmp"), Json.write(meta).getBytes(StandardCharsets.UTF_8));
+            try(java.nio.channels.FileChannel saved=java.nio.channels.FileChannel.open(directory.resolve("session.json.tmp"),StandardOpenOption.WRITE)){saved.force(true);}
             Files.move(directory.resolve("session.json.tmp"), directory.resolve("session.json"), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
             checkpoint = next;
         } catch (IOException | RuntimeException error) {
@@ -64,6 +86,7 @@ public final class SessionHost {
     private Map<String, Object> state(int viewerCoach) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("viewerCoachId", viewerCoach); result.put("demo", demo); result.put("simulationImplemented", true);
+        result.put("host",tokens.get(hostToken)==viewerCoach);
         result.put("storageFailed", storageFailed); result.put("checkpoint", checkpoint);
         result.put("round", round.snapshot()); result.put("game", game.snapshot()); result.put("playback",playback.snapshot());
         return result;
@@ -72,17 +95,18 @@ public final class SessionHost {
         if(!round.snapshot().get("phase").equals("WAITING_FOR_ENGINE"))return;
         try {
             playback.begin();round.engineStarted();persist();ticking=true;
-            clock.scheduleAtFixedRate(this::tick,tickMillis,tickMillis,TimeUnit.MILLISECONDS);
+            if(!clockScheduled){clock.scheduleWithFixedDelay(this::tick,tickMillis,tickMillis,TimeUnit.MILLISECONDS);clockScheduled=true;}
         } catch(Exception error) {
             playback.fail(error);round.engineFailed();persist();
             throw new IllegalStateException("Could not start match: "+error.getMessage());
         }
     }
+    private boolean clockScheduled;
     private synchronized void tick() {
         if(!ticking || storageFailed)return;
         try {
             boolean finished=playback.tick();
-            if(finished) { ticking=false;round.engineFinished();persist();clock.shutdown(); }
+            if(finished) { ticking=false;round.engineFinished();persist(); }
             else if(playback.snapshot().get("status").equals("HALF_TIME"))persist();
         } catch(Throwable error) {
             ticking=false;playback.fail(error);round.engineFailed();
@@ -135,6 +159,15 @@ public final class SessionHost {
     private static Map<String, Object> error(String message) {
         Map<String, Object> result = new LinkedHashMap<String, Object>(); result.put("error", message); return result;
     }
+    private Map<Integer,List<best.F>> rosterIdentities(){
+        Map<Integer,List<best.F>> result=new LinkedHashMap<Integer,List<best.F>>();
+        for(Object raw:c.a.SR.M()){
+            best.al coach=(best.al)raw;List<best.F> players=new ArrayList<best.F>();
+            if(coach.fg()!=null)for(Object value:coach.fg().kc())players.add((best.F)value);
+            result.put(coach.lT(),players);
+        }
+        return result;
+    }
     private synchronized void handle(HttpExchange exchange) throws IOException {
         try {
             String path = exchange.getRequestURI().getPath();
@@ -153,7 +186,8 @@ public final class SessionHost {
             }
             if (path.equals("/join") && method.equals("POST")) {
                 if (storageFailed) throw new IllegalStateException("Host storage unavailable");
-                if (!round.snapshot().get("phase").equals("PREPARING")) throw new IllegalStateException("Round already locked");
+                String phase=(String)round.snapshot().get("phase");
+                if (!phase.equals("PREPARING") && !phase.equals("FINISHED")) throw new IllegalStateException("Round already locked");
                 int coach = Integer.parseInt(required(form(exchange), "coachId"));
                 String token = claim(coach);
                 Map<String, Object> result = new LinkedHashMap<String, Object>();
@@ -161,6 +195,34 @@ public final class SessionHost {
             }
             int coach = authenticate(exchange);
             if (path.equals("/state") && method.equals("GET")) { reply(exchange, 200, state(coach)); return; }
+            if(path.equals("/management") && method.equals("GET")){reply(exchange,200,management.snapshot(coach));return;}
+            if(path.equals("/overview") && method.equals("GET")){reply(exchange,200,CareerViews.snapshot(coach));return;}
+            if(path.equals("/management") && method.equals("POST")){
+                if(storageFailed)throw new IllegalStateException("Host storage unavailable");
+                Map<String,String> data=form(exchange);required(data,"action");
+                long expectedRound=Long.parseLong(required(data,"round")),revision=Long.parseLong(required(data,"revision"));
+                Set<Integer> affected=management.affectedCoaches(coach,data);
+                Map<Integer,List<best.F>> before=rosterIdentities();
+                final Map<String,Object>[] result=new Map[1];
+                round.management(coach,expectedRound,revision,affected,()->{
+                    result[0]=management.execute(coach,data);
+                    Map<Integer,List<best.F>> after=rosterIdentities();Set<Integer> changed=new LinkedHashSet<Integer>();
+                    for(Integer id:before.keySet())if(!before.get(id).equals(after.get(id)))changed.add(id);
+                    if(!changed.isEmpty()){game.invalidateLineups(changed);round.invalidatePreparation(changed,coach);}
+                });
+                persist();Map<String,Object> response=state(coach);response.put("command",result[0]);reply(exchange,200,response);return;
+            }
+            if(path.equals("/advance") && method.equals("POST")) {
+                if(storageFailed)throw new IllegalStateException("Host storage unavailable");
+                if(!game.isCareer())throw new IllegalStateException("Friendly session has no career calendar");
+                if(!hostToken.equals(exchange.getRequestHeaders().getFirst("Authorization").substring(7)))throw new SecurityException("Only the host can advance the calendar");
+                Map<String,String> data=form(exchange);
+                round.nextRound(coach,Long.parseLong(required(data,"round")),Long.parseLong(required(data,"revision")),()->{
+                    try{CareerEngine.nextDate(game);}catch(RuntimeException error){round.engineFailed();playback.fail(error);throw error;}
+                });
+                playback=new MatchPlayback(game.currentMatches(),true);persist();
+                reply(exchange,200,state(coach));return;
+            }
             if (method.equals("POST") && (path.equals("/lineup") || path.equals("/ready"))) {
                 if (storageFailed) throw new IllegalStateException("Host storage unavailable");
                 Map<String, String> data = form(exchange);
@@ -186,16 +248,37 @@ public final class SessionHost {
         finally { exchange.close(); }
     }
     public static void main(String[] args) throws Exception {
-        Map<String, String> options = new HashMap<String, String>(); boolean demo = false;
+        Map<String, String> options = new HashMap<String, String>(); boolean demo = false,career=false;
         for (int i=0;i<args.length;i++) {
             if (args[i].equals("--demo")) demo = true;
+            else if(args[i].equals("--career"))career=true;
             else { if (i+1 == args.length) throw new IllegalArgumentException("Missing option value"); options.put(args[i],args[++i]); }
         }
         Path root = Paths.get(options.getOrDefault("--root", ".")).toAbsolutePath().normalize();
-        if (demo == options.containsKey("--save")) throw new IllegalArgumentException("Choose --demo or --save <local .s22>");
-        GameAdapter game = demo ? Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(), root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile()) : GameAdapter.readLocalSave(new File(options.get("--save")));
+        Map<String,Object> recoveredRound=null;
+        Map<String,Object> recoveredManagement=null;
+        boolean resumedDemo=false;
+        if ((demo?1:0)+(career?1:0)+(options.containsKey("--save")?1:0)+(options.containsKey("--resume")?1:0)!=1) throw new IllegalArgumentException("Choose --demo, --career, --resume <session directory> or --save <local .s22>");
+        if(options.containsKey("--resume")){
+            Path previous=Paths.get(options.get("--resume")).toAbsolutePath().normalize();
+            Map<String,Object> manifest=Data.parse(new String(Files.readAllBytes(previous.resolve("session.json")),StandardCharsets.UTF_8));
+            String phase=(String)Data.map(manifest.get("round")).get("phase");
+            String save=(String)manifest.get((phase.equals("RUNNING") || phase.equals("FAILED") || phase.equals("WAITING_FOR_ENGINE"))?"roundStartSave":"save");
+            if(save==null || !save.matches("career-[0-9]+\\.s22"))throw new IllegalArgumentException("Session has no valid recovery checkpoint");
+            options.put("--save",previous.resolve(save).toString());
+            recoveredRound=Data.map(manifest.get("round"));
+            Object managementState=manifest.get((phase.equals("RUNNING") || phase.equals("FAILED") || phase.equals("WAITING_FOR_ENGINE"))?"roundStartManagement":"management");
+            if(managementState instanceof Map)recoveredManagement=Data.map(managementState);
+            resumedDemo=Boolean.TRUE.equals(manifest.get("demo"));
+            System.out.println("Resuming saved career; interrupted matches restart from preparation.");
+        }
+        GameAdapter game = career?CareerEngine.create(root.toFile(),options.getOrDefault("--clubs","Corinthians,Palmeiras,Santos,São Paulo").split(",")):demo ? Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(), root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile()) : GameAdapter.readLocalSave(new File(options.get("--save")));
+        if(game.isCareer()){
+            if(!Boolean.getBoolean("brasfoot.host.ui.disabled"))throw new IllegalStateException("Career host requires -javaagent:host-ui-agent.jar");
+            c.a.SR.bs=false;
+        }
         int hostCoach = Integer.parseInt(options.getOrDefault("--host-coach", game.coachIds().iterator().next().toString()));
-        SessionHost host = new SessionHost(game, root.resolve("sessions"), hostCoach, demo, Long.parseLong(options.getOrDefault("--tick-ms","500")));
+        SessionHost host = new SessionHost(game, root.resolve("sessions"), hostCoach, demo||resumedDemo, Long.parseLong(options.getOrDefault("--tick-ms","500")),recoveredRound,recoveredManagement);
         String bind = options.getOrDefault("--bind", "0.0.0.0");
         int port = Integer.parseInt(options.getOrDefault("--port", "8212"));
         HttpServer server = HttpServer.create(new InetSocketAddress(bind, port), 16);

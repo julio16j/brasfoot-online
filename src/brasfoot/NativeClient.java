@@ -22,6 +22,9 @@ public final class NativeClient {
     private final JLabel status=new JLabel("Crie uma sessão ou entre pelo IP do host.");
     private final JTextField address=new JTextField("127.0.0.1:8212",23);
     private final JTextField port=new JTextField("8212",6);
+    private final JTextField careerClubs=new JTextField("Corinthians,Palmeiras,Santos,São Paulo",38);
+    private final JComboBox<String> sessionMode=new JComboBox<String>(new String[]{"Carreira (4 técnicos)","Amistoso (2 técnicos)"});
+    private final JButton resume=new JButton("Retomar carreira"),advance=new JButton("Próxima rodada");
     private final JComboBox<CoachChoice> choices=new JComboBox<CoachChoice>();
     private final JButton create=new JButton("Criar sessão"), discover=new JButton("Buscar técnicos"), join=new JButton("Entrar"), reconnect=new JButton("Reconectar com token");
     private final JButton auto=new JButton("Autoescalar"), lineup=new JButton("Escalação"), ready=new JButton("Pronto");
@@ -31,12 +34,18 @@ public final class NativeClient {
     private String token;
     private Process server;
     private GameAdapter model;
+    private VisualModel visual;
+    private final JPanel screens=new JPanel(new CardLayout());
+    private long displayedRound=-1;
     private NativeMatchPanel nativePanel;
+    private boolean audioEnabled=true;
+    private String ownRosterKey="";
     private volatile Map<String,Object> latest;
     private int coachId;
     private JDialog editor;
     private boolean connected,closed,testing,autoTest,testReady,testComplete,keepTestHost,testNativeEditor;
     private Path capture;
+    private Path preparationCapture;
     private volatile Throwable failure;
     private static final class CoachChoice {
         final int id;final String label;final boolean claimed;
@@ -51,17 +60,20 @@ public final class NativeClient {
             close();
         }});
         body.setBackground(new Color(28,65,35));frame.add(body);frame.add(status,BorderLayout.SOUTH);status.setBorder(BorderFactory.createEmptyBorder(6,12,6,12));
-        connectionScreen();frame.setSize(1100,800);frame.setMinimumSize(new Dimension(900,680));frame.setLocationRelativeTo(null);
+        connectionScreen();frame.setSize(1280,900);frame.setMinimumSize(new Dimension(1060,800));frame.setLocationRelativeTo(null);
         network.scheduleWithFixedDelay(()->{if(connected && !closed)try{Map<String,Object> snapshot=api.call("/state",null);SwingUtilities.invokeLater(()->accept(snapshot));}catch(Exception error){SwingUtilities.invokeLater(()->status.setText("Conexão interrompida; tentando novamente: "+error.getMessage()));}},250,250,TimeUnit.MILLISECONDS);
     }
     private void connectionScreen(){
         JPanel box=new JPanel();box.setLayout(new BoxLayout(box,BoxLayout.Y_AXIS));box.setBorder(BorderFactory.createEmptyBorder(55,85,55,85));box.setBackground(new Color(28,65,35));
         JLabel title=new JLabel("Brasfoot Online");title.setFont(new Font("Tahoma",Font.BOLD,30));title.setForeground(Color.WHITE);box.add(title);box.add(Box.createVerticalStrut(18));
-        JLabel note=new JLabel("Amistoso ABC × Corinthians • interface e sons originais • save no host");note.setForeground(new Color(255,255,180));box.add(note);box.add(Box.createVerticalStrut(30));
+        JLabel note=new JLabel("Carreira com 4 técnicos • interface e sons originais • save no host");note.setForeground(new Color(255,255,180));box.add(note);box.add(Box.createVerticalStrut(30));
         box.add(row(new JLabel("Criar sessão na porta:"),port,create));box.add(Box.createVerticalStrut(25));
+        box.add(row(new JLabel("Modo:"),sessionMode,resume));
+        box.add(row(new JLabel("Clubes dos técnicos (4 a 16):"),careerClubs));
         box.add(row(new JLabel("IP do host e porta:"),address,discover));box.add(row(new JLabel("Seu técnico:"),choices,join));box.add(row(reconnect));box.add(Box.createVerticalStrut(20));
         JLabel help=new JLabel("<html>O host compartilha o IP e a porta. Cada técnico escala seu time e confirma Pronto.<br>Todos acompanham a partida na tela original. A porta TCP precisa estar acessível.</html>");help.setForeground(Color.WHITE);box.add(help);
         join.setEnabled(false);create.addActionListener(e->createSession());discover.addActionListener(e->discover());join.addActionListener(e->join());
+        resume.addActionListener(e->{JFileChooser chooser=new JFileChooser(root.resolve("sessions").toFile());chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);chooser.setDialogTitle("Selecione a pasta da sessão salva");if(chooser.showOpenDialog(frame)==JFileChooser.APPROVE_OPTION){resumeDirectory=chooser.getSelectedFile().toPath();createSession();}});
         reconnect.addActionListener(e->{String value=JOptionPane.showInputDialog(frame,"Token de reconexão desta sessão:");if(value!=null && !value.trim().isEmpty())work(()->connect(address.getText(),value.trim()),null);});
         body.add(box,BorderLayout.CENTER);
     }
@@ -76,7 +88,14 @@ public final class NativeClient {
         work(()->{
             int selectedPort=Integer.parseInt(port.getText().trim());if(selectedPort<1024 || selectedPort>65535)throw new IllegalArgumentException("Escolha uma porta entre 1024 e 65535");
             String java=Paths.get(System.getProperty("java.home"),"bin","java.exe").toString();
-            ProcessBuilder builder=new ProcessBuilder(java,"-Djava.awt.headless=true","-cp",System.getProperty("java.class.path"),"brasfoot.SessionHost","--root",root.toString(),"--demo","--port",String.valueOf(selectedPort),"--tick-ms",testing?"75":"1000");builder.directory(root.resolve("game/Brasfoot22-23").toFile());builder.redirectErrorStream(true);
+            java.util.List<String> args=new ArrayList<String>();args.add(java);args.add("-Dfile.encoding=UTF-8");args.add("-Djava.awt.headless=true");
+            boolean career=!testing && sessionMode.getSelectedIndex()==0;
+            if(career || resumeDirectory!=null){Path agent=root.resolve("build/host-ui-agent.jar");if(!Files.exists(agent))agent=root.resolve("host-ui-agent.jar");if(!Files.exists(agent))agent=root.resolve("dist/host-ui-agent.jar");args.add("-javaagent:"+agent);}
+            Collections.addAll(args,"-cp",System.getProperty("java.class.path"),"brasfoot.SessionHost","--root",root.toString());
+            if(resumeDirectory!=null){args.add("--resume");args.add(resumeDirectory.toString());}else args.add(career?"--career":"--demo");
+            if(career && resumeDirectory==null)Collections.addAll(args,"--clubs",careerClubs.getText().trim());
+            Collections.addAll(args,"--port",String.valueOf(selectedPort),"--tick-ms",testing?"75":"1000");
+            ProcessBuilder builder=new ProcessBuilder(args);builder.directory(root.resolve("game/Brasfoot22-23").toFile());builder.redirectErrorStream(true);
             server=builder.start();BufferedReader output=new BufferedReader(new InputStreamReader(server.getInputStream(),"UTF-8"));String line,hostToken=null;
             while((line=output.readLine())!=null){if(line.startsWith("Host token: ")){hostToken=line.substring(12);break;}}
             if(hostToken==null)throw new IOException("O host não iniciou. Verifique se a porta já está em uso.");
@@ -86,6 +105,7 @@ public final class NativeClient {
             SwingUtilities.invokeLater(()->status.setText("Sessão criada. Compartilhe: "+invite+" — save em sessions/ no host."));
         },()->create.setEnabled(true));
     }
+    private Path resumeDirectory;
     private static String localAddresses(int port)throws SocketException{
         java.util.List<String> result=new ArrayList<String>();Enumeration<NetworkInterface> interfaces=NetworkInterface.getNetworkInterfaces();while(interfaces.hasMoreElements()){NetworkInterface network=interfaces.nextElement();if(!network.isUp() || network.isLoopback())continue;Enumeration<InetAddress> addresses=network.getInetAddresses();while(addresses.hasMoreElements()){InetAddress ip=addresses.nextElement();if(ip instanceof Inet4Address)result.add(ip.getHostAddress()+":"+port);}}
         return result.isEmpty()?"127.0.0.1:"+port:String.join(" / ",result);
@@ -101,20 +121,51 @@ public final class NativeClient {
     }
     private void connect(String address,String token)throws Exception{
         SessionApi connection=new SessionApi(address);connection.token(token);Map<String,Object> snapshot=connection.call("/state",null);
-        if(!Boolean.TRUE.equals(snapshot.get("demo")))throw new IOException("A interface deste protótipo está preparada para o amistoso de demonstração");
         this.api=connection;this.token=token;this.coachId=Data.number(snapshot.get("viewerCoachId"));connected=true;
         SwingUtilities.invokeLater(()->{try{gameScreen(snapshot);}catch(Throwable error){showError(error);}});
     }
     private void gameScreen(Map<String,Object> snapshot)throws Exception{
-        model=Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(),root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile());c.a.vH();
-        projectModel(snapshot);nativePanel=new NativeMatchPanel(frame,model.currentMatches());nativePanel.supportedClub(((al)c.a.SR.M().get(coachId)).fg().lk());nativePanel.muted(testing);
+        visual=new VisualModel(root.toFile(),snapshot);c.a.vH();
+        rebuildRound(snapshot);
         body.removeAll();JPanel controls=new JPanel(new FlowLayout(FlowLayout.LEFT,8,6));controls.setBackground(new Color(225,230,220));controls.add(lineup);controls.add(auto);controls.add(ready);
-        JCheckBox audio=new JCheckBox("Áudio original",!testing);audio.addActionListener(e->nativePanel.muted(!audio.isSelected()));controls.add(audio);
+        controls.add(advance);advance.addActionListener(e->command("/advance",new LinkedHashMap<String,String>(),null));
+        audioEnabled=!testing;JCheckBox audio=new JCheckBox("Áudio original",audioEnabled);audio.addActionListener(e->{audioEnabled=audio.isSelected();nativePanel.muted(!audioEnabled);});controls.add(audio);
         JButton copy=new JButton("Token de reconexão");copy.addActionListener(e->JOptionPane.showMessageDialog(frame,new JTextField(token),"Guarde o token desta sessão",JOptionPane.INFORMATION_MESSAGE));controls.add(copy);controls.add(preparation);
         auto.addActionListener(e->autoLineup());lineup.addActionListener(e->openLineup());ready.addActionListener(e->setReady(!isReady()));
-        body.add(controls,BorderLayout.NORTH);body.add(new JScrollPane(nativePanel),BorderLayout.CENTER);nativePanel.setPreferredSize(new Dimension(1030,650));
+        body.add(controls,BorderLayout.NORTH);body.add(screens,BorderLayout.CENTER);
         frame.setTitle("Brasfoot Online — "+own(snapshot).get("club")+(server!=null?" (host)":""));body.revalidate();body.repaint();frame.validate();accept(snapshot);
+        if(preparationCapture!=null)capture(preparationCapture);
         if(autoTest)autoLineup();
+    }
+    private void rebuildRound(Map<String,Object> snapshot)throws Exception{
+        if(editor!=null){editor.dispose();editor=null;}
+        visual.rebuild(snapshot);screens.removeAll();
+        java.util.List<I> shown=new ArrayList<I>();I ownMatch=visual.ownMatch(coachId);
+        if(ownMatch!=null)shown.add(ownMatch);
+        for(I match:visual.matches())if(match!=ownMatch && (ownMatch==null || Objects.equals(match.hy().getNome(),ownMatch.hy().getNome())))shown.add(match);
+        nativePanel=new NativeMatchPanel(frame,shown);al owner=visual.coach(coachId);
+        if(owner.fg()!=null)nativePanel.supportedClub(owner.fg().lk());nativePanel.muted(!audioEnabled || testing);
+        nativePanel.setPreferredSize(new Dimension(1024,750));
+        JPanel stadium=new components.E(null,0);stadium.setLayout(new GridBagLayout());
+        GridBagConstraints layout=new GridBagConstraints();layout.weighty=1;layout.fill=GridBagConstraints.VERTICAL;layout.anchor=GridBagConstraints.NORTH;stadium.add(nativePanel,layout);screens.add(stadium,"MATCH");
+        I next=visual.preparationMatch(coachId);
+        if(owner.fg()!=null && next!=null)screens.add(NativePreparation.create(frame,owner.fg(),next,()->openLineup(),this::openCareerMenu),"PREPARING");
+        else screens.add(new JLabel("Sem partida nesta data. Aguarde os demais técnicos.",SwingConstants.CENTER),"PREPARING");
+        displayedRound=Data.longNumber(Data.map(snapshot.get("round")).get("round"));ownRosterKey=rosterKey(snapshot);screens.revalidate();screens.repaint();
+    }
+    private String rosterKey(Map<String,Object> snapshot){
+        Map<String,Object> owner=own(snapshot);StringBuilder key=new StringBuilder(String.valueOf(owner.get("clubId")));
+        for(Object raw:Data.list(Data.map(snapshot.get("game")).get("visualClubs"))){Map<String,Object> club=Data.map(raw);if(Objects.equals(club.get("clubId"),owner.get("clubId"))){key.append(club.get("balance"));for(Object p:Data.list(club.get("players"))){Map<String,Object> player=Data.map(p);key.append('/').append(player.get("playerId")).append(player.get("name")).append(player.get("salary")).append(player.get("contractDays"));}break;}}
+        return key.toString();
+    }
+    private void openCareerMenu(String action){
+        if(latest==null)return;
+        boolean career=Boolean.TRUE.equals(Data.map(latest.get("game")).get("career"));
+        work(()->{
+            Map<String,Object> overview=api.call("/overview",null);
+            Map<String,Object> management=career?api.call("/management",null):new LinkedHashMap<String,Object>();
+            SwingUtilities.invokeLater(()->NativeCareerDialogs.open(frame,action,overview,management,(fields,success)->command("/management",fields,success)));
+        },null);
     }
     private Map<String,Object> own(Map<String,Object> state){for(Object raw:Data.list(Data.map(state.get("game")).get("coaches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("coachId"))==coachId)return row;}throw new IllegalStateException("Técnico não encontrado");}
     private Map<String,Object> ownRound(){for(Object raw:Data.list(Data.map(latest.get("round")).get("coaches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("coachId"))==coachId)return row;}throw new IllegalStateException("Técnico não encontrado");}
@@ -122,20 +173,26 @@ public final class NativeClient {
     private void accept(Map<String,Object> snapshot){
         if(closed || nativePanel==null)return;latest=snapshot;
         try{
+            if(displayedRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) || ((editor==null || !editor.isDisplayable()) && !ownRosterKey.equals(rosterKey(snapshot))))rebuildRound(snapshot);
             if(editor==null || !editor.isDisplayable())projectModel(snapshot);
             nativePanel.project(snapshot);
             String phase=(String)Data.map(snapshot.get("round")).get("phase");boolean edit=phase.equals("PREPARING") && !isReady() && (editor==null || !editor.isDisplayable());
+            ((CardLayout)screens.getLayout()).show(screens,phase.equals("PREPARING")?"PREPARING":"MATCH");
+            advance.setVisible(Boolean.TRUE.equals(Data.map(snapshot.get("game")).get("career")) && Boolean.TRUE.equals(snapshot.get("host")));advance.setEnabled(phase.equals("FINISHED"));
             auto.setEnabled(edit);lineup.setEnabled(edit);ready.setEnabled(phase.equals("PREPARING") && (editor==null || !editor.isDisplayable()));ready.setText(isReady()?"Retirar Pronto":"Pronto");
-            StringBuilder text=new StringBuilder();for(Object raw:Data.list(Data.map(snapshot.get("round")).get("coaches"))){Map<String,Object> c=Data.map(raw);if(text.length()>0)text.append(" | ");text.append("Técnico ").append(Data.number(c.get("coachId"))+1).append(Boolean.TRUE.equals(c.get("ready"))?": pronto":": preparando");}preparation.setText(text.toString());
+            if(!Boolean.TRUE.equals(own(snapshot).get("hasMatch"))){auto.setEnabled(false);lineup.setEnabled(false);}
+            int readyCount=0;for(Object raw:Data.list(Data.map(snapshot.get("round")).get("coaches")))if(Boolean.TRUE.equals(Data.map(raw).get("ready")))readyCount++;
+            preparation.setText(Data.map(snapshot.get("game")).get("date")+" — "+readyCount+"/"+Data.list(Data.map(snapshot.get("round")).get("coaches")).size()+" prontos");
             Map<String,Object> live=Data.map(snapshot.get("playback"));
             if(Boolean.TRUE.equals(snapshot.get("storageFailed")))status.setText("O host pausou a sessão por falha ao gravar o save.");
-            else if(phase.equals("FINISHED"))status.setText("Fim de jogo — o resultado foi salvo pelo host.");
+            else if(phase.equals("FINISHED"))status.setText("Fim de jogo — resultado salvo. O host pode avançar para a próxima rodada.");
             else if(phase.equals("FAILED"))status.setText("Partida interrompida: "+live.get("failure"));
             if(testing && phase.equals("FINISHED"))finishTest(snapshot);
         }catch(Throwable error){showError(error);}
     }
     @SuppressWarnings("unchecked")
     private void projectModel(Map<String,Object> snapshot){
+        if(visual!=null){try{visual.update(snapshot);}catch(Exception error){throw new IllegalStateException("Não foi possível atualizar a interface original",error);}return;}
         for(Object raw:Data.list(Data.map(snapshot.get("game")).get("coaches"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("coachId"));al local=null;for(Object value:c.a.SR.M())if(((al)value).lT()==id)local=(al)value;if(local==null)throw new IllegalStateException("Técnico desconhecido no modelo visual");
             ah club=local.fg();I match=model.currentMatches().get(0);java.util.List<F> players=new ArrayList<F>(club.kc()),ordered=new ArrayList<F>();
             club.kY().clear();club.kZ().clear();java.util.List<F> all=match.hc()==club?match.hl():match.hm(),active=match.hc()==club?match.hp():match.hq(),bench=match.hc()==club?match.hn():match.ho();all.clear();active.clear();bench.clear();
@@ -152,7 +209,7 @@ public final class NativeClient {
     }
     private void autoLineup(){Map<String,Object> suggestion=Data.map(own(latest).get("suggestion"));Map<String,String> data=new LinkedHashMap<String,String>();data.put("starters",Data.csv(Data.list(suggestion.get("starters"))));data.put("bench",Data.csv(Data.list(suggestion.get("bench"))));command("/lineup",data,()->{status.setText("Escalação enviada. Você pode ajustar na tela original antes do Pronto.");if(autoTest && !testReady){testReady=true;if(testNativeEditor)openLineup();else setReady(true);}});}
     private void setReady(boolean value){Map<String,String> data=new LinkedHashMap<String,String>();data.put("ready",String.valueOf(value));command("/ready",data,null);}
-    private void openLineup(){I match=model.currentMatches().get(0);al coach=null;for(Object value:c.a.SR.M())if(((al)value).lT()==coachId)coach=(al)value;if(coach==null)return;
+    private void openLineup(){if(latest==null || !Data.map(latest.get("round")).get("phase").equals("PREPARING") || isReady())return;I match=visual.ownMatch(coachId);al coach=visual.coach(coachId);if(coach==null || match==null)return;
         editor=NativeLineup.open(frame,coach.fg(),match,(form,success)->command("/lineup",form,()->{success.run();if(testing && testNativeEditor)setReady(true);}));editor.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){editor=null;if(latest!=null)accept(latest);}});editor.setVisible(!testing);
         if(testing && testNativeEditor){
             a.bz original=(a.bz)((JScrollPane)editor.getContentPane().getComponent(0)).getViewport().getView();
@@ -166,14 +223,18 @@ public final class NativeClient {
         if(nativePanel.GO!=null && nativePanel.GO.isRunning())throw new AssertionError("Local game timer started");
         Map<String,Object> row=Data.map(Data.list(Data.map(state.get("playback")).get("matches")).get(0));System.out.println("GUI_FINISHED "+row.get("homeGoals")+" "+row.get("awayGoals")+" sounds="+nativePanel.emittedSounds().size()+" timerStopped=true");if(!keepTestHost){close();System.exit(0);}
     }
+    private void capture(Path path)throws IOException{
+        frame.validate();BufferedImage image=new BufferedImage(body.getWidth(),body.getHeight(),BufferedImage.TYPE_INT_RGB);Graphics2D graphics=image.createGraphics();body.printAll(graphics);graphics.dispose();ImageIO.write(image,"png",path.toFile());
+    }
     private void close(){if(closed)return;closed=true;connected=false;network.shutdownNow();a.dV.qb();if(server!=null)server.destroy();frame.dispose();}
     public static void main(String[] args)throws Exception{
         Map<String,String> options=new HashMap<String,String>();for(int i=0;i<args.length;i++){if(i+1>=args.length)throw new IllegalArgumentException("Missing option value");options.put(args[i],args[++i]);}
         Path root=Paths.get(options.getOrDefault("--root",".")).toAbsolutePath().normalize();System.setProperty("user.dir",root.resolve("game/Brasfoot22-23").toString());
-        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
         SwingUtilities.invokeLater(()->{NativeClient client=new NativeClient(root);client.testing=options.containsKey("--test-token") || options.containsKey("--test-create");client.keepTestHost=options.containsKey("--test-create");client.autoTest=options.containsKey("--test-auto");client.testNativeEditor=options.containsKey("--test-native-editor");client.capture=options.containsKey("--capture")?Paths.get(options.get("--capture")):null;client.frame.setVisible(!client.testing);client.frame.addNotify();client.frame.validate();
             Runtime.getRuntime().addShutdownHook(new Thread(()->{client.network.shutdownNow();if(client.server!=null)client.server.destroy();}));
             if(options.containsKey("--port"))client.port.setText(options.get("--port"));
+            if(options.containsKey("--capture-preparation"))client.preparationCapture=Paths.get(options.get("--capture-preparation"));
             if(options.containsKey("--address"))client.address.setText(options.get("--address"));
             if(options.containsKey("--test-create"))SwingUtilities.invokeLater(()->client.create.doClick());
             else if(client.testing)client.work(()->client.connect(options.get("--address"),options.get("--test-token")),null);

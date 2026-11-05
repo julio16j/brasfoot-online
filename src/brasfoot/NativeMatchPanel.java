@@ -38,7 +38,15 @@ public final class NativeMatchPanel extends a.dV {
         if(component instanceof JComponent){JComponent c=(JComponent)component;c.getActionMap().clear();for(int condition:new int[]{0,1,2})c.getInputMap(condition).clear();}
         if(component instanceof Container)for(Component child:((Container)component).getComponents())disableLocalActions(child);
     }
-    public void supportedClub(int id){supportedClub=id;}
+    public void supportedClub(int id){
+        supportedClub=id;
+        for(int index=0;index<qi().size();index++){
+            I match=((components.v)qi().get(index)).tR();
+            if(match!=null && (match.hc().lk()==id || match.hd().lk()==id)){
+                Data.set(this,"GW",index);pZ();break;
+            }
+        }
+    }
     public void muted(boolean value){mute=value;c.a.SR.setUsaSons(!value);if(value)a.dV.qb();}
     private void sound(int index){sounds.add(index);if(!mute)dk(index);}
     public java.util.List<Integer> emittedSounds(){return new ArrayList<Integer>(sounds);}
@@ -49,15 +57,19 @@ public final class NativeMatchPanel extends a.dV {
         String status=(String)live.get("status");
         // Do not replay old goal sounds when connecting/reconnecting to an ongoing match.
         boolean replay=!first;
-        java.util.List<Object> rows=Data.list(live.get("matches"));
+        java.util.List<Object> rows=new ArrayList<Object>();
+        for(I match:matches)for(Object raw:Data.list(live.get("matches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("homeId"))==match.hc().lk() && Data.number(row.get("awayId"))==match.hd().lk()){rows.add(row);break;}}
         for(int index=0;index<rows.size() && index<matches.size();index++){
             Map<String,Object> row=Data.map(rows.get(index));I match=matches.get(index);
             Data.set(match,"fB",Data.number(row.get("homeGoals")));Data.set(match,"fC",Data.number(row.get("awayGoals")));
             match.a(Boolean.TRUE.equals(row.get("played")));
+            if(row.containsKey("attendance")){Data.set(match,"fD",new int[]{Data.number(row.get("attendance")),0,0,0});}
+            if(row.containsKey("penalties")){java.util.List<Object> pen=Data.list(row.get("penalties"));match.i(new int[]{Data.number(pen.get(0)),Data.number(pen.get(1))});}
             components.v wrapper=null;
             for(Object object:qi())if(((components.v)object).tR()==match){wrapper=(components.v)object;break;}
             if(wrapper==null)continue;
             Data.set(wrapper,"Pq",match.hu());Data.set(wrapper,"Pr",match.hw());
+            wrapper.tW();
             for(Object raw:Data.list(row.get("events"))){
                 Map<String,Object> event=Data.map(raw);String key=index+":"+event.get("id");
                 if(!received.add(key))continue;
@@ -73,6 +85,13 @@ public final class NativeMatchPanel extends a.dV {
         }
         if(!rows.isEmpty()){
             Map<String,Object> row=Data.map(rows.get(0));
+            I featured=matches.get(0);
+            ((JLabel)Data.get(this,"Hp")).setText(featured.hc().getNome()+" ");((JLabel)Data.get(this,"Ho")).setText(" "+featured.hd().getNome());
+            ((JLabel)Data.get(this,"Hp")).setBackground(featured.hc().kB());((JLabel)Data.get(this,"Hp")).setForeground(featured.hc().kC());
+            ((JLabel)Data.get(this,"Ho")).setBackground(featured.hd().kB());((JLabel)Data.get(this,"Ho")).setForeground(featured.hd().kC());
+            ((JLabel)Data.get(this,"Hh")).setIcon(featured.hc().kP());((JLabel)Data.get(this,"Hi")).setIcon(featured.hd().kP());
+            if(row.containsKey("attendance"))((JLabel)Data.get(this,"Hm")).setText(String.valueOf(row.get("attendance")));
+            if(row.containsKey("phaseLabel"))((JLabel)Data.get(this,"Ht")).setText((String)row.get("phaseLabel"));
             ((JLabel)Data.get(this,"Hn")).setText(row.get("homeGoals")+" x "+row.get("awayGoals"));
             String text=status.equals("FINISHED")?"Fim de jogo":status.equals("HALF_TIME")?"Intervalo":status.equals("FAILED")?"Partida interrompida":status.equals("NOT_STARTED")?"Aguardando os técnicos":live.get("minute")+"' - "+live.get("half")+"º tempo";
             ((JLabel)Data.get(this,"uh")).setText(text);

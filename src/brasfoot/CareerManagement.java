@@ -1,0 +1,129 @@
+package brasfoot;
+
+import best.F;
+import best.ah;
+import best.al;
+import java.util.*;
+
+/** Explicit online commands that apply the original career transactions on the host. */
+public final class CareerManagement {
+    private final GameAdapter game;
+    private final best.f state;
+    private final Map<Long,Map<String,Object>> offers=new LinkedHashMap<Long,Map<String,Object>>();
+    private final Map<Integer,List<Integer>> jobOffers=new HashMap<Integer,List<Integer>>();
+    private long jobDate=-1,nextOffer=1;
+    private int nextPlayer;
+
+    public CareerManagement(GameAdapter game){this.game=game;this.state=c.a.SR;ensureIds();}
+    private void check(){if(c.a.SR!=state)throw new IllegalStateException("Career globals changed");if(!game.isCareer())throw new IllegalStateException("Management requires a career session");}
+    private al coach(int id){check();if(!game.coachIds().contains(id))throw new IllegalArgumentException("Unknown human coach");for(Object raw:state.M()){al coach=(al)raw;if(coach.lT()==id)return coach;}throw new IllegalArgumentException("Unknown human coach");}
+    private ah own(int id){ah club=coach(id).fg();if(club==null)throw new IllegalStateException("Choose a club before managing players");return club;}
+    private List<F> allPlayers(){Set<F> seen=Collections.newSetFromMap(new IdentityHashMap<F,Boolean>());List<F> result=new ArrayList<F>();
+        for(Object raw:state.P()){ah club=(ah)raw;for(Object value:club.kc())if(seen.add((F)value))result.add((F)value);for(Object value:club.ky())if(seen.add((F)value))result.add((F)value);}
+        return result;
+    }
+    /** The native ID field is saved with the player, so roster edits never change a command target. */
+    private void ensureIds(){Set<Integer> used=new HashSet<Integer>();List<F> players=allPlayers();for(F player:players)nextPlayer=Math.max(nextPlayer,player.gD()+1);
+        for(F player:players){if(player.gD()<0 || !used.add(player.gD())){player.az(nextPlayer++);used.add(player.gD());}}
+    }
+    private F player(int id){ensureIds();for(F player:allPlayers())if(player.gD()==id)return player;throw new IllegalArgumentException("Player no longer exists");}
+    private F ownedPlayer(int coach,int id,boolean youth){ah club=own(coach);F player=player(id);if(player.fg()!=club || !(youth?club.ky():club.kc()).contains(player))throw new IllegalArgumentException("Player does not belong to your squad");return player;}
+    private int humanOwner(ah club){if(club==null || !Boolean.TRUE.equals(club.jZ()))return -1;for(Object raw:state.M()){al coach=(al)raw;if(coach.fg()==club)return coach.lT();}return -1;}
+    private long date(){return state.bb().getTimeInMillis();}
+    private static String required(Map<String,String> data,String key){String value=data.get(key);if(value==null || value.trim().isEmpty())throw new IllegalArgumentException("Missing "+key);return value;}
+    private static int number(Map<String,String> data,String key){try{return Integer.parseInt(required(data,key));}catch(NumberFormatException error){throw new IllegalArgumentException("Invalid "+key);}}
+    private static boolean bool(Map<String,String> data,String key){String value=required(data,key);if(!value.equals("true") && !value.equals("false"))throw new IllegalArgumentException("Invalid "+key);return Boolean.parseBoolean(value);}
+    private static int price(Map<String,String> data){int price=number(data,"price");if(price<=0)throw new IllegalArgumentException("Price must be positive");return price;}
+    private Map<String,Object> offer(long id){Map<String,Object> value=offers.get(id);if(value==null)throw new IllegalArgumentException("Unknown offer");return value;}
+    private boolean pending(Map<String,Object> offer){return "PENDING".equals(offer.get("status")) && Data.longNumber(offer.get("dateMillis"))==date();}
+
+    /** The caller checks every participant's Ready flag before entering execute(). */
+    public Set<Integer> affectedCoaches(int coachId,Map<String,String> data){coach(coachId);Set<Integer> affected=new LinkedHashSet<Integer>();affected.add(coachId);String action=required(data,"action");
+        if(action.equals("offer")){int owner=humanOwner(player(number(data,"playerId")).fg());if(owner>=0)affected.add(owner);}
+        if(action.equals("respond")){Map<String,Object> offer=offer(Long.parseLong(required(data,"offerId")));affected.add(Data.number(offer.get("buyerCoachId")));}
+        return affected;
+    }
+    public Map<String,Object> execute(int coachId,Map<String,String> data){coach(coachId);ensureIds();String action=required(data,"action");Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("action",action);
+        if(action.equals("offer")){
+            ah buyer=own(coachId);F player=player(number(data,"playerId"));ah seller=player.fg();int amount=price(data);
+            if(seller==null || seller==buyer || seller.lk()!=number(data,"sellerClubId") || !seller.kc().contains(player))throw new IllegalArgumentException("Invalid seller or player");
+            validateTransfer(player,seller,buyer,amount);
+            int owner=humanOwner(seller);
+            if(owner<0){if(!player.ft())throw new IllegalStateException("AI player is not listed for sale");if(amount<asking(player))throw new IllegalStateException("AI club requires the asking price");transfer(player,seller,buyer,amount,true);result.put("status","COMPLETED");}
+            else {
+                for(Map<String,Object> current:offers.values())if(pending(current) && Data.number(current.get("buyerCoachId"))==coachId && Data.number(current.get("playerId"))==player.gD())throw new IllegalStateException("An offer for this player is already pending");
+                if(offers.size()>=400){Iterator<Map.Entry<Long,Map<String,Object>>> iterator=offers.entrySet().iterator();while(iterator.hasNext()){Map.Entry<Long,Map<String,Object>> entry=iterator.next();if(!pending(entry.getValue()))iterator.remove();}if(offers.size()>=400)throw new IllegalStateException("Too many pending offers");}
+                Map<String,Object> offer=new LinkedHashMap<String,Object>();long id=nextOffer++;
+                offer.put("offerId",id);offer.put("playerId",player.gD());offer.put("player",player.getNome());offer.put("sellerClubId",seller.lk());offer.put("sellerCoachId",owner);offer.put("buyerClubId",buyer.lk());offer.put("buyerCoachId",coachId);offer.put("buyerClub",buyer.getNome());offer.put("price",amount);offer.put("dateMillis",date());offer.put("status","PENDING");offers.put(id,offer);
+                result.put("offerId",id);result.put("status","PENDING");
+            }
+        } else if(action.equals("respond")){
+            Map<String,Object> offer=offer(Long.parseLong(required(data,"offerId")));
+            if(Data.number(offer.get("sellerCoachId"))!=coachId)throw new IllegalArgumentException("Only the seller may respond");
+            if(!pending(offer))throw new IllegalStateException("Offer already resolved or expired");boolean accept=bool(data,"accept");
+            if(accept){ah seller=own(coachId),buyer=own(Data.number(offer.get("buyerCoachId")));F player=player(Data.number(offer.get("playerId")));int amount=Data.number(offer.get("price"));
+                if(seller.lk()!=Data.number(offer.get("sellerClubId")) || buyer.lk()!=Data.number(offer.get("buyerClubId")))throw new IllegalStateException("Offer clubs changed");
+                validateTransfer(player,seller,buyer,amount);transfer(player,seller,buyer,amount,false);
+            }
+            offer.put("status",accept?"ACCEPTED":"REJECTED");result.put("status",offer.get("status"));
+        } else if(action.equals("renew")){
+            F player=ownedPlayer(coachId,number(data,"playerId"),false);int days=number(data,"days"),index=-1;int[] durations={180,365,730,1095};for(int i=0;i<durations.length;i++)if(days==durations[i])index=i;
+            if(index<0)throw new IllegalArgumentException("Choose 180, 365, 730 or 1095 days");
+            int salary=data.containsKey("salary")?number(data,"salary"):minimumSalary(player,index);
+            if(salary<=0 || salary<minimumSalary(player,index) || salary>Math.max(1,Math.round(player.fk()*0.25f)))throw new IllegalArgumentException("Salary is outside this player's accepted range");
+            player.c(false);player.fm();player.a((long)days,player.fR()<0);player.ae(salary);result.put("status","RENEWED");
+        } else if(action.equals("promote")){
+            ah club=own(coachId);F player=ownedPlayer(coachId,number(data,"playerId"),true);
+            if(club.kc().size()>=35)throw new IllegalStateException("Professional squad is full");
+            best.K.a(false,player,club);player.aB(300);result.put("status","PROMOTED");
+        } else if(action.equals("list")){
+            F player=ownedPlayer(coachId,number(data,"playerId"),false);boolean forSale=bool(data,"forSale");int amount=forSale?(data.containsKey("price")?price(data):Math.max(1,player.fk())):player.fk();
+            if(player.gl())throw new IllegalStateException("Loaned players cannot be listed");player.ag(amount);player.c(forSale);result.put("status",forSale?"LISTED":"WITHDRAWN");
+        } else if(action.equals("sell")){
+            F player=ownedPlayer(coachId,number(data,"playerId"),false);ah seller=own(coachId);int amount=price(data);validateSeller(player,seller);
+            if(amount>Math.max(1,player.fk()*1.15))throw new IllegalArgumentException("Price exceeds native AI buyer range");
+            best.l search=new best.l(player,amount,true,false,0);search.a(false,false);ah buyer=search.cK();int accepted=search.cL();
+            if(buyer==null || buyer.jZ() || accepted<amount)throw new IllegalStateException("No AI club accepted this price; lower the price or list the player");
+            validateTransfer(player,seller,buyer,accepted);transfer(player,seller,buyer,accepted,false);result.put("status","SOLD");result.put("buyerClub",buyer.getNome());result.put("price",accepted);
+        } else if(action.equals("job")){
+            al coach=coach(coachId);if(coach.fg()!=null)throw new IllegalStateException("You already manage a club");int clubId=number(data,"clubId");
+            if(!jobs(coach).contains(clubId))throw new IllegalStateException("Club has not offered this position");ah club=state.x(clubId);
+            if(club==null || club.jZ())throw new IllegalStateException("Club is no longer available");
+            state.a(club,club.ka(),coach);jobOffers.remove(coachId);result.put("status","EMPLOYED");
+        } else throw new IllegalArgumentException("Unknown management action");
+        return result;
+    }
+    private static int asking(F player){return Math.max(1,player.fl()>0?player.fl():player.fk());}
+    private static int minimumSalary(F player,int duration){int[] reduction={1,3,5,12},increase={10,12,15,5};return player.fR()<60?Math.max(1,player.fj()-Math.round(player.fj()*reduction[duration]/100f)):Math.max(1,player.fj()+Math.round(player.fj()*increase[duration]/100f));}
+    private void validateSeller(F player,ah seller){
+        if(player.fg()!=seller || !seller.kc().contains(player))throw new IllegalStateException("Player no longer belongs to the seller");
+        if(player.gl())throw new IllegalStateException("Loaned players cannot be transferred");
+        if(seller.kc().size()<=11)throw new IllegalStateException("Seller needs at least eleven players after the sale");
+        if(player.getPosicao()==0){int keepers=0;for(Object raw:seller.kc())if(((F)raw).getPosicao()==0)keepers++;if(keepers<2)throw new IllegalStateException("Cannot sell the only goalkeeper");}
+    }
+    private void validateTransfer(F player,ah seller,ah buyer,int amount){validateSeller(player,seller);if(buyer.kc().size()>=35)throw new IllegalStateException("Buyer's squad is full");if(amount<=0 || buyer.kb()<amount)throw new IllegalStateException("Buyer has insufficient funds");}
+    private void transfer(F player,ah seller,ah buyer,int amount,boolean listedPurchase){
+        // Native transaction updates the roster, contracts, finances and transfer history.
+        // CPU clubs do not account for balances in F.a(), so update their ledger explicitly.
+        boolean sellerHuman=seller.jZ(),buyerHuman=buyer.jZ();player.a(buyer,amount,listedPurchase,false,false);
+        if(!sellerHuman)seller.v(amount,1);if(!buyerHuman)buyer.w(amount,1);
+        player.as(-1);player.b(false);
+    }
+    private List<Integer> jobs(al coach){
+        if(jobDate!=date()){jobDate=date();jobOffers.clear();}
+        List<Integer> available=jobOffers.get(coach.lT());if(available!=null)return available;
+        available=new ArrayList<Integer>();if(coach.fg()==null)for(Object raw:c.a.afQ.b(coach,false)){ah club=(ah)raw;if(!club.jZ() && !available.contains(club.lk()))available.add(club.lk());}
+        jobOffers.put(coach.lT(),available);return available;
+    }
+    private Map<String,Object> playerRow(F player){ah club=player.fg();Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("age",player.getIdade());row.put("strength",player.fi());row.put("salary",player.fj());row.put("value",player.fk());row.put("askingPrice",asking(player));row.put("contractDays",player.fR());row.put("forSale",player.ft());row.put("clubId",club==null?null:club.lk());row.put("club",club==null?null:club.getNome());row.put("humanOwner",humanOwner(club));row.put("loaned",player.gl());return row;}
+    public Map<String,Object> snapshot(int coachId){al coach=coach(coachId);ensureIds();ah own=coach.fg();Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("clubId",own==null?null:own.lk());result.put("balance",own==null?0L:own.kb());
+        List<Object> squad=new ArrayList<Object>(),youth=new ArrayList<Object>(),market=new ArrayList<Object>(),pending=new ArrayList<Object>(),jobs=new ArrayList<Object>();
+        if(own!=null){for(Object raw:own.kc())squad.add(playerRow((F)raw));for(Object raw:own.ky())youth.add(playerRow((F)raw));}
+        for(Object raw:state.P()){ah club=(ah)raw;if(club==own)continue;for(Object value:club.kc()){F player=(F)value;if(!player.gl() && (player.ft() || club.jZ()))market.add(playerRow(player));}}
+        for(Map<String,Object> value:offers.values())if(Data.number(value.get("buyerCoachId"))==coachId || Data.number(value.get("sellerCoachId"))==coachId){Map<String,Object> row=new LinkedHashMap<String,Object>(value);if("PENDING".equals(row.get("status")) && !pending(row))row.put("status","EXPIRED");pending.add(row);}
+        for(Integer clubId:jobs(coach)){ah club=state.x(clubId);if(club!=null && !club.jZ()){Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("clubId",clubId);row.put("club",club.getNome());row.put("division",club.getDivisao());jobs.add(row);}}
+        result.put("players",squad);result.put("youth",youth);result.put("market",market);result.put("offers",pending);result.put("jobs",jobs);return result;
+    }
+    public Map<String,Object> exportState(){Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("nextOffer",nextOffer);result.put("nextPlayer",nextPlayer);List<Object> rows=new ArrayList<Object>();for(Map<String,Object> offer:offers.values())rows.add(new LinkedHashMap<String,Object>(offer));result.put("offers",rows);return result;}
+    public void restoreState(Map<String,Object> saved){if(saved==null)return;offers.clear();nextOffer=Data.longNumber(saved.get("nextOffer"));nextPlayer=Math.max(nextPlayer,Data.number(saved.get("nextPlayer")));for(Object raw:Data.list(saved.get("offers"))){Map<String,Object> offer=new LinkedHashMap<String,Object>(Data.map(raw));offers.put(Data.longNumber(offer.get("offerId")),offer);}ensureIds();}
+}
