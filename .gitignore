@@ -1,0 +1,8 @@
+game/
+analysis/
+tools/*.jar
+__pycache__/
+build/
+sessions/
+dist/*
+!dist/Brasfoot-Online-Teste.zip

@@ -1,0 +1,183 @@
+package brasfoot;
+import best.F;
+import best.I;
+import best.ah;
+import best.al;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.*;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+
+/** Graphical online session built around the original Brasfoot Swing panels. */
+public final class NativeClient {
+    private final Path root;
+    private final JFrame frame=new JFrame("Brasfoot — Multiplayer Online");
+    private final JPanel body=new JPanel(new BorderLayout());
+    private final JLabel status=new JLabel("Crie uma sessão ou entre pelo IP do host.");
+    private final JTextField address=new JTextField("127.0.0.1:8212",23);
+    private final JTextField port=new JTextField("8212",6);
+    private final JComboBox<CoachChoice> choices=new JComboBox<CoachChoice>();
+    private final JButton create=new JButton("Criar sessão"), discover=new JButton("Buscar técnicos"), join=new JButton("Entrar"), reconnect=new JButton("Reconectar com token");
+    private final JButton auto=new JButton("Autoescalar"), lineup=new JButton("Escalação"), ready=new JButton("Pronto");
+    private final JLabel preparation=new JLabel();
+    private final ScheduledExecutorService network=Executors.newSingleThreadScheduledExecutor();
+    private SessionApi api;
+    private String token;
+    private Process server;
+    private GameAdapter model;
+    private NativeMatchPanel nativePanel;
+    private volatile Map<String,Object> latest;
+    private int coachId;
+    private JDialog editor;
+    private boolean connected,closed,testing,autoTest,testReady,testComplete,keepTestHost,testNativeEditor;
+    private Path capture;
+    private volatile Throwable failure;
+    private static final class CoachChoice {
+        final int id;final String label;final boolean claimed;
+        CoachChoice(Map<String,Object> row){id=Data.number(row.get("coachId"));claimed=Boolean.TRUE.equals(row.get("claimed"));label=row.get("name")+" — "+row.get("club")+(claimed?" (ocupado)":"");}
+        @Override public String toString(){return label;}
+    }
+    public NativeClient(Path root){
+        this.root=root;frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        frame.setIconImage(new ImageIcon(getClass().getResource("/aicons/ball.png")).getImage());
+        frame.addWindowListener(new WindowAdapter(){@Override public void windowClosing(WindowEvent e){
+            if(server!=null && server.isAlive() && JOptionPane.showConfirmDialog(frame,"Encerrar a sessão e desconectar os outros jogadores? Os checkpoints ficam salvos no host.","Encerrar host",JOptionPane.YES_NO_OPTION)!=JOptionPane.YES_OPTION)return;
+            close();
+        }});
+        body.setBackground(new Color(28,65,35));frame.add(body);frame.add(status,BorderLayout.SOUTH);status.setBorder(BorderFactory.createEmptyBorder(6,12,6,12));
+        connectionScreen();frame.setSize(1100,800);frame.setMinimumSize(new Dimension(900,680));frame.setLocationRelativeTo(null);
+        network.scheduleWithFixedDelay(()->{if(connected && !closed)try{Map<String,Object> snapshot=api.call("/state",null);SwingUtilities.invokeLater(()->accept(snapshot));}catch(Exception error){SwingUtilities.invokeLater(()->status.setText("Conexão interrompida; tentando novamente: "+error.getMessage()));}},250,250,TimeUnit.MILLISECONDS);
+    }
+    private void connectionScreen(){
+        JPanel box=new JPanel();box.setLayout(new BoxLayout(box,BoxLayout.Y_AXIS));box.setBorder(BorderFactory.createEmptyBorder(55,85,55,85));box.setBackground(new Color(28,65,35));
+        JLabel title=new JLabel("Brasfoot Online");title.setFont(new Font("Tahoma",Font.BOLD,30));title.setForeground(Color.WHITE);box.add(title);box.add(Box.createVerticalStrut(18));
+        JLabel note=new JLabel("Amistoso ABC × Corinthians • interface e sons originais • save no host");note.setForeground(new Color(255,255,180));box.add(note);box.add(Box.createVerticalStrut(30));
+        box.add(row(new JLabel("Criar sessão na porta:"),port,create));box.add(Box.createVerticalStrut(25));
+        box.add(row(new JLabel("IP do host e porta:"),address,discover));box.add(row(new JLabel("Seu técnico:"),choices,join));box.add(row(reconnect));box.add(Box.createVerticalStrut(20));
+        JLabel help=new JLabel("<html>O host compartilha o IP e a porta. Cada técnico escala seu time e confirma Pronto.<br>Todos acompanham a partida na tela original. A porta TCP precisa estar acessível.</html>");help.setForeground(Color.WHITE);box.add(help);
+        join.setEnabled(false);create.addActionListener(e->createSession());discover.addActionListener(e->discover());join.addActionListener(e->join());
+        reconnect.addActionListener(e->{String value=JOptionPane.showInputDialog(frame,"Token de reconexão desta sessão:");if(value!=null && !value.trim().isEmpty())work(()->connect(address.getText(),value.trim()),null);});
+        body.add(box,BorderLayout.CENTER);
+    }
+    private static JPanel row(Component... components){JPanel row=new JPanel(new FlowLayout(FlowLayout.LEFT,10,8));row.setOpaque(false);for(Component c:components){if(c instanceof JLabel)c.setForeground(Color.WHITE);row.add(c);}row.setMaximumSize(new Dimension(1000,70));return row;}
+    private interface Task {void run()throws Exception;}
+    private void work(Task task,Runnable success){
+        network.execute(()->{try{task.run();if(success!=null)SwingUtilities.invokeLater(success);}catch(Throwable error){failure=error;SwingUtilities.invokeLater(()->showError(error));}});
+    }
+    private void showError(Throwable error){create.setEnabled(true);status.setText("Não foi possível concluir: "+error.getMessage());if(testing){error.printStackTrace();close();System.exit(1);}else JOptionPane.showMessageDialog(frame,error.getMessage(),"Brasfoot Online",JOptionPane.WARNING_MESSAGE);}
+    private void createSession(){
+        create.setEnabled(false);status.setText("Criando a sessão no seu computador...");
+        work(()->{
+            int selectedPort=Integer.parseInt(port.getText().trim());if(selectedPort<1024 || selectedPort>65535)throw new IllegalArgumentException("Escolha uma porta entre 1024 e 65535");
+            String java=Paths.get(System.getProperty("java.home"),"bin","java.exe").toString();
+            ProcessBuilder builder=new ProcessBuilder(java,"-Djava.awt.headless=true","-cp",System.getProperty("java.class.path"),"brasfoot.SessionHost","--root",root.toString(),"--demo","--port",String.valueOf(selectedPort),"--tick-ms",testing?"75":"1000");builder.directory(root.resolve("game/Brasfoot22-23").toFile());builder.redirectErrorStream(true);
+            server=builder.start();BufferedReader output=new BufferedReader(new InputStreamReader(server.getInputStream(),"UTF-8"));String line,hostToken=null;
+            while((line=output.readLine())!=null){if(line.startsWith("Host token: ")){hostToken=line.substring(12);break;}}
+            if(hostToken==null)throw new IOException("O host não iniciou. Verifique se a porta já está em uso.");
+            final BufferedReader rest=output;Thread drain=new Thread(()->{try{while(rest.readLine()!=null){ }}catch(IOException ignored){ }},"host-output");drain.setDaemon(true);drain.start();
+            connect("127.0.0.1:"+selectedPort,hostToken);
+            final String invite=localAddresses(selectedPort);SwingUtilities.invokeLater(()->preparation.setToolTipText("Compartilhe: "+invite));
+            SwingUtilities.invokeLater(()->status.setText("Sessão criada. Compartilhe: "+invite+" — save em sessions/ no host."));
+        },()->create.setEnabled(true));
+    }
+    private static String localAddresses(int port)throws SocketException{
+        java.util.List<String> result=new ArrayList<String>();Enumeration<NetworkInterface> interfaces=NetworkInterface.getNetworkInterfaces();while(interfaces.hasMoreElements()){NetworkInterface network=interfaces.nextElement();if(!network.isUp() || network.isLoopback())continue;Enumeration<InetAddress> addresses=network.getInetAddresses();while(addresses.hasMoreElements()){InetAddress ip=addresses.nextElement();if(ip instanceof Inet4Address)result.add(ip.getHostAddress()+":"+port);}}
+        return result.isEmpty()?"127.0.0.1:"+port:String.join(" / ",result);
+    }
+    private void discover(){
+        work(()->{
+            SessionApi connection=new SessionApi(address.getText());Map<String,Object> info=connection.call("/session",null);
+            SwingUtilities.invokeLater(()->{choices.removeAllItems();for(Object raw:Data.list(info.get("coaches")))choices.addItem(new CoachChoice(Data.map(raw)));join.setEnabled(true);status.setText("Selecione um técnico disponível e clique Entrar.");});
+        },null);
+    }
+    private void join(){CoachChoice selected=(CoachChoice)choices.getSelectedItem();if(selected==null || selected.claimed){status.setText("Esse técnico já está ocupado. Escolha outro.");return;}
+        work(()->{SessionApi connection=new SessionApi(address.getText());Map<String,String> data=new LinkedHashMap<String,String>();data.put("coachId",String.valueOf(selected.id));Map<String,Object> result=connection.call("/join",data);connect(address.getText(),(String)result.get("token"));},null);
+    }
+    private void connect(String address,String token)throws Exception{
+        SessionApi connection=new SessionApi(address);connection.token(token);Map<String,Object> snapshot=connection.call("/state",null);
+        if(!Boolean.TRUE.equals(snapshot.get("demo")))throw new IOException("A interface deste protótipo está preparada para o amistoso de demonstração");
+        this.api=connection;this.token=token;this.coachId=Data.number(snapshot.get("viewerCoachId"));connected=true;
+        SwingUtilities.invokeLater(()->{try{gameScreen(snapshot);}catch(Throwable error){showError(error);}});
+    }
+    private void gameScreen(Map<String,Object> snapshot)throws Exception{
+        model=Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(),root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile());c.a.vH();
+        projectModel(snapshot);nativePanel=new NativeMatchPanel(frame,model.currentMatches());nativePanel.supportedClub(((al)c.a.SR.M().get(coachId)).fg().lk());nativePanel.muted(testing);
+        body.removeAll();JPanel controls=new JPanel(new FlowLayout(FlowLayout.LEFT,8,6));controls.setBackground(new Color(225,230,220));controls.add(lineup);controls.add(auto);controls.add(ready);
+        JCheckBox audio=new JCheckBox("Áudio original",!testing);audio.addActionListener(e->nativePanel.muted(!audio.isSelected()));controls.add(audio);
+        JButton copy=new JButton("Token de reconexão");copy.addActionListener(e->JOptionPane.showMessageDialog(frame,new JTextField(token),"Guarde o token desta sessão",JOptionPane.INFORMATION_MESSAGE));controls.add(copy);controls.add(preparation);
+        auto.addActionListener(e->autoLineup());lineup.addActionListener(e->openLineup());ready.addActionListener(e->setReady(!isReady()));
+        body.add(controls,BorderLayout.NORTH);body.add(new JScrollPane(nativePanel),BorderLayout.CENTER);nativePanel.setPreferredSize(new Dimension(1030,650));
+        frame.setTitle("Brasfoot Online — "+own(snapshot).get("club")+(server!=null?" (host)":""));body.revalidate();body.repaint();frame.validate();accept(snapshot);
+        if(autoTest)autoLineup();
+    }
+    private Map<String,Object> own(Map<String,Object> state){for(Object raw:Data.list(Data.map(state.get("game")).get("coaches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("coachId"))==coachId)return row;}throw new IllegalStateException("Técnico não encontrado");}
+    private Map<String,Object> ownRound(){for(Object raw:Data.list(Data.map(latest.get("round")).get("coaches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("coachId"))==coachId)return row;}throw new IllegalStateException("Técnico não encontrado");}
+    private boolean isReady(){return Boolean.TRUE.equals(ownRound().get("ready"));}
+    private void accept(Map<String,Object> snapshot){
+        if(closed || nativePanel==null)return;latest=snapshot;
+        try{
+            if(editor==null || !editor.isDisplayable())projectModel(snapshot);
+            nativePanel.project(snapshot);
+            String phase=(String)Data.map(snapshot.get("round")).get("phase");boolean edit=phase.equals("PREPARING") && !isReady() && (editor==null || !editor.isDisplayable());
+            auto.setEnabled(edit);lineup.setEnabled(edit);ready.setEnabled(phase.equals("PREPARING") && (editor==null || !editor.isDisplayable()));ready.setText(isReady()?"Retirar Pronto":"Pronto");
+            StringBuilder text=new StringBuilder();for(Object raw:Data.list(Data.map(snapshot.get("round")).get("coaches"))){Map<String,Object> c=Data.map(raw);if(text.length()>0)text.append(" | ");text.append("Técnico ").append(Data.number(c.get("coachId"))+1).append(Boolean.TRUE.equals(c.get("ready"))?": pronto":": preparando");}preparation.setText(text.toString());
+            Map<String,Object> live=Data.map(snapshot.get("playback"));
+            if(Boolean.TRUE.equals(snapshot.get("storageFailed")))status.setText("O host pausou a sessão por falha ao gravar o save.");
+            else if(phase.equals("FINISHED"))status.setText("Fim de jogo — o resultado foi salvo pelo host.");
+            else if(phase.equals("FAILED"))status.setText("Partida interrompida: "+live.get("failure"));
+            if(testing && phase.equals("FINISHED"))finishTest(snapshot);
+        }catch(Throwable error){showError(error);}
+    }
+    @SuppressWarnings("unchecked")
+    private void projectModel(Map<String,Object> snapshot){
+        for(Object raw:Data.list(Data.map(snapshot.get("game")).get("coaches"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("coachId"));al local=null;for(Object value:c.a.SR.M())if(((al)value).lT()==id)local=(al)value;if(local==null)throw new IllegalStateException("Técnico desconhecido no modelo visual");
+            ah club=local.fg();I match=model.currentMatches().get(0);java.util.List<F> players=new ArrayList<F>(club.kc()),ordered=new ArrayList<F>();
+            club.kY().clear();club.kZ().clear();java.util.List<F> all=match.hc()==club?match.hl():match.hm(),active=match.hc()==club?match.hp():match.hq(),bench=match.hc()==club?match.hn():match.ho();all.clear();active.clear();bench.clear();
+            for(Object value:Data.list(row.get("players"))){Map<String,Object> p=Data.map(value);F player=null;for(F candidate:players)if(!ordered.contains(candidate) && candidate.getNome().equals(p.get("name"))){player=candidate;break;}if(player==null)throw new IllegalStateException("Elenco local diferente do host");ordered.add(player);
+                player.setIdade(Data.number(p.get("age")));player.ad(Data.number(p.get("strength")));player.ai(Data.number(p.get("fitness")));player.setLado(Data.number(p.get("side")));player.setCr1(Data.number(p.get("skill1")));player.setCr2(Data.number(p.get("skill2")));player.setStatus(Data.number(p.get("status")));player.a(Boolean.TRUE.equals(p.get("star")));player.j(Boolean.TRUE.equals(p.get("worldClass")));player.as(Data.number(p.get("slot")));player.d(Boolean.TRUE.equals(p.get("eligible"))?0L:Long.MAX_VALUE);
+                if(player.fT()>=1 && player.fT()<=25){club.kY().add(player);all.add(player);active.add(player);}else if(player.fT()>=26 && player.fT()<=36){club.kZ().add(player);bench.add(player);}
+            }
+            club.kc().clear();club.kc().addAll(ordered);if(row.containsKey("tactics")){java.util.List<Object> t=Data.list(row.get("tactics"));int[] values=new int[4];for(int i=0;i<4;i++)values[i]=Data.number(t.get(i));club.k(values);}
+        }
+    }
+    private void command(String path,Map<String,String> fields,Runnable success){
+        Map<String,Object> round=Data.map(latest.get("round"));fields.put("round",String.valueOf(Data.longNumber(round.get("round"))));fields.put("revision",String.valueOf(Data.longNumber(ownRound().get("revision"))));
+        work(()->{Map<String,Object> snapshot=api.call(path,fields);SwingUtilities.invokeLater(()->{accept(snapshot);if(success!=null)success.run();});},null);
+    }
+    private void autoLineup(){Map<String,Object> suggestion=Data.map(own(latest).get("suggestion"));Map<String,String> data=new LinkedHashMap<String,String>();data.put("starters",Data.csv(Data.list(suggestion.get("starters"))));data.put("bench",Data.csv(Data.list(suggestion.get("bench"))));command("/lineup",data,()->{status.setText("Escalação enviada. Você pode ajustar na tela original antes do Pronto.");if(autoTest && !testReady){testReady=true;if(testNativeEditor)openLineup();else setReady(true);}});}
+    private void setReady(boolean value){Map<String,String> data=new LinkedHashMap<String,String>();data.put("ready",String.valueOf(value));command("/ready",data,null);}
+    private void openLineup(){I match=model.currentMatches().get(0);al coach=null;for(Object value:c.a.SR.M())if(((al)value).lT()==coachId)coach=(al)value;if(coach==null)return;
+        editor=NativeLineup.open(frame,coach.fg(),match,(form,success)->command("/lineup",form,()->{success.run();if(testing && testNativeEditor)setReady(true);}));editor.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){editor=null;if(latest!=null)accept(latest);}});editor.setVisible(!testing);
+        if(testing && testNativeEditor){
+            a.bz original=(a.bz)((JScrollPane)editor.getContentPane().getComponent(0)).getViewport().getView();
+            ((JComboBox<?>)Data.get(original,"Bg")).setSelectedIndex(1);
+            ((JButton)Data.get(original,"Bn")).doClick();
+        }
+    }
+    private void finishTest(Map<String,Object> state)throws Exception{
+        if(testComplete)return;testComplete=true;
+        if(capture!=null){frame.validate();BufferedImage image=new BufferedImage(body.getWidth(),body.getHeight(),BufferedImage.TYPE_INT_RGB);Graphics2D graphics=image.createGraphics();body.printAll(graphics);graphics.dispose();ImageIO.write(image,"png",capture.toFile());}
+        if(nativePanel.GO!=null && nativePanel.GO.isRunning())throw new AssertionError("Local game timer started");
+        Map<String,Object> row=Data.map(Data.list(Data.map(state.get("playback")).get("matches")).get(0));System.out.println("GUI_FINISHED "+row.get("homeGoals")+" "+row.get("awayGoals")+" sounds="+nativePanel.emittedSounds().size()+" timerStopped=true");if(!keepTestHost){close();System.exit(0);}
+    }
+    private void close(){if(closed)return;closed=true;connected=false;network.shutdownNow();a.dV.qb();if(server!=null)server.destroy();frame.dispose();}
+    public static void main(String[] args)throws Exception{
+        Map<String,String> options=new HashMap<String,String>();for(int i=0;i<args.length;i++){if(i+1>=args.length)throw new IllegalArgumentException("Missing option value");options.put(args[i],args[++i]);}
+        Path root=Paths.get(options.getOrDefault("--root",".")).toAbsolutePath().normalize();System.setProperty("user.dir",root.resolve("game/Brasfoot22-23").toString());
+        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        SwingUtilities.invokeLater(()->{NativeClient client=new NativeClient(root);client.testing=options.containsKey("--test-token") || options.containsKey("--test-create");client.keepTestHost=options.containsKey("--test-create");client.autoTest=options.containsKey("--test-auto");client.testNativeEditor=options.containsKey("--test-native-editor");client.capture=options.containsKey("--capture")?Paths.get(options.get("--capture")):null;client.frame.setVisible(!client.testing);client.frame.addNotify();client.frame.validate();
+            Runtime.getRuntime().addShutdownHook(new Thread(()->{client.network.shutdownNow();if(client.server!=null)client.server.destroy();}));
+            if(options.containsKey("--port"))client.port.setText(options.get("--port"));
+            if(options.containsKey("--address"))client.address.setText(options.get("--address"));
+            if(options.containsKey("--test-create"))SwingUtilities.invokeLater(()->client.create.doClick());
+            else if(client.testing)client.work(()->client.connect(options.get("--address"),options.get("--test-token")),null);
+            else if("create".equals(options.get("--mode")))SwingUtilities.invokeLater(()->client.create.doClick());
+        });
+    }
+}
