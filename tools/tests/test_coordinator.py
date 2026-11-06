@@ -1,5 +1,6 @@
 """Validate the shared-round protocol independently of native career or UI changes."""
 from pathlib import Path
+import test_logs
 import subprocess
 
 ROOT=Path(__file__).resolve().parents[2]

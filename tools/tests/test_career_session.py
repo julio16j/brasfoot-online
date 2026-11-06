@@ -1,5 +1,6 @@
 """Four authenticated users, original Swing panels, repeated rounds and restart recovery."""
 from pathlib import Path
+import test_logs
 import concurrent.futures, json, os, re, socket, subprocess, time, urllib.request, urllib.parse, urllib.error
 ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
@@ -15,7 +16,7 @@ def request(base,path,data=None,token=None,expected=200):
 def host(mode):
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     log_path=ROOT/f'analysis/career-host-{port}.log'
-    log=log_path.open('w',encoding='utf-8')
+    log=test_logs.open_log(log_path)
     proc=subprocess.Popen([JAVA,'-Dfile.encoding=UTF-8','-Djava.awt.headless=true','-javaagent:'+str(ROOT/'build/host-ui-agent.jar'),'-cp',CP,'brasfoot.SessionHost','--root',str(ROOT),'--bind','127.0.0.1','--port',str(port),'--tick-ms','25',*mode],stdout=log,stderr=subprocess.STDOUT)
     processes.append(proc);deadline=time.monotonic()+30
     while True:
@@ -59,7 +60,7 @@ try:
     # Four separate client JVMs submit through the original lineup screen.
     gui=[]
     for index,credential in enumerate(tokens):
-        out=(ROOT/f'analysis/career-native-{index+1}.log').open('w',encoding='utf-8')
+        out=test_logs.open_log(ROOT/f'analysis/career-native-{index+1}.log')
         client=subprocess.Popen([JAVA,'-cp',CP,'brasfoot.NativeClient','--root',str(ROOT),'--address',base,'--test-token',credential,'--test-auto','true','--test-native-editor','true','--capture',str(ROOT/f'analysis/career-game-{index+1}.png'),'--capture-preparation',str(ROOT/f'analysis/career-preparation-{index+1}.png')],stdout=out,stderr=subprocess.STDOUT)
         processes.append(client);gui.append(client)
     for index,client in enumerate(gui):

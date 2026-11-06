@@ -1,5 +1,6 @@
 """End-to-end test: real bytecode, HTTP clients, host-only checkpoints."""
 from pathlib import Path
+import test_logs
 import concurrent.futures, json, os, subprocess, sys, time, urllib.request, urllib.parse, urllib.error, socket
 ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'

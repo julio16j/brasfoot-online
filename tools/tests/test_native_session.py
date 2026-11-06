@@ -1,5 +1,6 @@
 """Runs two original Swing game panels against one host until full time."""
 from pathlib import Path
+import test_logs
 import json, os, re, socket, subprocess, urllib.request, urllib.parse, time
 ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
