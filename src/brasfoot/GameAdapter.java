@@ -109,6 +109,39 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         }
         submitted.add(coach);
     }
+    public Map<String,Object> substitute(int coach,int outgoingId,int incomingId,MatchPlayback playback){
+        ah club=club(coach);if(club==null)throw new IllegalStateException("Choose a club before making substitutions");
+        I fixture=match(club);if(fixture==null)throw new IllegalStateException("No current match for this club");
+        boolean home=fixture.hc()==club;int side=home?0:1;
+        F outgoing=null,incoming=null;
+        for(Object raw:club.kc()){F player=(F)raw;if(player.gD()==outgoingId)outgoing=player;if(player.gD()==incomingId)incoming=player;}
+        if(outgoing==null || incoming==null)throw new IllegalArgumentException("Player no longer belongs to your club");
+        if(!outgoing.a(fixture,false) && !((home?fixture.hp():fixture.hq()).contains(outgoing)))throw new IllegalStateException("Player leaving is unavailable");
+        if(!incoming.a(fixture,false))throw new IllegalStateException("Player entering is unavailable");
+        playback.substitute(fixture,side,outgoing,incoming);
+        Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("status","SUBSTITUTED");result.put("outgoing",outgoing.getNome());result.put("incoming",incoming.getNome());result.put("substitutionsRemaining",fixture.aR(side));return result;
+    }
+    public Map<String,Object> liveLineup(int coach,int[] starters,int[] bench,int[] slots,int[] tactics,MatchPlayback playback){
+        ah club=club(coach);if(club==null)throw new IllegalStateException("Choose a club before editing its live lineup");
+        I fixture=match(club);if(fixture==null)throw new IllegalStateException("No current match for this club");
+        if(starters.length!=11 || slots.length!=11)throw new IllegalArgumentException("A live lineup needs eleven starters and positions");
+        List<F> desired=new ArrayList<F>(),reserves=new ArrayList<F>();Set<F> unique=new HashSet<F>();
+        for(int index:starters){if(index<0 || index>=club.kc().size())throw new IllegalArgumentException("Invalid starter");F player=(F)club.kc().get(index);if(!unique.add(player))throw new IllegalArgumentException("Duplicate player in lineup");desired.add(player);}
+        for(int index:bench){if(index<0 || index>=club.kc().size())throw new IllegalArgumentException("Invalid substitute");F player=(F)club.kc().get(index);if(!unique.add(player))throw new IllegalArgumentException("Duplicate player in lineup");reserves.add(player);}
+        Set<Integer> positions=new HashSet<Integer>();for(int slot:slots)if(slot<1 || slot>25 || !positions.add(slot))throw new IllegalArgumentException("Invalid player position");
+        boolean home=fixture.hc()==club;int side=home?0:1;List<F> active=home?fixture.hp():fixture.hq(),currentBench=home?fixture.hn():fixture.ho();
+        List<F> outgoing=new ArrayList<F>(),incoming=new ArrayList<F>();for(F player:active)if(!desired.contains(player))outgoing.add(player);for(F player:desired)if(!active.contains(player))incoming.add(player);
+        if(outgoing.size()!=incoming.size())throw new IllegalArgumentException("The requested lineup cannot be applied");
+        if(outgoing.size()>fixture.aR(side))throw new IllegalStateException("Not enough substitutions remain");
+        for(int i=0;i<outgoing.size();i++)playback.substitute(fixture,side,outgoing.get(i),incoming.get(i));
+        active.clear();active.addAll(desired);currentBench.clear();currentBench.addAll(reserves);
+        List<F> all=home?fixture.hl():fixture.hm();all.clear();all.addAll(desired);
+        for(int i=0;i<desired.size();i++){desired.get(i).as(slots[i]);desired.get(i).b(true);}
+        for(int i=0;i<reserves.size();i++){reserves.get(i).as(26+i);reserves.get(i).b(true);}
+        club.kY().clear();club.kY().addAll(desired);club.kZ().clear();club.kZ().addAll(reserves);
+        if(tactics!=null && tactics.length==4)club.k(tactics);
+        Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("status","LINEUP_UPDATED");result.put("substitutionsApplied",outgoing.size());result.put("substitutionsRemaining",fixture.aR(side));return result;
+    }
     public void ready(int coach, boolean value) {
         ah club = club(coach);
         if (value && match(club) != null && !submitted.contains(coach)) throw new IllegalStateException("Submit a lineup before ready");
@@ -119,6 +152,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         for(Object value: state.S()) result.add((I)value);
         return result;
     }
+    /** Whether this date contains a fixture managed by any human coach. */
+    public boolean hasHumanMatch(){for(I fixture:currentMatches())if(fixture.hc().jZ() || fixture.hd().jZ())return true;return false;}
     private Map<String,Object> suggestion(ah club, I match) {
         List<Integer> starters=new ArrayList<Integer>(), bench=new ArrayList<Integer>();
         if (club!=null && match!=null) {
@@ -164,20 +199,24 @@ public final class GameAdapter implements RoundCoordinator.Actions {
                 for (Object object : club.kc()) {
                     F player = (F) object;
                     Map<String, Object> p = new LinkedHashMap<String, Object>();
-                    p.put("index", index++); p.put("name", player.getNome());
+                    p.put("index", index++);p.put("playerId",player.gD());p.put("name", player.getNome());
                     p.put("position", player.getPosicao()); p.put("slot", player.fT());
                     p.put("age",player.getIdade());p.put("strength",player.fi());p.put("fitness",player.fp());p.put("side",player.getLado());
                     p.put("skill1",player.getCr1());p.put("skill2",player.getCr2());p.put("status",player.getStatus());p.put("star",player.ff());p.put("worldClass",player.gm());
                     p.put("eligible", match != null && player.a(match, false)); players.add(p);
                 }
             }
-            row.put("players", players); row.put("suggestion",suggestion(club,match)); list.add(row);
+            row.put("players", players);row.put("suggestion",suggestion(club,match));
+            if(match!=null){int side=match.hc()==club?0:1;row.put("liveLineup",liveLineup(match,side));row.put("substitutionsRemaining",match.aR(side));}
+            else {row.put("liveLineup",Collections.<String,Object>emptyMap());row.put("substitutionsRemaining",0);}
+            list.add(row);
         }
         result.put("coaches", list);
         List<Object> matches=new ArrayList<Object>();
         for(I match:currentMatches()) {
             Map<String,Object> m=new LinkedHashMap<String,Object>();
-            m.put("home",match.hc().getNome());m.put("away",match.hd().getNome());
+            m.put("home",match.hc().getNome());m.put("away",match.hd().getNome());m.put("homeId",match.hc().lk());m.put("awayId",match.hd().lk());
+            m.put("homeStarters",livePlayers(match.hp()));m.put("homeBench",livePlayers(match.hn()));m.put("awayStarters",livePlayers(match.hq()));m.put("awayBench",livePlayers(match.ho()));
             m.put("homeGoals",match.hu());m.put("awayGoals",match.hw());m.put("played",match.e());matches.add(m);
         }
         result.put("matches",matches);
@@ -191,6 +230,10 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             next.put("phaseLabel",fixture.hG());
         }
         result.put("upcoming",upcoming);
+        List<Object> stadiumExpansions=new ArrayList<Object>();
+        for(Object raw:state.bw()){best.B project=(best.B)raw;int owner=-1;for(Object value:state.P()){ah candidate=(ah)value;if(candidate.ev()==project.ev()){owner=candidate.lk();break;}}
+            if(owner<0)continue;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("clubId",owner);row.put("endMillis",project.ew().getTimeInMillis());row.put("seats",integers(projectSeats(project)));stadiumExpansions.add(row);}
+        result.put("stadiumExpansions",stadiumExpansions);
         for(I fixture:currentMatches()){visible.add(fixture.hc());visible.add(fixture.hd());}
         List<Object> visual=new ArrayList<Object>();
         for(ah club:visible)visual.add(visualClub(club));
@@ -199,7 +242,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
     private Map<String,Object> visualClub(ah club){
         Map<String,Object> row=new LinkedHashMap<String,Object>();
         row.put("clubId",club.lk());row.put("club",club.getNome());row.put("asset",club.jY());row.put("country",club.getPais());
-        row.put("balance",club.kb());row.put("division",club.getDivisao());
+        row.put("balance",club.kb());row.put("division",club.getDivisao());row.put("trainingFocus",club.lm());
+        if(club.ev()!=null){Map<String,Object> stadium=new LinkedHashMap<String,Object>();stadium.put("name",club.ev().dS());stadium.put("seats",integers(club.ev().dT()));stadium.put("prices",integers(club.ev().dU()));stadium.put("suggestedPrices",club.ev().dV());row.put("stadium",stadium);}
         row.put("confidence",club.ka()==null?null:scalarFields(club.ka(),new String[]{"oe","of"}));
         List<Integer> tactics=new ArrayList<Integer>();for(int value:club.kj())tactics.add(value);row.put("tactics",tactics);
         List<Object> players=new ArrayList<Object>();I fixture=match(club);int index=0;
@@ -215,6 +259,10 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         }
         row.put("players",players);return row;
     }
+    private Map<String,Object> liveLineup(I match,int side){Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("starters",livePlayers(side==0?match.hp():match.hq()));result.put("bench",livePlayers(side==0?match.hn():match.ho()));result.put("substitutionsRemaining",match.aR(side));return result;}
+    private static List<Object> livePlayers(List<?> players){List<Object> result=new ArrayList<Object>();for(Object raw:players){F player=(F)raw;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("slot",player.fT());result.add(row);}return result;}
+    private static int[] projectSeats(best.B project){return (int[])Data.get(project,"dJ");}
+    private static List<Integer> integers(int[] values){List<Integer> result=new ArrayList<Integer>();for(int value:values)result.add(value);return result;}
     private Map<String,Object> scalarFields(Object target,String[] fields){
         Map<String,Object> result=new LinkedHashMap<String,Object>();
         for(String field:fields)try{result.put(field,Data.get(target,field));}catch(IllegalStateException ignored){ }

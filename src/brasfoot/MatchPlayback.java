@@ -43,14 +43,30 @@ public final class MatchPlayback {
         }
         status="FIRST_HALF";sequence++;
     }
+    public boolean isLive(){return status.equals("FIRST_HALF") || status.equals("SECOND_HALF");}
+    public boolean acceptsAdjustments(){return isLive() || status.equals("HALF_TIME");}
+    public String status(){return status;}
+    public int half(){return half;}
+    public int halfMinute(){return minute;}
+    public synchronized void substitute(I match,int side,F outgoing,F incoming){
+        if(!acceptsAdjustments() || !matches.contains(match))throw new IllegalStateException("This match is not accepting adjustments");
+        if(side<0 || side>1)throw new IllegalArgumentException("Invalid team side");
+        int remaining=match.aR(side);if(remaining<=0)throw new IllegalStateException("No substitutions remain");
+        List<F> active=side==0?match.hp():match.hq(),bench=side==0?match.hn():match.ho();
+        if(!active.contains(outgoing))throw new IllegalArgumentException("The player leaving is not on the field");
+        if(!bench.contains(incoming))throw new IllegalArgumentException("The player entering is not on the bench");
+        if(outgoing==incoming)throw new IllegalArgumentException("Choose two different players");
+        if((outgoing.getPosicao()==0)!=(incoming.getPosicao()==0))throw new IllegalArgumentException("A goalkeeper can only be replaced by another goalkeeper");
+        match.a(side,outgoing,incoming,half,minute,outgoing.fT());
+        if(match.aR(side)!=remaining-1)throw new IllegalStateException("The original engine did not apply the substitution");
+        sequence++;
+    }
     @SuppressWarnings("unchecked")
     public boolean tick() {
         if(status.equals("FINISHED"))return true;
         if(status.equals("NOT_STARTED") || status.equals("FAILED"))throw new IllegalStateException("Match is not running");
         if(status.equals("HALF_TIME")) {
-            half=2;minute=0;
-            for(I match:liveMatches) match.m(2,0);
-            status="SECOND_HALF";sequence++;return false;
+            throw new IllegalStateException("Waiting for all coaches to confirm the second half");
         }
         for(I match:liveMatches) {
             int previous=match.hE().size();
@@ -78,6 +94,10 @@ public final class MatchPlayback {
             }
         }
         return status.equals("FINISHED");
+    }
+    public void resumeSecondHalf(){
+        if(!status.equals("HALF_TIME"))throw new IllegalStateException("The match is not at halftime");
+        half=2;minute=0;for(I match:liveMatches)match.m(2,0);status="SECOND_HALF";sequence++;
     }
     // Same conversion chance used by the original a.gb penalty dialog, resolved on the host.
     static void resolvePenalty(I match,A event,Random random) {
@@ -115,6 +135,7 @@ public final class MatchPlayback {
             row.put("id",index);row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
             row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());
             row.put("competition",match.hy()==null?"Partida":match.hy().getNome());
+            row.put("competitionType",match.hy()==null?0:match.hy().b());
             row.put("phaseLabel",match.hG());row.put("stadium",match.ev()!=null?match.ev().dS():match.ik());
             row.put("attendance",match.hU());row.put("attendanceBySection",integers(match.hT()));row.put("revenue",match.hN());
             row.put("homePenalties",match.hQ()[0]);row.put("awayPenalties",match.hQ()[1]);

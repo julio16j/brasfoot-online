@@ -80,7 +80,7 @@ public final class AdapterTest {
         check(playback.snapshot().get("status").equals("FIRST_HALF"),"Kickoff uses original engine");
         int ticks=0;boolean interval=false;
         while(!playback.tick()) {
-            ticks++;if(playback.snapshot().get("status").equals("HALF_TIME"))interval=true;
+            ticks++;if(playback.snapshot().get("status").equals("HALF_TIME")){interval=true;playback.resumeSecondHalf();}
             if(ticks>=110)throw new AssertionError("Match exceeded duration bound");
         }
         check(ticks>=90 && ticks<110,"Bounded match duration");

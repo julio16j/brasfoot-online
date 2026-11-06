@@ -4,7 +4,7 @@ import java.util.*;
 
 /** Single authority for one preparation phase. Does not simulate matches. */
 public final class RoundCoordinator {
-    public enum Phase { PREPARING, WAITING_FOR_ENGINE, RUNNING, FINISHED, FAILED }
+    public enum Phase { PREPARING, WAITING_FOR_ENGINE, RUNNING, HALF_TIME, FINISHED, FAILED }
     public interface Actions {
         void lineup(int coach, int[] starters, int[] bench);
         void ready(int coach, boolean value);
@@ -51,7 +51,26 @@ public final class RoundCoordinator {
             if(!ready.containsKey(id))throw new IllegalArgumentException("Unknown affected coach");
             if(ready.get(id))throw new IllegalStateException("Affected coach must withdraw ready before this transaction");
         }
-        command.run();changed(coach);
+        command.run();ready.put(coach,false);changed(coach);
+    }
+    /** Live match commands are serialized with the engine tick and versioned per coach. */
+    public synchronized void liveCommand(int coach,long expectedRound,long expectedRevision,Runnable command){
+        if(!ready.containsKey(coach))throw new IllegalArgumentException("Unknown coach");
+        if(expectedRound!=round || expectedRevision!=revisions.get(coach))throw new IllegalStateException("Stale round or coach revision");
+        if(phase!=Phase.RUNNING && phase!=Phase.HALF_TIME)throw new IllegalStateException("Live match adjustments are only available during play");
+        command.run();ready.put(coach,false);changed(coach);
+    }
+    public synchronized void engineHalfTime(){
+        if(phase!=Phase.RUNNING)throw new IllegalStateException("Match is not in the first half");
+        phase=Phase.HALF_TIME;revision++;
+        for(Integer id:ready.keySet()){ready.put(id,false);revisions.put(id,revisions.get(id)+1);}
+    }
+    public synchronized void halftimeReady(int coach,long expectedRound,long expectedRevision,boolean value,Runnable resume){
+        if(!ready.containsKey(coach))throw new IllegalArgumentException("Unknown coach");
+        if(expectedRound!=round || expectedRevision!=revisions.get(coach))throw new IllegalStateException("Stale round or coach revision");
+        if(phase!=Phase.HALF_TIME)throw new IllegalStateException("The halftime barrier is not active");
+        ready.put(coach,value);changed(coach);
+        if(!ready.containsValue(false)){resume.run();phase=Phase.RUNNING;revision++;}
     }
     /** Changes to a roster invalidate selections and old forms from every affected manager. */
     public synchronized void invalidatePreparation(Collection<Integer> coaches,int actingCoach){

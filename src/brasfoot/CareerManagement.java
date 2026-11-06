@@ -49,7 +49,28 @@ public final class CareerManagement {
             if(seller==null || seller==buyer || seller.lk()!=number(data,"sellerClubId") || !seller.kc().contains(player))throw new IllegalArgumentException("Invalid seller or player");
             validateTransfer(player,seller,buyer,amount);
             int owner=humanOwner(seller);
-            if(owner<0){if(!player.ft())throw new IllegalStateException("AI player is not listed for sale");if(amount<asking(player))throw new IllegalStateException("AI club requires the asking price");transfer(player,seller,buyer,amount,true);result.put("status","COMPLETED");}
+            if(owner<0){
+                boolean acceptCounter=data.containsKey("acceptCounter") && bool(data,"acceptCounter");
+                if(!acceptCounter && nativeListedPurchase(player.ft(),amount,asking(player))){
+                    transfer(player,seller,buyer,asking(player),false);result.put("status","COMPLETED");
+                } else {
+                    int originalOffer=acceptCounter?number(data,"offerAmount"):amount;
+                    int decision=best.l.a(player,buyer,originalOffer);
+                    if(nativeOfferAccepted(decision)){
+                        if(acceptCounter)throw new IllegalStateException("The native counteroffer changed; submit a new offer");
+                        transfer(player,seller,buyer,originalOffer,false);result.put("status","COMPLETED");
+                    } else if(nativeOfferCountered(decision)){
+                        int counterPrice=decision==7?best.l.cN():originalOffer,counterSalary=best.l.cM();
+                        if(acceptCounter){
+                            if(amount!=counterPrice || !data.containsKey("counterSalary") || number(data,"counterSalary")!=counterSalary)throw new IllegalStateException("The native counteroffer changed; submit a new offer");
+                            validateTransfer(player,seller,buyer,counterPrice);if(counterSalary>0)player.ae(counterSalary);
+                            transfer(player,seller,buyer,counterPrice,false);result.put("status","COMPLETED");
+                        } else {
+                            result.put("status","COUNTEROFFER");result.put("counterPrice",counterPrice);result.put("counterSalary",counterSalary);result.put("offerAmount",originalOffer);
+                        }
+                    } else throw new IllegalStateException(nativeOfferRefusal(decision));
+                }
+            }
             else {
                 for(Map<String,Object> current:offers.values())if(pending(current) && Data.number(current.get("buyerCoachId"))==coachId && Data.number(current.get("playerId"))==player.gD())throw new IllegalStateException("An offer for this player is already pending");
                 if(offers.size()>=400){Iterator<Map.Entry<Long,Map<String,Object>>> iterator=offers.entrySet().iterator();while(iterator.hasNext()){Map.Entry<Long,Map<String,Object>> entry=iterator.next();if(!pending(entry.getValue()))iterator.remove();}if(offers.size()>=400)throw new IllegalStateException("Too many pending offers");}
@@ -85,6 +106,20 @@ public final class CareerManagement {
             best.l search=new best.l(player,amount,true,false,0);search.a(false,false);ah buyer=search.cK();int accepted=search.cL();
             if(buyer==null || buyer.jZ() || accepted<amount)throw new IllegalStateException("No AI club accepted this price; lower the price or list the player");
             validateTransfer(player,seller,buyer,accepted);transfer(player,seller,buyer,accepted,false);result.put("status","SOLD");result.put("buyerClub",buyer.getNome());result.put("price",accepted);
+        } else if(action.equals("stadium-expand")){
+            ah club=own(coachId);best.v stadium=club.ev();if(stadium==null)throw new IllegalStateException("Club has no stadium model");
+            for(Object raw:state.bw())if(((best.B)raw).ev()==stadium)throw new IllegalStateException("Stadium construction is already in progress");
+            int[] additions=new int[4];int total=0;for(int i=0;i<4;i++){additions[i]=number(data,"seats"+i);if(additions[i]<0)throw new IllegalArgumentException("Seat additions cannot be negative");total+=additions[i];}
+            if(total==0)throw new IllegalArgumentException("Select seats to build");
+            NativeStadium.Quote quote=NativeStadium.quote(club,additions);if(club.kb()<quote.cost)throw new IllegalStateException("Insufficient funds for this stadium expansion");
+            best.B project=new best.B();project.a(stadium);project.c(quote.completion);project.c(additions);state.bw().add(project);club.w(quote.cost,7);
+            result.put("status","CONSTRUCTION_STARTED");result.put("cost",quote.cost);result.put("endMillis",quote.completion.getTimeInMillis());result.put("seats",integers(additions));
+        } else if(action.equals("stadium-settings")){
+            best.v stadium=own(coachId).ev();if(stadium==null)throw new IllegalStateException("Club has no stadium model");boolean suggested=bool(data,"suggestedPrices");int[] prices=new int[4];String[] keys={"price0","price1","price2","price3"};int[] limits={200,300,500,1000};
+            for(int i=0;i<4;i++){prices[i]=number(data,keys[i]);if(prices[i]<1 || prices[i]>limits[i])throw new IllegalArgumentException("Price is outside native range");}
+            stadium.o(suggested);if(!suggested)stadium.b(prices);result.put("status","STADIUM_SETTINGS_UPDATED");
+        } else if(action.equals("training-focus")){
+            int focus=number(data,"focus");if(focus<0 || focus>1)throw new IllegalArgumentException("Invalid native training focus");own(coachId).bZ(focus);result.put("status","TRAINING_UPDATED");result.put("focus",focus);
         } else if(action.equals("job")){
             al coach=coach(coachId);if(coach.fg()!=null)throw new IllegalStateException("You already manage a club");int clubId=number(data,"clubId");
             if(!jobs(coach).contains(clubId))throw new IllegalStateException("Club has not offered this position");ah club=state.x(clubId);
@@ -94,6 +129,11 @@ public final class CareerManagement {
         return result;
     }
     private static int asking(F player){return Math.max(1,player.fl()>0?player.fl():player.fk());}
+    static boolean nativeListedPurchase(boolean listed,int amount,int asking){return listed && amount>=asking;}
+    static boolean nativeOfferAccepted(int nativeResult){return nativeResult==1;}
+    static boolean nativeOfferCountered(int nativeResult){return nativeResult==6 || nativeResult==7;}
+    static String nativeOfferRefusal(int nativeResult){switch(nativeResult){case 0:return "The AI club refused this offer";case 2:return "This player already belongs to your club";case 3:return "The native loan limit was reached";case 4:return "The player does not want to join this club";case 5:return "The AI club refused this offer";default:return "The native Brasfoot negotiation failed ("+nativeResult+")";}}
+    private static List<Integer> integers(int[] values){List<Integer> result=new ArrayList<Integer>();for(int value:values)result.add(value);return result;}
     private static int minimumSalary(F player,int duration){int[] reduction={1,3,5,12},increase={10,12,15,5};return player.fR()<60?Math.max(1,player.fj()-Math.round(player.fj()*reduction[duration]/100f)):Math.max(1,player.fj()+Math.round(player.fj()*increase[duration]/100f));}
     private void validateSeller(F player,ah seller){
         if(player.fg()!=seller || !seller.kc().contains(player))throw new IllegalStateException("Player no longer belongs to the seller");
@@ -105,8 +145,11 @@ public final class CareerManagement {
     private void transfer(F player,ah seller,ah buyer,int amount,boolean listedPurchase){
         // Native transaction updates the roster, contracts, finances and transfer history.
         // CPU clubs do not account for balances in F.a(), so update their ledger explicitly.
-        boolean sellerHuman=seller.jZ(),buyerHuman=buyer.jZ();player.a(buyer,amount,listedPurchase,false,false);
-        if(!sellerHuman)seller.v(amount,1);if(!buyerHuman)buyer.w(amount,1);
+        long sellerBefore=seller.kb(),buyerBefore=buyer.kb();player.a(buyer,amount,listedPurchase,false,false);
+        long sellerChange=seller.kb()-sellerBefore,buyerChange=buyerBefore-buyer.kb();
+        if(sellerChange<amount)seller.v((int)(amount-sellerChange),1);
+        if(buyerChange<amount)buyer.w((int)(amount-buyerChange),1);
+        if(seller.kc().contains(player) || !buyer.kc().contains(player) || player.fg()!=buyer)throw new IllegalStateException("Native transfer did not update both club rosters");
         player.as(-1);player.b(false);
     }
     private List<Integer> jobs(al coach){

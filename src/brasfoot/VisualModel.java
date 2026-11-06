@@ -37,6 +37,7 @@ public final class VisualModel {
         for(Object raw:Data.list(Data.map(state.get("playback")).get("matches"))){Map<String,Object> row=Data.map(raw);
             String name=(String)row.get("competition");f.a competition=competitions.get(name);
             if(competition==null){competition=new f.a();competition.setNome(name);competitions.put(name,competition);}
+            if(row.containsKey("competitionType"))Data.set(competition,"tR",Data.number(row.get("competitionType")));
             I match=new I(null,0,clubs.get(Data.number(row.get("homeId"))),clubs.get(Data.number(row.get("awayId"))),0,competition,null);matches.add(match);
             if(row.containsKey("phaseLabel"))match.o((String)row.get("phaseLabel"));
         }
@@ -72,18 +73,32 @@ public final class VisualModel {
                 club.kc().add(player);
             }
             List<Object> t=Data.list(row.get("tactics"));int[] settings=new int[4];for(int i=0;i<4;i++)settings[i]=Data.number(t.get(i));club.k(settings);
+            if(row.containsKey("trainingFocus"))club.bZ(Data.number(row.get("trainingFocus")));
+            if(row.get("stadium") instanceof Map){Map<String,Object> stadiumRow=Data.map(row.get("stadium"));List<Object> capacities=Data.list(stadiumRow.get("seats")),prices=Data.list(stadiumRow.get("prices"));int[] seats=new int[4],costs=new int[4];for(int i=0;i<4;i++){seats[i]=Data.number(capacities.get(i));costs[i]=Data.number(prices.get(i));}
+                best.v stadium=club.ev();if(stadium==null){int total=0;for(int value:seats)total+=value;stadium=new best.v(String.valueOf(stadiumRow.get("name")),total,club);}
+                stadium.i(String.valueOf(stadiumRow.get("name")));stadium.a(seats);stadium.b(costs);stadium.o(Boolean.TRUE.equals(stadiumRow.get("suggestedPrices")));club.a(stadium);
+            }
         }
     }
     @SuppressWarnings("unchecked")
     public void update(Map<String,Object> state)throws Exception{
-        updateClubs(Data.map(state.get("game")));
-        for(I match:matches) {
-            for(ah club:new ah[]{match.hc(),match.hd()}){
-                List<F> all=club==match.hc()?match.hl():match.hm(),active=club==match.hc()?match.hp():match.hq(),bench=club==match.hc()?match.hn():match.ho();
-                club.kY().clear();club.kZ().clear();all.clear();active.clear();bench.clear();
-                for(Object raw:club.kc()){F p=(F)raw;if(p.fT()>=1 && p.fT()<=25){all.add(p);active.add(p);club.kY().add(p);}else if(p.fT()>=26 && p.fT()<=36){bench.add(p);club.kZ().add(p);}}
-            }
+        Map<String,Object> game=Data.map(state.get("game"));updateClubs(game);syncStadiumExpansions(game);
+        for(Object raw:Data.list(game.get("matches"))){Map<String,Object> row=Data.map(raw);I match=findMatch(Data.number(row.get("homeId")),Data.number(row.get("awayId")));if(match==null)continue;
+            projectSide(match,true,Data.list(row.get("homeStarters")),Data.list(row.get("homeBench")));
+            projectSide(match,false,Data.list(row.get("awayStarters")),Data.list(row.get("awayBench")));
         }
+    }
+    private void syncStadiumExpansions(Map<String,Object> game){
+        c.a.SR.bw().clear();for(Object raw:Data.list(game.get("stadiumExpansions"))){Map<String,Object> row=Data.map(raw);ah club=clubs.get(Data.number(row.get("clubId")));if(club==null || club.ev()==null)continue;
+            best.B expansion=new best.B();expansion.a(club.ev());Calendar end=Calendar.getInstance();end.setTimeInMillis(Data.longNumber(row.get("endMillis")));expansion.c(end);List<Object> values=Data.list(row.get("seats"));int[] seats=new int[4];for(int i=0;i<4;i++)seats[i]=Data.number(values.get(i));expansion.c(seats);c.a.SR.bw().add(expansion);
+        }
+    }
+    private I findMatch(int home,int away){for(I match:matches)if(match.hc().lk()==home && match.hd().lk()==away)return match;return null;}
+    private void projectSide(I match,boolean home,List<Object> starters,List<Object> bench){
+        ah club=home?match.hc():match.hd();List<F> all=home?match.hl():match.hm(),active=home?match.hp():match.hq(),reserves=home?match.hn():match.ho();
+        all.clear();active.clear();reserves.clear();club.kY().clear();club.kZ().clear();Map<Integer,F> roster=new HashMap<Integer,F>();for(Object raw:club.kc()){F player=(F)raw;roster.put(player.gD(),player);}
+        for(Object raw:starters){int id=Data.number(Data.map(raw).get("playerId"));F player=roster.get(id);if(player==null)throw new IllegalStateException("Live lineup contains an unknown starter");all.add(player);active.add(player);club.kY().add(player);}
+        for(Object raw:bench){int id=Data.number(Data.map(raw).get("playerId"));F player=roster.get(id);if(player==null)throw new IllegalStateException("Live lineup contains an unknown substitute");reserves.add(player);club.kZ().add(player);}
     }
     public I ownMatch(int coach){al owner=coaches.get(coach);if(owner==null)return null;for(I match:matches)if(match.hc()==owner.fg() || match.hd()==owner.fg())return match;return null;}
     public I preparationMatch(int coach){I current=ownMatch(coach);return current==null?upcoming.get(coach):current;}

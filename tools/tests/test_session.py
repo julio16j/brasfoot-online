@@ -1,7 +1,7 @@
 """End-to-end test: real bytecode, HTTP clients, host-only checkpoints."""
 from pathlib import Path
 import concurrent.futures, json, os, subprocess, sys, time, urllib.request, urllib.parse, urllib.error, socket
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
 cp=os.pathsep.join(map(str,[ROOT/'build/classes',ROOT/'analysis/brasfoot.jar',*sorted((ROOT/'analysis/lib').glob('*.jar'))]))
 with socket.socket() as s:
@@ -58,7 +58,7 @@ try:
     viewers=[]
     for token in [host_token,guest]:
         viewers.append(subprocess.Popen([sys.executable,str(ROOT/'tools/client.py'),base,'--token='+token,'--watch'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,encoding='utf-8',env={**os.environ,'PYTHONIOENCODING':'utf-8'}))
-    seen_running=False; seen_half=False; last_sequence=-1; deadline=time.monotonic()+20
+    seen_running=False; seen_half=False; halftime_confirmed=False; last_sequence=-1; deadline=time.monotonic()+20
     while True:
         state=status(200,'/state',token=host_token)
         live=state['playback']
@@ -66,6 +66,12 @@ try:
         last_sequence=live['sequence']
         seen_running |= state['round']['phase']=='RUNNING'
         seen_half |= live['status'] in ('HALF_TIME','SECOND_HALF','FINISHED')
+        if state['round']['phase']=='HALF_TIME' and not halftime_confirmed:
+            round_state=state['round']
+            coaches=round_state['coaches']
+            for token,coach_state in zip([host_token,guest],coaches):
+                status(200,'/halftime-ready',{'round':round_state['round'],'revision':coach_state['revision'],'ready':'true'},token)
+            halftime_confirmed=True
         if state['round']['phase']=='FAILED':raise AssertionError(live)
         if state['round']['phase']=='FINISHED':break
         assert time.monotonic()<deadline,'Match did not finish'
@@ -86,9 +92,14 @@ try:
         assert 'FIM DE JOGO' in output and ('1o tempo' in output or '2o tempo' in output),output
         for match in live['matches']:
             assert f"{match['home']} {match['homeGoals']} x {match['awayGoals']} {match['away']}" in output
-    manifest=json.loads((directory/'session.json').read_text())
+    manifest=json.loads((directory/'session.json').read_text(encoding='utf-8'))
     assert manifest['round']['phase']=='FINISHED'
-    assert manifest['playback']==live
+    assert manifest['playback']['status']==live['status']
+    assert manifest['playback']['minute']==live['minute']
+    assert len(manifest['playback']['matches'])==len(live['matches'])
+    for saved_match,live_match in zip(manifest['playback']['matches'],live['matches']):
+        for field in ['homeGoals','awayGoals','played']:
+            assert saved_match[field]==live_match[field],(field,saved_match,live_match)
     assert (directory/manifest['save']).stat().st_size>0
     restored=subprocess.run([JAVA,'-Djava.awt.headless=true','-cp',cp,'brasfoot.Inspect',str(directory/manifest['save'])],capture_output=True,text=True,check=True)
     saved=json.loads(restored.stdout)

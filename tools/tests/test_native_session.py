@@ -1,7 +1,7 @@
 """Runs two original Swing game panels against one host until full time."""
 from pathlib import Path
 import json, os, re, socket, subprocess, urllib.request, urllib.parse, time
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
 cp=os.pathsep.join(map(str,[ROOT/'build/classes',ROOT/'analysis/brasfoot.jar',*sorted((ROOT/'analysis/lib').glob('*.jar'))]))
 with socket.socket() as sock:

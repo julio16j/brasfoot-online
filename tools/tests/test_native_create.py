@@ -1,7 +1,7 @@
 """Validates the graphical Create Session button and a second original-game client."""
 from pathlib import Path
 import json, os, re, socket, subprocess, time, urllib.request, urllib.parse
-ROOT=Path(__file__).resolve().parents[1]
+ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
 cp=os.pathsep.join(map(str,[ROOT/'build/classes',ROOT/'analysis/brasfoot.jar',*sorted((ROOT/'analysis/lib').glob('*.jar'))]))
 with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
