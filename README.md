@@ -57,4 +57,6 @@ python tools/package_client.py
 
 Os testes Python ficam em `tools/tests/`. Os testes Java ficam em `tests/brasfoot/`. `src/brasfoot/` contém o host, o protocolo, o motor de carreira e as interfaces online. `docs/multiplayer.md` descreve o funcionamento e os limites atuais.
 
+A [investigação dos calendários de outras ligas](docs/investigacao-calendarios.md) registra os problemas encontrados, os cenários exercitados e a ordem proposta de implementação. Para reproduzir o diagnóstico local, execute `python tools/investigate_calendars.py` após compilar o adaptador.
+
 O jogo original não é recompilado nem alterado. O pacote distribuível é produzido em `dist/` pelo script de empacotamento.
