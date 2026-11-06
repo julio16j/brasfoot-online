@@ -84,6 +84,12 @@ public final class NativeClient {
     }
     private void showError(Throwable error){create.setEnabled(true);status.setText("Não foi possível concluir: "+error.getMessage());if(testing){error.printStackTrace();close();System.exit(1);}else JOptionPane.showMessageDialog(frame,error.getMessage(),"Brasfoot Online",JOptionPane.WARNING_MESSAGE);}
     private void createSession(){
+        try{
+            int selectedPort=Integer.parseInt(port.getText().trim());
+            if(selectedPort<1024 || selectedPort>65535)throw new IllegalArgumentException("Escolha uma porta entre 1024 e 65535");
+            try(ServerSocket probe=new ServerSocket()){probe.setReuseAddress(false);probe.bind(new InetSocketAddress(selectedPort));}
+            catch(BindException occupied){throw new IOException("A porta "+selectedPort+" já está em uso. Feche a sessão anterior ou escolha outra porta. Para entrar na sessão existente, use Buscar técnicos.");}
+        }catch(Exception error){showError(error);return;}
         create.setEnabled(false);
         boolean career=!testing && sessionMode.getSelectedIndex()==0;
         java.util.List<NativeClubSelection.CoachChoice> selected=null;
@@ -108,8 +114,12 @@ public final class NativeClient {
             Collections.addAll(args,"--port",String.valueOf(selectedPort),"--tick-ms",testing?"75":"1000");
             ProcessBuilder builder=new ProcessBuilder(args);builder.directory(root.resolve("game/Brasfoot22-23").toFile());builder.redirectErrorStream(true);
             server=builder.start();BufferedReader output=new BufferedReader(new InputStreamReader(server.getInputStream(),"UTF-8"));String line,hostToken=null;
-            while((line=output.readLine())!=null){if(line.startsWith("Host token: ")){hostToken=line.substring(12);break;}}
-            if(hostToken==null)throw new IOException("O host não iniciou. Verifique se a porta já está em uso.");
+            StringBuilder startupOutput=new StringBuilder();
+            while((line=output.readLine())!=null){if(line.startsWith("Host token: ")){hostToken=line.substring(12);break;}startupOutput.append(line).append('\n');}
+            if(hostToken==null){
+                Path log=root.resolve("analysis/host-startup.log");Files.createDirectories(log.getParent());Files.write(log,startupOutput.toString().getBytes(StandardCharsets.UTF_8));
+                throw new IOException("O host não iniciou. Detalhes em: "+log);
+            }
             final BufferedReader rest=output;Thread drain=new Thread(()->{try{while(rest.readLine()!=null){ }}catch(IOException ignored){ }},"host-output");drain.setDaemon(true);drain.start();
             connect("127.0.0.1:"+selectedPort,hostToken);
             final String invite=localAddresses(selectedPort);SwingUtilities.invokeLater(()->preparation.setToolTipText("Compartilhe: "+invite));

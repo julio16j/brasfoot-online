@@ -21,6 +21,13 @@ public final class VisualModel {
     public List<I> matches(){return matches;}
     public ah club(int id){return clubs.get(id);}
     public al coach(int id){return coaches.get(id);}
+    static File clubAssetFile(File root,String asset)throws IOException{
+        if(asset==null || asset.trim().isEmpty() || asset.equals(".") || asset.equals("..") || !asset.matches("[^\\\\/:*?\"<>|\\p{Cntrl}]+"))throw new IOException("Invalid club asset: "+asset);
+        File directory=new File(root,"game/Brasfoot22-23/teams").getCanonicalFile();
+        File file=new File(directory,asset+".ban").getCanonicalFile();
+        if(!directory.equals(file.getParentFile()))throw new IOException("Invalid club asset: "+asset);
+        return file;
+    }
     @SuppressWarnings("unchecked")
     public void rebuild(Map<String,Object> state)throws Exception{
         Map<String,Object> game=Data.map(state.get("game"));
@@ -53,8 +60,7 @@ public final class VisualModel {
     private void updateClubs(Map<String,Object> game)throws Exception{
         for(Object raw:Data.list(game.get("visualClubs"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("clubId"));ah club=clubs.get(id);
             if(club==null){
-                String asset=(String)row.get("asset");if(asset==null || !asset.matches("[A-Za-z0-9_\\-]+"))throw new IOException("Invalid club asset");
-                File file=new File(root,"game/Brasfoot22-23/teams/"+asset+".ban");
+                String asset=(String)row.get("asset");File file=clubAssetFile(root,asset);
                 if(file.isFile())try(ObjectInputStream input=new ObjectInputStream(new FileInputStream(file))){club=new ah((e.t)input.readObject());}
                 else {club=new ah();Data.set(club,"dm",row.get("club"));Data.set(club,"mV",asset);}
                 club.bX(id);clubs.put(id,club);
