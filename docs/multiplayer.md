@@ -10,7 +10,7 @@ Clientes compartilham calendário, partidas, placares e eventos. A interface usa
 
 Qualquer participante pode clicar no nome de um clube ou em uma partida da lista para abrir a tela nativa de escalação. Clubes de outros técnicos abrem somente para consulta; o técnico responsável abre a mesma tela editável. O host valida cada alteração e o limite de substituições. Abrir ou fechar os detalhes não pausa o relógio.
 
-Quando o primeiro tempo termina, o relógio pausa e a tela editável do próprio clube abre automaticamente para cada técnico. Depois dos ajustes, cada um confirma **Pronto para o 2º tempo**. O host libera a segunda etapa somente quando todos confirmam.
+Quando o primeiro tempo com partidas humanas termina, o relógio pausa. A abertura automática da escalação segue a opção do host; desabilitá-la não impede a abertura manual. Depois dos ajustes, cada um confirma **Pronto para o 2º tempo**. O host libera a segunda etapa somente quando todos confirmam. Em datas sem humanos, o intervalo é retomado automaticamente.
 
 ## Fluxo da carreira
 
@@ -40,3 +40,5 @@ Só estão disponíveis na interface online as ações de carreira que possuem c
 ## Cobertura automatizada
 
 `tools/tests/test_career_session.py` cobre quatro clientes, telas originais de preparação e escalação, barreira do quarto técnico, resultados compartilhados, avanço de datas, retomada de checkpoint e recuperação de rodada interrompida. `tools/tests/test_career.py` cobre o avanço do calendário do motor original por várias temporadas.
+
+O [mapa da implementação](mapa-implementacao.md) relaciona cada funcionalidade ao código, à validação e às pendências. Os diagnósticos já corrigidos ficam em [resolvidos](resolvidos/README.md); especificações parciais e investigações abertas permanecem no [índice principal](README.md).

@@ -101,7 +101,7 @@ public final class NativeMatchPanel extends a.dV {
             String text=status.equals("FINISHED")?"Fim de jogo":status.equals("HALF_TIME")?"Intervalo":status.equals("FAILED")?"Partida interrompida":status.equals("NOT_STARTED")?"Aguardando os técnicos":live.get("minute")+"' - "+live.get("half")+"º tempo";
             ((JLabel)Data.get(this,"uh")).setText(text);
             JProgressBar progress=(JProgressBar)Data.get(this,"Hf");progress.setMaximum(45);progress.setValue(Math.min(45,Data.number(live.get("halfMinute"))));
-            ((JLabel)Data.get(this,"xI")).setText("<html>Posse: "+Data.list(row.get("possession")).get(0)+"% / "+Data.list(row.get("possession")).get(1)+"%<br>Finalizações: "+Data.list(row.get("shots")).get(0)+" / "+Data.list(row.get("shots")).get(1)+"</html>");
+            ((JLabel)Data.get(this,"xI")).setText(Boolean.FALSE.equals(row.get("statisticsAvailable"))?"Estatísticas disponíveis ao fim da partida":"<html>Posse: "+Data.list(row.get("possession")).get(0)+"% / "+Data.list(row.get("possession")).get(1)+"%<br>Finalizações: "+Data.list(row.get("shots")).get(0)+" / "+Data.list(row.get("shots")).get(1)+"</html>");
         }
         if(replay && !status.equals(lastStatus)){if(!intervalSounded && (status.equals("HALF_TIME") || Data.number(live.get("half"))==2)){sound(0);intervalSounded=true;}if(status.equals("FINISHED"))sound(1);}
         lastStatus=status;first=false;

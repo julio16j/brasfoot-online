@@ -78,7 +78,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             for(int i=0;i<4;i++)if(tactics[i]<0 || tactics[i]>=limits[i])throw new IllegalArgumentException("Invalid tactic");
         }
         List<F> roster = new ArrayList<F>(club.kc());
-        if (roster.size() > 36) throw new IllegalStateException("Roster above supported 36 slots");
+        // Native slots 1..25 describe pitch positions and 26..36 the bench.
+        // Roster indices may exceed 35; unselected players keep slot -1.
         Set<Integer> selected = new HashSet<Integer>();
         List<F> chosen = new ArrayList<F>();
         for (int[] group : new int[][] {starters, bench}) {
@@ -177,6 +178,10 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         result.put("starters",starters);result.put("bench",bench);return result;
     }
     public Map<String, Object> snapshot() {
+        return snapshot(Collections.<Integer,Object>emptyMap(),null);
+    }
+    /** Reuse pre-match AI presentation data instead of exporting already final player state. */
+    Map<String,Object> snapshot(Map<Integer,Object> frozenClubs,List<Object> frozenMatches) {
         checkGlobal();
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("calendarIndex", state.J());
@@ -214,9 +219,10 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         result.put("coaches", list);
         List<Object> matches=new ArrayList<Object>();
         for(I match:currentMatches()) {
+            Map<String,Object> frozen=frozenMatches!=null && !match.hc().jZ() && !match.hd().jZ()?Data.map(frozenMatches.get(matches.size())):null;
             Map<String,Object> m=new LinkedHashMap<String,Object>();
             m.put("home",match.hc().getNome());m.put("away",match.hd().getNome());m.put("homeId",match.hc().lk());m.put("awayId",match.hd().lk());
-            m.put("homeStarters",livePlayers(match.hp()));m.put("homeBench",livePlayers(match.hn()));m.put("awayStarters",livePlayers(match.hq()));m.put("awayBench",livePlayers(match.ho()));
+            m.put("homeStarters",frozen==null?livePlayers(match.hp()):frozen.get("homeStarters"));m.put("homeBench",frozen==null?livePlayers(match.hn()):frozen.get("homeBench"));m.put("awayStarters",frozen==null?livePlayers(match.hq()):frozen.get("awayStarters"));m.put("awayBench",frozen==null?livePlayers(match.ho()):frozen.get("awayBench"));
             m.put("homeGoals",match.hu());m.put("awayGoals",match.hw());m.put("played",match.e());matches.add(m);
         }
         result.put("matches",matches);
@@ -236,7 +242,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         result.put("stadiumExpansions",stadiumExpansions);
         for(I fixture:currentMatches()){visible.add(fixture.hc());visible.add(fixture.hd());}
         List<Object> visual=new ArrayList<Object>();
-        for(ah club:visible)visual.add(visualClub(club));
+        for(ah club:visible)visual.add(frozenClubs.containsKey(club.lk())?frozenClubs.get(club.lk()):visualClub(club));
         result.put("visualClubs",visual);return result;
     }
     private Map<String,Object> visualClub(ah club){

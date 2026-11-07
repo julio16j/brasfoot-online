@@ -46,6 +46,7 @@ public final class MatchPlayback {
     public boolean isLive(){return status.equals("FIRST_HALF") || status.equals("SECOND_HALF");}
     public boolean acceptsAdjustments(){return isLive() || status.equals("HALF_TIME");}
     public String status(){return status;}
+    public long sequence(){return sequence;}
     public int half(){return half;}
     public int halfMinute(){return minute;}
     public synchronized void substitute(I match,int side,F outgoing,F incoming){
@@ -131,6 +132,7 @@ public final class MatchPlayback {
         List<Object> rows=new ArrayList<Object>();
         for(int index=0;index<matches.size();index++) {
             I match=matches.get(index);
+            boolean concealed=career && !liveMatches.contains(match) && !status.equals("FINISHED") && !status.equals("NOT_STARTED");
             Map<String,Object> row=new LinkedHashMap<String,Object>();
             row.put("id",index);row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
             row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());
@@ -138,8 +140,8 @@ public final class MatchPlayback {
             row.put("competitionType",match.hy()==null?0:match.hy().b());
             row.put("phaseLabel",match.hG());row.put("stadium",match.ev()!=null?match.ev().dS():match.ik());
             row.put("attendance",match.hU());row.put("attendanceBySection",integers(match.hT()));row.put("revenue",match.hN());
-            row.put("homePenalties",match.hQ()[0]);row.put("awayPenalties",match.hQ()[1]);
-            row.put("homeGoals",match.hu());row.put("awayGoals",match.hw());row.put("played",match.e());
+            row.put("homePenalties",concealed?0:match.hQ()[0]);row.put("awayPenalties",concealed?0:match.hQ()[1]);
+            row.put("homeGoals",match.hu());row.put("awayGoals",match.hw());row.put("played",!concealed && match.e());
             row.put("shots",Arrays.asList(match.hA()[0],match.hA()[1]));
             row.put("possession",Arrays.asList(match.hz()[0],match.hz()[1]));
             row.put("shotsOnTarget",integers(match.hZ()));row.put("shotsOffTarget",integers(match.ia()));
@@ -148,12 +150,17 @@ public final class MatchPlayback {
             for(int i=0;i<match.hE().size();i++) {
                 A event=(A)match.hE().get(i);
                 if(event.b()==8)continue;
+                if(concealed && (event.en()>half || (event.en()==half && event.em()>=minute)))continue;
                 Map<String,Object> e=new LinkedHashMap<String,Object>();
                 e.put("id",i);e.put("type",event.b());e.put("detail",event.el());e.put("half",event.en());
                 e.put("minute",(event.en()==2?45:0)+event.em());
                 e.put("club",event.cu()==null?null:event.cu().getNome());
                 e.put("player",event.eo()==null?null:event.eo().getNome());events.add(e);
             }
+            if(concealed){int home=0,away=0;for(Object raw:events){Map<String,Object> event=Data.map(raw);if(Data.number(event.get("type"))==1){if(match.hc().getNome().equals(event.get("club")))home++;else away++;}}row.put("homeGoals",home);row.put("awayGoals",away);
+                for(String key:Arrays.asList("shots","possession","shotsOnTarget","shotsOffTarget","tackles","passErrors","fouls"))row.put(key,Arrays.asList(null,null));
+                row.put("statisticsAvailable",false);
+            }else row.put("statisticsAvailable",true);
             row.put("events",events);rows.add(row);
         }
         result.put("matches",rows);return result;

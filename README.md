@@ -17,7 +17,7 @@ O fluxo multiplayer de carreira roda em uma instância autoritativa no host. A s
 
 Durante uma partida, qualquer participante pode clicar em um clube para abrir sua escalação nativa. A tela de outro clube é somente leitura; o técnico responsável pode editar a própria escalação. O servidor valida as alterações e o limite de substituições. Abrir a tela não pausa o relógio.
 
-No fim do primeiro tempo, o relógio pausa e a tela editável do próprio clube abre automaticamente para cada técnico. O segundo tempo começa somente quando todos confirmam **Pronto para o 2º tempo**. O host mantém checkpoints locais; uma partida interrompida é retomada desde a preparação da data salva.
+No fim do primeiro tempo com partidas humanas, o relógio pausa. A tela editável do próprio clube abre automaticamente conforme a configuração do host; a abertura manual continua disponível. O segundo tempo começa somente quando todos confirmam **Pronto para o 2º tempo**. O host mantém checkpoints locais; uma partida interrompida é retomada desde a preparação da data salva.
 
 ## Jogar
 
@@ -57,6 +57,10 @@ python tools/package_client.py
 
 Os testes Python ficam em `tools/tests/`. Os testes Java ficam em `tests/brasfoot/`. `src/brasfoot/` contém o host, o protocolo, o motor de carreira e as interfaces online. `docs/multiplayer.md` descreve o funcionamento e os limites atuais.
 
-A [investigação dos calendários de outras ligas](docs/investigacao-calendarios.md) registra os problemas encontrados, os cenários exercitados e a ordem proposta de implementação. Para reproduzir o diagnóstico local, execute `python tools/investigate_calendars.py` após compilar o adaptador.
+O [índice da documentação](docs/README.md) reúne o [mapa da implementação](docs/mapa-implementacao.md), as pendências e o histórico de [problemas resolvidos](docs/resolvidos/README.md).
+
+As [configurações online](docs/especificacao/spec-configuracoes-online.md) têm edição exclusiva do host. A tela Configurações sincroniza velocidades, som, cores, tema e abertura da escalação no intervalo. Veja o [progresso da implementação e as opções ainda bloqueadas](docs/implementacao-configuracoes-online.md). Validação específica: `python tools/tests/test_session_options.py`.
+
+A [investigação dos calendários de outras ligas](docs/task-calendarios.md) registra os problemas encontrados, os cenários exercitados e a ordem proposta de implementação. Para reproduzir o diagnóstico local, execute `python tools/investigate_calendars.py` após compilar o adaptador.
 
 O jogo original não é recompilado nem alterado. O pacote distribuível é produzido em `dist/` pelo script de empacotamento.

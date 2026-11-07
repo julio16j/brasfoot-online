@@ -39,8 +39,12 @@ public final class NativeClient {
     private long displayedRound=-1;
     private NativeMatchPanel nativePanel;
     private boolean audioEnabled=true;
+    private JCheckBox audio;
+    private NativeSessionOptions optionsDialog;
+    private boolean optionsRequest;
     private String ownRosterKey="";
     private volatile Map<String,Object> latest;
+    private volatile boolean snapshotQueued;
     private int coachId;
     private long halftimeDialogRound=-1;
     private JDialog editor;
@@ -62,7 +66,7 @@ public final class NativeClient {
         }});
         body.setBackground(new Color(28,65,35));frame.add(body);frame.add(status,BorderLayout.SOUTH);status.setBorder(BorderFactory.createEmptyBorder(6,12,6,12));
         connectionScreen();frame.setSize(1280,900);frame.setMinimumSize(new Dimension(1060,800));frame.setLocationRelativeTo(null);
-        network.scheduleWithFixedDelay(()->{if(connected && !closed)try{Map<String,Object> snapshot=api.call("/state",null);SwingUtilities.invokeLater(()->accept(snapshot));}catch(Exception error){SwingUtilities.invokeLater(()->status.setText("Conexão interrompida; tentando novamente: "+error.getMessage()));}},250,250,TimeUnit.MILLISECONDS);
+        network.scheduleWithFixedDelay(()->{if(connected && !closed && !snapshotQueued){snapshotQueued=true;try{Map<String,Object> snapshot=api.call("/state",null);SwingUtilities.invokeLater(()->{try{accept(snapshot);}finally{snapshotQueued=false;}});}catch(Exception error){snapshotQueued=false;SwingUtilities.invokeLater(()->status.setText("Conexão interrompida; tentando novamente: "+error.getMessage()));}}},250,250,TimeUnit.MILLISECONDS);
     }
     private void connectionScreen(){
         JPanel box=new JPanel();box.setLayout(new BoxLayout(box,BoxLayout.Y_AXIS));box.setBorder(BorderFactory.createEmptyBorder(55,85,55,85));box.setBackground(new Color(28,65,35));
@@ -111,7 +115,8 @@ public final class NativeClient {
                 java.util.List<String> ids=new ArrayList<String>(),names=new ArrayList<String>();for(NativeClubSelection.CoachChoice choice:careerSelection){ids.add(String.valueOf(choice.clubId));names.add(choice.coachName);}
                 args.add("--club-ids");args.add(String.join(",",ids));args.add("--coach-names");args.add(Base64.getUrlEncoder().withoutPadding().encodeToString(String.join("\n",names).getBytes(StandardCharsets.UTF_8)));
             }
-            Collections.addAll(args,"--port",String.valueOf(selectedPort),"--tick-ms",testing?"75":"1000");
+            Collections.addAll(args,"--port",String.valueOf(selectedPort));
+            if(testing)Collections.addAll(args,"--tick-ms","75");
             ProcessBuilder builder=new ProcessBuilder(args);builder.directory(root.resolve("game/Brasfoot22-23").toFile());builder.redirectErrorStream(true);
             server=builder.start();BufferedReader output=new BufferedReader(new InputStreamReader(server.getInputStream(),"UTF-8"));String line,hostToken=null;
             StringBuilder startupOutput=new StringBuilder();
@@ -147,12 +152,14 @@ public final class NativeClient {
     }
     private void gameScreen(Map<String,Object> snapshot)throws Exception{
         visual=new VisualModel(root.toFile(),snapshot);c.a.vH();
+        SessionOptions.project(Data.map(snapshot.get("sessionOptions")));
         rebuildRound(snapshot);
         body.removeAll();JPanel controls=new JPanel(new FlowLayout(FlowLayout.LEFT,8,6));controls.setBackground(new Color(225,230,220));controls.add(lineup);controls.add(auto);controls.add(ready);controls.add(substitutions);controls.add(careerMenu);
         controls.add(advance);advance.addActionListener(e->command("/advance",new LinkedHashMap<String,String>(),null));
         careerMenu.addActionListener(e->openCareerMenu("Gestão da carreira"));
         substitutions.addActionListener(e->openSubstitution());
-        audioEnabled=!testing;JCheckBox audio=new JCheckBox("Áudio original",audioEnabled);audio.addActionListener(e->{audioEnabled=audio.isSelected();nativePanel.muted(!audioEnabled);});controls.add(audio);
+        audio=new JCheckBox("Áudio original");audio.addActionListener(e->{Map<String,Object> changes=new LinkedHashMap<String,Object>();changes.put("soundsEnabled",audio.isSelected());sendOptions(changes);});controls.add(audio);
+        JButton options=new JButton("Configurações");options.addActionListener(e->{if(optionsDialog==null || !optionsDialog.isDisplayable())optionsDialog=new NativeSessionOptions(frame,Data.map(latest.get("sessionOptions")),this::sendOptions);optionsDialog.update(Data.map(latest.get("sessionOptions")),optionsRequest);optionsDialog.setVisible(true);});controls.add(options);
         JButton copy=new JButton("Token de reconexão");copy.addActionListener(e->JOptionPane.showMessageDialog(frame,new JTextField(token),"Guarde o token desta sessão",JOptionPane.INFORMATION_MESSAGE));controls.add(copy);controls.add(preparation);
         auto.addActionListener(e->autoLineup());lineup.addActionListener(e->openLineup());ready.addActionListener(e->setReady(!isReady()));
         body.add(controls,BorderLayout.NORTH);body.add(screens,BorderLayout.CENTER);
@@ -254,6 +261,10 @@ public final class NativeClient {
     private void accept(Map<String,Object> snapshot){
         if(closed || nativePanel==null)return;latest=snapshot;
         try{
+            Map<String,Object> settings=Data.map(snapshot.get("sessionOptions"));SessionOptions.project(settings);
+            audioEnabled=Boolean.TRUE.equals(Data.map(settings.get("values")).get("soundsEnabled"));audio.setSelected(audioEnabled);audio.setEnabled(Boolean.TRUE.equals(settings.get("canEdit")) && !optionsRequest);nativePanel.muted(!audioEnabled || testing);
+            if(optionsDialog!=null && optionsDialog.isDisplayable())optionsDialog.update(settings,optionsRequest);
+            NativeSessionOptions.refreshWindows();
             if(displayedRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) || ((editor==null || !editor.isDisplayable()) && !ownRosterKey.equals(rosterKey(snapshot))))rebuildRound(snapshot);
             if(editor==null || !editor.isDisplayable())projectModel(snapshot);
             nativePanel.project(snapshot);
@@ -274,9 +285,15 @@ public final class NativeClient {
             else if(phase.equals("FAILED"))status.setText("Partida interrompida: "+live.get("failure"));
             else if(halftime){int halftimeReady=0;for(Object raw:Data.list(Data.map(snapshot.get("round")).get("coaches")))if(Boolean.TRUE.equals(Data.map(raw).get("ready")))halftimeReady++;status.setText("Intervalo — ajustes de escalação liberados; "+halftimeReady+"/"+Data.list(Data.map(snapshot.get("round")).get("coaches")).size()+" prontos para o segundo tempo.");}
             if(!halftime)halftimeDialogRound=-1;
-            else if(halftimeDialogRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) && (editor==null || !editor.isDisplayable())){halftimeDialogRound=Data.longNumber(Data.map(snapshot.get("round")).get("round"));if(testing && autoTest)setReady(true);else{I intervalMatch=visual.ownMatch(coachId);if(intervalMatch!=null)openMatchDetail(intervalMatch);}}
+            else if(halftimeDialogRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) && (editor==null || !editor.isDisplayable())){halftimeDialogRound=Data.longNumber(Data.map(snapshot.get("round")).get("round"));if(testing && autoTest)setReady(true);else if(Boolean.TRUE.equals(Data.map(settings.get("values")).get("openLineupAtHalfTime"))){I intervalMatch=visual.ownMatch(coachId);if(intervalMatch!=null)openMatchDetail(intervalMatch);}}
             if(testing && phase.equals("FINISHED"))finishTest(snapshot);
         }catch(Throwable error){showError(error);}
+    }
+    private void sendOptions(Map<String,Object> changes){
+        if(optionsRequest || latest==null)return;Map<String,Object> settings=Data.map(latest.get("sessionOptions"));if(!Boolean.TRUE.equals(settings.get("canEdit")))return;
+        optionsRequest=true;if(optionsDialog!=null)optionsDialog.update(settings,true);audio.setEnabled(false);
+        Map<String,String> fields=new LinkedHashMap<String,String>();fields.put("optionsRevision",String.valueOf(settings.get("revision")));fields.put("changes",Json.write(changes));
+        network.execute(()->{try{Map<String,Object> result=api.call("/session-options",fields);SwingUtilities.invokeLater(()->{optionsRequest=false;accept(result);});}catch(Throwable error){Map<String,Object> confirmed=null;try{confirmed=api.call("/state",null);}catch(Exception ignored){}final Map<String,Object> restored=confirmed;SwingUtilities.invokeLater(()->{optionsRequest=false;if(restored!=null)accept(restored);else if(optionsDialog!=null)optionsDialog.update(Data.map(latest.get("sessionOptions")),false);showError(error);});}});
     }
     @SuppressWarnings("unchecked")
     private void projectModel(Map<String,Object> snapshot){

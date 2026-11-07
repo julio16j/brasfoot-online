@@ -46,7 +46,7 @@ Os estaduais brasileiros numa sessão do Barcelona são compatíveis com o probl
 
 Consequência para a correção: além de explicar a folga na preparação, a tela de partidas deve informar que o clube não joga naquela data e identificar o escopo da lista. O fluxo atual permite aguardar a conclusão e o avanço pelo host até uma data com partida própria; automatizar datas sem humanos deve preservar eventuais partidas do outro técnico e as decisões de gestão.
 
-A [investigação dos calendários](investigacao-calendarios.md) já registrou muitas datas sem jogos humanos. O resultado local existente em `analysis/calendar-investigation/results.json` contém, para Barcelona, **152 datas simuladas**, das quais **96 sem partida humana**. Esse resultado é de outra execução; não identifica a data ou o adversário da captura.
+A [investigação dos calendários](task-calendarios.md) já registrou muitas datas sem jogos humanos. O resultado local existente em `analysis/calendar-investigation/results.json` contém, para Barcelona, **152 datas simuladas**, das quais **96 sem partida humana**. Esse resultado é de outra execução; não identifica a data ou o adversário da captura.
 
 `GameAdapter.ready` (`:145–148`) aceita Pronto sem escalação quando não há partida atual. `SessionHost.kickoffIfReady` (`:94–101`) acelera datas exclusivas da IA depois da barreira de Pronto. Isso explica por que a ação Pronto pode estar liberada com a escalação bloqueada. Se outro técnico tiver partida na data, a sessão ainda precisa processar esse jogo normalmente.
 

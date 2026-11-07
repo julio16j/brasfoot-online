@@ -56,16 +56,31 @@ def finish(base,tokens):
 try:
     subprocess.run([JAVA,'-cp',CP,'brasfoot.CoordinatorTest'],check=True,timeout=15)
     proc,base,token,directory=host(['--career']);tokens=join_all(base,token)
+    initial=request(base,'/state',token=token)
+    roster_sizes={coach['club']:len(coach['players']) for coach in initial['game']['coaches']}
+    print('Career roster sizes: '+json.dumps(roster_sizes,ensure_ascii=True),flush=True)
+    print(f'Initial snapshot: {len(initial["game"]["matches"])} matches, {len(initial["game"]["visualClubs"])} clubs, {len(json.dumps(initial).encode())} bytes',flush=True)
     # Four separate client JVMs submit through the original lineup screen.
     gui=[]
     for index,credential in enumerate(tokens):
         out=(ROOT/f'analysis/career-native-{index+1}.log').open('w',encoding='utf-8')
         client=subprocess.Popen([JAVA,'-cp',CP,'brasfoot.NativeClient','--root',str(ROOT),'--address',base,'--test-token',credential,'--test-auto','true','--test-native-editor','true','--capture',str(ROOT/f'analysis/career-game-{index+1}.png'),'--capture-preparation',str(ROOT/f'analysis/career-preparation-{index+1}.png')],stdout=out,stderr=subprocess.STDOUT)
         processes.append(client);gui.append(client)
-    for index,client in enumerate(gui):
-        client.wait(timeout=60)
-        output=(ROOT/f'analysis/career-native-{index+1}.log').read_text(encoding='utf-8',errors='replace')
-        assert client.returncode==0 and 'GUI_FINISHED' in output,output[-4000:]
+    remaining=set(range(len(gui)));deadline=time.monotonic()+60
+    while remaining:
+        for index in list(remaining):
+            client=gui[index]
+            if client.poll() is None:continue
+            output=(ROOT/f'analysis/career-native-{index+1}.log').read_text(encoding='utf-8',errors='replace')
+            assert client.returncode==0 and 'GUI_FINISHED' in output,f'Client {index+1} failed:\n{output[-4000:]}'
+            remaining.remove(index)
+        if remaining:
+            if time.monotonic()>=deadline:
+                state=request(base,'/state',token=token)
+                diagnostics={index+1:(ROOT/f'analysis/career-native-{index+1}.log').read_text(encoding='utf-8',errors='replace')[-2000:] for index in range(len(gui))}
+                playback={key:state['playback'][key] for key in ['status','minute','sequence','failure']}
+                raise AssertionError(f'Clients {sorted(index+1 for index in remaining)} stalled; round={state["round"]}; playback={playback}; logs={diagnostics}')
+            time.sleep(.1)
     first=finish(base,tokens)
     first_round=first['round']['round']
     request(base,'/advance',fields(first,1),tokens[1],expected=401)
@@ -99,7 +114,7 @@ try:
     assert recovery['round']['phase']=='PREPARING'
     assert recovery['round']['round']==3
     assert all(not m['played'] for m in recovery['game']['matches'])
-    result={'result':'PASS','players':4,'originalPreparationPanel':True,'originalLineupPanel':True,'originalMatchPanel':True,'consecutiveRounds':2,'fourthPlayerBarrier':True,'sharedResults':True,'saveResume':True,'interruptedRoundRecovery':'restart from preparation','screenshots':['analysis/career-preparation-1.png','analysis/career-game-1.png']}
+    result={'result':'PASS','players':4,'rosterSizes':roster_sizes,'originalPreparationPanel':True,'originalLineupPanel':True,'originalMatchPanel':True,'consecutiveRounds':2,'fourthPlayerBarrier':True,'sharedResults':True,'saveResume':True,'interruptedRoundRecovery':'restart from preparation','screenshots':['analysis/career-preparation-1.png','analysis/career-game-1.png']}
     (ROOT/'analysis/career-session-result.json').write_text(json.dumps(result,indent=2))
     print(json.dumps(result,indent=2))
 finally:

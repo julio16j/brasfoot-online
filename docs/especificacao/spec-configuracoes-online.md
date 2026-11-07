@@ -1,6 +1,6 @@
 # Especificação técnica: configurações nativas na sessão online
 
-Data: 6 de novembro de 2026. Status: proposta para implementação.
+Data: 6 de novembro de 2026. Status: entrega atual resolvida por aceite do usuário; cobertura do catálogo completo ainda parcial. Ver [aceite](../resolvidos/task-configuracoes-online.md) e [progresso e pendências](../implementacao-configuracoes-online.md).
 
 ## Objetivo e escopo
 
@@ -8,11 +8,11 @@ Data: 6 de novembro de 2026. Status: proposta para implementação.
 
 O adaptador multiplayer deve conectar os controles às funções existentes, transportar comandos e sincronizar os resultados. A integração inclui tanto as alterações feitas pelo host quanto os efeitos que o motor nativo produz ao longo da carreira. Reutilizar a aparência da tela ou atualizar um valor local, sem executar e compartilhar a função correspondente, não atende a este objetivo.
 
-Fazer o relógio autoritativo respeitar as velocidades nativas escolhidas pelo host. Eliminar o intervalo obrigatório de 1000 ms da interface online e manter todos os participantes no mesmo estado. O diagnóstico e as evidências estão em [investigacao-velocidade-simulacao.md](investigacao-velocidade-simulacao.md).
+Fazer o relógio autoritativo respeitar as velocidades nativas escolhidas pelo host. Eliminar o intervalo obrigatório de 1000 ms da interface online e manter todos os participantes no mesmo estado. O diagnóstico e as evidências estão em [task-configuracoes-online.md](../resolvidos/task-configuracoes-online.md).
 
 Inclui todas as configurações disponíveis na tela nativa de opções (`a.fB`): simulação, gestão, salvamento, apresentação, som, cores e filtros. Todas seguem edição exclusiva do host, consulta pelos participantes, sincronização e persistência. Controles ainda sem integração permanecem sem edição, inclusive no host, até a entrega do efeito correspondente.
 
-O nome deste arquivo foi preservado para manter os links existentes. As seções de relógio continuam detalhando a velocidade; o contrato comum abaixo se aplica ao restante das opções.
+Esta especificação fica em `docs/especificacao/spec-configuracoes-online.md` e abrange todas as configurações. As seções de relógio continuam detalhando a velocidade; o contrato comum abaixo se aplica ao restante das opções. O progresso e os limites da implementação estão em [implementacao-configuracoes-online.md](../implementacao-configuracoes-online.md).
 
 ## Regras de negócio
 

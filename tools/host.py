@@ -11,13 +11,14 @@ p.add_argument('--save', type=Path)
 p.add_argument('--host-coach', type=int)
 p.add_argument('--port', type=int, default=8212)
 p.add_argument('--bind', default='0.0.0.0')
-p.add_argument('--tick-ms',type=int,default=500,help='Duracao de um minuto de jogo em milissegundos')
+p.add_argument('--tick-ms',type=int,help='Sobrescrita de diagnostico (5 a 10000 ms); por padrao usa as configuracoes nativas')
 a=p.parse_args()
 if sum([a.demo,a.career,bool(a.save),bool(a.resume)])!=1:
     p.error('Escolha --demo, --career, --save CAMINHO.s22 ou --resume PASTA')
 subprocess.run([sys.executable,str(root/'tools/build_adapter.py'),'--java',a.java],check=True,cwd=root)
 cp=os.pathsep.join(map(str,[root/'build/classes',root/'analysis/brasfoot.jar',*sorted((root/'analysis/lib').glob('*.jar'))]))
-command=[a.java,'-Djava.awt.headless=true','-javaagent:'+str(root/'build/host-ui-agent.jar'),'-cp',cp,'brasfoot.SessionHost','--root',str(root),'--bind',a.bind,'--port',str(a.port),'--tick-ms',str(a.tick_ms)]
+command=[a.java,'-Djava.awt.headless=true','-javaagent:'+str(root/'build/host-ui-agent.jar'),'-cp',cp,'brasfoot.SessionHost','--root',str(root),'--bind',a.bind,'--port',str(a.port)]
+if a.tick_ms is not None: command += ['--tick-ms',str(a.tick_ms)]
 command += ['--demo'] if a.demo else ['--career','--clubs',a.clubs] if a.career else ['--resume',str(a.resume.resolve())] if a.resume else ['--save',str(a.save.resolve())]
 if a.host_coach is not None: command += ['--host-coach',str(a.host_coach)]
 try:
