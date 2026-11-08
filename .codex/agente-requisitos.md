@@ -1,6 +1,6 @@
 # Agente 1 — Requisitos e diagnóstico
 
-Estado operacional: **parado por instrução do usuário em 08/11/2026**, após o checkpoint de revisão. Retomar trabalho somente com nova instrução explícita do usuário. A integração à main está a cargo do agente principal.
+Estado operacional: **pesquisa retomada por instrução do usuário em 08/11/2026**, após a publicação da integração na main. Continuar investigação e documentação das pendências; o agente de implementação permanece parado. Não solicitar implementação nem reativar o agente 2.
 
 ## Missão
 

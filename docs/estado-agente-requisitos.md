@@ -1,5 +1,7 @@
 # Estado do agente de requisitos e diagnóstico
 
+Estado atual: **pesquisa retomada somente pelo agente de requisitos**, por instrução do usuário em 08/11/2026 após integração `fd4aa24f` na `main`. O Agente 2 permanece parado; não solicitar implementação nem reativá-lo. Escopo desta retomada: pesquisa, cenários isolados e documentação; sem alterar produção/testes/pacotes, commit ou push. As seções anteriores de parada e os estados pré-integração são históricos e não suspendem esta autorização nova.
+
 Rodada 1 concluída documentalmente em 08/11/2026. Paridade nativa continua aberta. Escopo executado: análise e documentação; nenhuma alteração de produção, testes, dependências, pacotes ou saves. As instruções permanecem exclusivamente em `.codex/agente-requisitos.md`.
 
 ## Base e preservação
@@ -100,3 +102,17 @@ Para gestão e estádio, preparar matriz de validação isolada de efeito, autor
 ## Atualização pelo agente principal — integração de 08/11/2026
 
 Agentes parados no checkpoint solicitado. Fontes das entregas de folga e auxiliar combinados com o trabalho local de Opções; pacote principal reconstruído e validação integrada aprovada. Esta atualização posterior não altera o alcance das evidências históricas acima. Ver [registro integrado](integracao-main-2026-11-08.md) para cenários, hashes e limites. Retomada dos agentes somente com nova instrução do usuário.
+
+## Retomada de pesquisa após integração — 08/11/2026
+
+Perfil atualizado, relatório, backlog, índice, mapa e registro integrado relidos. `git log` confirmou `fd4aa24f`; no início desta retomada somente `.codex/agente-requisitos.md` tinha modificação local, preservada. Folga, auxiliar e Opções são tratados como incorporados e validados nos limites do registro de integração, sem reabrir os recortes aceitos. Sem mensagens ao Agente 2 ou pedido de implementação.
+
+Ambiente de evidências novas: `C:/Users/Julio/AppData/Local/Temp/brasfoot-audit-integrated-1881dwvb`, metadados em `metadata.json`. Todos os probes compilados nessa pasta externa e executados com `dist/brasfoot-online.jar`, SHA256 `02f328fb24ba0f59f43da46b5b3f32373facfb931ec9b21d9ff95dc71c5cdf87`. Nenhuma recompilação/alteração do produto.
+
+### Checkpoint 7 — PN-12 no artefato integrado
+
+`AuditAvailabilityMatrix.java`/`availability-matrix.txt` executou cinco cenários com Fixture nativa descartável. Controle saudável com partida manteve estado médico/contrato; folga inventou lesão até MAX; lesão real perdeu prazo e virou MAX; contrato vencido virou lesão e foi projetado com término futuro; suspensão corrente perdeu registro contextual e virou lesão. A matriz e alcance estão na [task PN-12](task-projecao-lesoes-online.md).
+
+`NativeRestDayWindowTest` executado novamente no JAR integrado passou e gerou `rest-day-window/`. Captura `rest-next.png` inspecionada: nova mensagem de folga/acessos corretos coexistem com cruzes de lesão e data 17/08/292278994. Não é reabertura do recorte de mensagem integrado; comprova a pendência médica separada na versão atual.
+
+`AuditCompetitionIdentity.java`/`competition-identity.txt`: dois objetos nativos com mesmo nome, IDs 101/202 e tipos 1/3 foram projetados como a mesma referência, ambos tipo 3 e ID -1. Bug confirmado na projeção por nome; cenário sintético controlado, não afirma ocorrência em cada carreira real. Refinar o contrato PN-12 e calendários para identidade canônica antes de reconstruir suspensão. Próximo lote executável: comprovar academia Juniores pela janela nativa/host e expandir áudio no artefato integrado, sem envolver o implementador.

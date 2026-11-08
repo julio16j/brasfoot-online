@@ -4,6 +4,24 @@ Status: bug confirmado por execução, aberto; P1 proposta. Investigação de 08
 
 Contrato de campos, regras temporais e aceite: [spec de disponibilidade](especificacao/spec-disponibilidade-jogadores-online.md).
 
+## Matriz executada após integração `fd4aa24f`
+
+Em 08/11/2026, `AuditAvailabilityMatrix.java` executou o JAR integrado SHA256 `02f328fb24ba0f59f43da46b5b3f32373facfb931ec9b21d9ff95dc71c5cdf87`. Fonte/log `availability-matrix.txt` em `C:/Users/Julio/AppData/Local/Temp/brasfoot-audit-integrated-1881dwvb`. Cada cenário recria Fixture com atletas reais; datas/campos alterados somente nesses objetos descartáveis.
+
+| Cenário | Host | Projeção observada |
+| --- | --- | --- |
+| Saudável com partida | Sem contusão, elegível | Sem contusão, prazo contratual preservado; controle |
+| Saudável sem partida atual | Sem contusão | Contusão até `Long.MAX_VALUE`; contexto inexistente |
+| Contusão real de 10 dias | Prazo médico real e inelegível | Prazo substituído por `Long.MAX_VALUE` |
+| Contrato vencido há um dia | Sem contusão; contrato passado; inelegível | Lesão fictícia e prazo contratual futuro de um dia |
+| Suspensão na competição atual | Sem contusão; registro de suspensão ativo | Lesão fictícia; consulta de suspensão da competição projetada retorna falso |
+
+O problema médico encobre uma perda contratual/contextual: `VisualModel` chama `a(Math.max(1,contractDays),true)`, que projeta contrato vencido como vigente. Não se trata de renovação no host; o dado errado é do cliente. Retirar somente a lesão fictícia sem corrigir contrato e suspensão pode liberar indevidamente filtros nativos.
+
+`NativeRestDayWindowTest` também passou novamente no artefato integrado, com janela real. Captura `rest-day-window/rest-next.png` foi inspecionada e ainda mostra cruzes em todos os atletas e fim de contusão em 17/08/292278994, ao lado da mensagem de folga já corrigida. Nenhuma reprodução de save de usuário é alegada.
+
+Dependência confirmada por outro probe: `AuditCompetitionIdentity.java`/`competition-identity.txt` criou competições homônimas com IDs 101/202 e tipos 1/3. `VisualModel` as fundiu por nome: mesma referência, ambos tipo 3 e ID -1. Fonte é o mapa `Map<String,f.a>` de `rebuild`. Esse teste sintético confirma a possibilidade de colisão; ainda falta medir quais nomes reais colidem nas carreiras locais. Não reconstruir punições associando apenas nome ou tipo.
+
 ## Evidência
 
 `GameAdapter.java:264` publica `eligible = fixture != null && jogador.a(fixture,false)`; a cópia por técnico faz o mesmo em `:211`. `VisualModel.java:77` transforma qualquer `eligible=false` em `player.d(Long.MAX_VALUE)`. O setter representa fim da contusão, não o motivo geral de inelegibilidade (`analysis/decompiled/best/F.java:319–325`).
