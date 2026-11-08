@@ -1,6 +1,16 @@
 # Mapa da implementação
 
+## Integração de 08/11/2026
+
+O conjunto atual incorpora Opções/Preferências/F3 e paleta nativa, coerência dos acessos de escalação nas folgas e auxiliar de treino autoritativo. O [registro de integração](integracao-main-2026-11-08.md) identifica validação, pacote e limites. As evidências históricas abaixo permanecem com suas datas; não equivalem à execução de todos os cenários nesta integração.
+
+- [Folgas](implementacao-escalacao-folga.md): mensagens e três acessos coerentes; automação e escalação antecipada pendentes.
+- [Auxiliar](implementacao-treino-auxiliar-completo.md): comando separado do foco, confirmação, snapshot, persistência e precedência semanal nativa; correção com editor aberto preserva rascunho.
+- [Lesões fictícias](task-projecao-lesoes-online.md), [juniores](task-juniores-nativos-online.md), áudio e demais lacunas permanecem abertas. O lote não implementa paridade completa.
+
 Revisado em 6 de novembro de 2026, com base no código desta pasta de trabalho e nas validações registradas. Este mapa descreve os fontes; não afirma que os pacotes já existentes em `dist/` foram reconstruídos com essas alterações.
+
+Coordenação de 08/11/2026: implementações do Agente 2 em branches/worktrees separadas devem indicar branch/commit e validação, sem serem classificadas como integradas à principal antes da conferência da integração. A atualização dos artefatos distribuídos também exige evidência própria. O relatório de implementação em `docs/estado-agente-implementacao.md` é mantido pelo segundo agente; a auditoria e a retomada de requisitos ficam em [estado do agente de requisitos](estado-agente-requisitos.md).
 
 ## Funcionalidades presentes
 
@@ -18,7 +28,7 @@ Revisado em 6 de novembro de 2026, com base no código desta pasta de trabalho e
 | Consultas da carreira | Calendário, resultados, classificações, finanças e elenco do técnico | [CareerViews](../src/brasfoot/CareerViews.java), [NativeCareerDialogs](../src/brasfoot/NativeCareerDialogs.java) | Consultas de gestão e visão geral ficam indisponíveis durante a apresentação da data para evitar exposição de resultados futuros. Filtros e navegação ainda têm pendências |
 | Gestão por técnico | Comandos de renovação manual, promoção da base, lista de transferências, venda e busca de emprego | [CareerManagement](../src/brasfoot/CareerManagement.java), [NativeCareerDialogs](../src/brasfoot/NativeCareerDialogs.java) | Fluxos presentes no protocolo; não houve certificação individual de todas essas ações nesta revisão |
 | Mercado e propostas | Telas nativas Procura e Times; compras e negociação com IA, contrapropostas e propostas pendentes entre técnicos humanos | [NativeTransferSearch](../src/brasfoot/NativeTransferSearch.java), [NativeTransferMarket](../src/brasfoot/NativeTransferMarket.java), [CareerManagement](../src/brasfoot/CareerManagement.java) | Testes de busca, compra, negociação e contraproposta aprovados por `build_adapter.py --test`; empréstimos permanecem desabilitados |
-| Treino | Escolha do foco na tela nativa encaminhada ao comando `training-focus` do host | [NativeTraining](../src/brasfoot/NativeTraining.java), [CareerManagement](../src/brasfoot/CareerManagement.java) | Integração presente; sem teste específico de ponta a ponta registrado nesta revisão |
+| Treino | Foco e auxiliar na tela nativa encaminhados a comandos distintos do host, com confirmação e persistência | [NativeTraining](../src/brasfoot/NativeTraining.java), [CareerManagement](../src/brasfoot/CareerManagement.java) | [Matriz de 08/11](implementacao-treino-auxiliar-completo.md): API, janelas reais, erro, retomada, precedência e fronteira semanal; limites explícitos |
 | Estádio | Telas e comandos de preços e expansão encaminhados ao host; orçamento obtido pelo painel original | [NativeStadium](../src/brasfoot/NativeStadium.java), [CareerManagement](../src/brasfoot/CareerManagement.java) | Parcialmente validado: obra e débito de expansão ainda precisam de confirmação completa; não tratar como correção concluída |
 | Persistência e recuperação | Checkpoints Kryo e manifesto no host; retomada em outra JVM; data interrompida volta à preparação | [SessionHost](../src/brasfoot/SessionHost.java), [GameAdapter](../src/brasfoot/GameAdapter.java) | Salvamento, retomada e interrupção aprovados com quatro clientes. Tokens precisam ser emitidos novamente ao reiniciar o host |
 | Configurações da sessão | Catálogo de 22 opções, revisão, autorização do host, validação, persistência, capacidades e pendências; dez opções editáveis | [SessionOptions](../src/brasfoot/SessionOptions.java), [NativeSessionOptions](../src/brasfoot/NativeSessionOptions.java), [OptionsJson](../src/brasfoot/OptionsJson.java) | Suíte específica aprovada. As doze opções sem integração permanecem bloqueadas na interface e na API |
@@ -35,14 +45,26 @@ Ainda faltam: auto-save adicional; avisos e callbacks nativos de gestão; config
 
 ## Problemas abertos
 
+Auditoria documental adicional em 08/11/2026: o [relatório de requisitos](estado-agente-requisitos.md) rastreia as áreas do código e diferencia evidência histórica de validação nova. O [backlog de paridade](task-paridade-nativa.md) prioriza PN-01 a PN-11 e a [spec geral](especificacao/spec-paridade-nativa.md) define o contrato de certificação. Não foram repetidas suítes nem reconstruídos pacotes nesta auditoria.
+
+Limites adicionais confirmados por inspeção: capitão e batedores bloqueados em `NativeLineup.java:23`; juniores indisponíveis no editor em `:45,53`; seleções e regionais desativados em `CareerEngine.java:42`. A promoção da base já presente não equivale ao uso direto de juniores na escalação.
+
+Auditoria executada posteriormente em 08/11 confirmou [divergência dos juniores nativos](task-juniores-nativos-online.md): academia aberta por HW usa a projeção do clube, cuja base não é sincronizada com `youth` do host. Probe de carreira isolada mostrou 8 juniores no host/gestão e 1 na projeção, sem o marcador criado no host. O comando de promoção existente não certifica esse acesso nativo; sua integração permanece aberta em PN-08.
+
+Outro bug confirmado por execução na principal: [inelegibilidade projetada como lesão](task-projecao-lesoes-online.md), PN-12. Em folga, jogador saudável recebe fim de contusão `Long.MAX_VALUE` na projeção; a janela real mostra cruzes e data fictícia. Não há evidência de alteração médica no save autoritativo. Revisões independentes das branches de [treino](revisao-independente-treino.md) e [folga](revisao-independente-folga.md) não significam integração de seus recortes à principal.
+
+O treino deve ser classificado como **parcial**: o foco manual percorre o host, mas a caixa do auxiliar mantém listener nativo local sem comando correspondente. Ver [diagnóstico e critérios de aceite](task-treino-auxiliar-online.md). O efeito semanal do foco e a conclusão da obra do estádio ainda precisam de validação individual, incluindo save e retomada. Não há correção implementada por esta revisão.
+
+Validação independente posterior em 08/11: [treino](especificacao/spec-treino-auxiliar-online.md) teve consumidor, precedência, quatro combinações Kryo, agenda de 52 domingos e consumo único da fila aprovados; falta o comando completo e o avanço online. [Estádio](validacao-gestao-nativa.md) teve orçamento/débito, rejeição de obra duplicada, identidade Kryo e conclusão pelo consumidor nativo aprovados; faltam interface, HTTP e avanço normal. Esses resultados delimitam as pendências anteriores, sem certificar todos os fluxos.
+
 | Tema | Estado e referência |
 | --- | --- |
 | Geração das ligas e criação estrangeira | Seleção de países aplicada depois da geração por IDs; criação por nome limitada ao Brasil. Ver [calendários](task-calendarios.md) |
 | Datas sem humanos | O relógio e o intervalo automático estão integrados, mas ainda há barreira inicial de Pronto e avanço pelo host. Isso não equivale à automação completa das folgas |
-| Escalação em folga | Próximo confronto pode aparecer enquanto não há partida atual; acessos à escalação não explicam o bloqueio de forma consistente. Ver [escalação](task-escalacao.md) |
+| Escalação em folga | Três acessos e mensagens corrigidos; automação de datas e planejamento antecipado seguem na [task](task-escalacao.md) |
 | Navegação do calendário | Catálogo de ligas, escopo sem clube, ordenação cronológica e atualização de janelas ainda precisam das correções propostas em [calendários](task-calendarios.md) |
 | Outras integrações | Doze configurações, empréstimos e validação completa da expansão do estádio continuam pendentes |
-| Acesso às opções | [Entrega atual das configurações resolvida por aceite do usuário](resolvidos/task-configuracoes-online.md). A [task de Opções nativas](task-opcoes-nativas-online.md) permanece aberta e acompanha a remoção do botão adicional e o envio das alterações pelo botão original |
+| Acesso às opções | Botão adicional removido; Opções → Preferências e F3 integrados ao host com painel e paleta nativos. [Fontes e JAR validados, com rebuild concluído](implementacao-opcoes-nativas-online.md); [task](task-opcoes-nativas-online.md) aguardando validação do usuário |
 | Áudio dos eventos | [Task aberta](task-audio-eventos-repetidos.md): usuário relata efeitos sem evento aparente e possível repetição; falta reproduzir e identificar a causa |
 
 ## Evidência de validação

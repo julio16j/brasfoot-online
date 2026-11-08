@@ -1,0 +1,4 @@
+# Permissoes do Codex para este repositorio confiavel.
+# Acesso completo a maquina e a rede, sem aprovacao por comando.
+approval_policy = "never"
+sandbox_mode = "danger-full-access"

@@ -19,6 +19,8 @@ O manifesto persiste o candidato antes da confirmação. Uma falha de armazename
 
 A tela usa o layout original `a.fB.mJ`, com listeners online próprios. O construtor de `fB` não é executado: ele instala listeners que escrevem `options.bcf` durante a própria inicialização dos seletores. A construção do painel usa a infraestrutura de serialização do Java 8 para inicializar `JPanel`, seguida apenas do método nativo de layout. Não há chamada de `c.a.vJ`. Esse caminho depende da distribuição Java 8 já exigida pelo projeto e tem teste gráfico específico.
 
+Desde a revisão de 7 de novembro de 2026, o acesso usa **Opções → Preferências** e **F3**, sem o botão adicional Configurações. O editor da paleta também usa o painel nativo com confirmação online. Ver [implementação do acesso nativo e validação do JAR](implementacao-opcoes-nativas-online.md).
+
 Os participantes consultam a mesma tela, com controles, amostras, tabelas e setas sem edição. Envios em andamento bloqueiam novos comandos. Erros recarregam o estado confirmado; conflitos não repetem a escolha antiga. A atualização programática não envia comandos. Checkpoints obrigatórios são explicados na tela.
 
 Sem `--tick-ms`, o host usa as velocidades da sessão; o cliente não impõe 1000 ms e `tools/host.py` não impõe 500 ms. Uma sobrescrita explícita de 5 a 10000 ms publica `CLI_OVERRIDE` e impede alterações de velocidade, preservando as demais capacidades. Os limites de velocidade vêm de `c.a.vL()`.

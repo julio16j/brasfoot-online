@@ -16,9 +16,10 @@ final class NativeSessionOptions extends JDialog {
     private final JLabel notice=new JLabel();
     private Map<String,Object> settings;
     private boolean projecting,busy;
+    private NativeOptionsPalette paletteDialog;
     private static int previousTheme=-1;
     NativeSessionOptions(JFrame owner,Map<String,Object> settings,Consumer<Map<String,Object>> submit){
-        super(owner,"Configurações da sessão",false);this.submit=submit;
+        super(owner,"Preferências",true);this.submit=submit;setUndecorated(true);setResizable(false);
         try{
             // fB's constructor installs disk-writing listeners before selecting values.
             // Run JPanel's constructor and fB.mJ (layout only), then bind our own controls.
@@ -33,15 +34,20 @@ final class NativeSessionOptions extends JDialog {
         String[][] checks={{"showPlayerAuctions","IL"},{"autoRenewExpiredContracts","IN"},{"humanScoreColorsEnabled","IO"},{"soundsEnabled","IV"},{"highlightHomeEvents","IU"},{"playerListColorsEnabled","IP"},{"groupStateCompetitions","IQ"},{"hideNonHumanNationalLeagues","IT"},{"hideStateRegionalOutsideBrazil","IR"},{"hideRegionalsWithoutHumanHistory","IS"}};
         for(String[] item:checks){JCheckBox check=(JCheckBox)Data.get(panel,item[1]);controls.put(item[0],check);check.addActionListener(e->send(item[0],check.isSelected()));}
         colorChoices("humanScoreColorIndex",new String[]{"Ef","Eg","Eh"},new String[]{"cor0","cor2","cor3"});colorChoices("windowThemeIndex",new String[]{"Jr","Js","Jt","Ju","Jv"},new String[]{"corTema0","corTema1","corTema2","corTema3","corTema4"});
-        JButton palette=(JButton)Data.get(panel,"IM");controls.put("playerListPalette",palette);palette.addActionListener(e->{java.util.List<Object> colors=Data.list(Data.map(this.settings.get("values")).get("playerListPalette"));java.util.List<String> changed=new ArrayList<String>();for(int i=0;i<5;i++){Color color=JColorChooser.showDialog(this,"Cor "+(i+1),Color.decode(String.valueOf(colors.get(i))));if(color==null)return;changed.add(String.format("#%06X",color.getRGB()&0xffffff));}send("playerListPalette",changed);});
+        JButton palette=(JButton)Data.get(panel,"IM");controls.put("playerListPalette",palette);palette.addActionListener(e->openPalette());
         ((JButton)Data.get(panel,"vm")).addActionListener(e->dispose());
         controls.put("watchedLeagueCountryIds",(JTable)Data.get(panel,"JG"));
         for(String name:new String[]{"yV","yZ"}){JButton arrow=(JButton)Data.get(panel,name);arrow.setEnabled(false);arrow.setToolTipText(SessionOptions.adapter("nonHumanCompetitionPlayback").unavailable);}
-        update(settings,false);setSize(890,690);setLocationRelativeTo(owner);
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"close");getRootPane().getActionMap().put("close",new AbstractAction(){public void actionPerformed(ActionEvent event){dispose();}});
+        update(settings,false);setSize(867,620);setLocationRelativeTo(owner);
     }
     private void combo(String key,String field,String[] labels){JComboBox<String> box=(JComboBox<String>)Data.get(panel,field);for(String label:labels)box.addItem(label);controls.put(key,box);box.addActionListener(e->send(key,SessionOptions.adapter(key).kind.equals("boolean")?box.getSelectedIndex()==1:box.getSelectedIndex()));}
     private void colorChoices(String key,String[] fields,String[] icons){for(int i=0;i<fields.length;i++){final int index=i;JLabel label=(JLabel)Data.get(panel,fields[i]);label.setName(icons[i]);controls.put(key+":"+i,label);label.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(label.isEnabled())send(key,index);}});}}
-    private void send(String key,Object value){if(projecting || busy)return;Map<String,Object> changes=new LinkedHashMap<String,Object>();changes.put(key,value);submit.accept(changes);}
+    boolean canEdit(String key){return !busy && Boolean.TRUE.equals(settings.get("canEdit")) && Data.list(settings.get("supportedKeys")).contains(key) && !(key.endsWith("SpeedIndex") && "CLI_OVERRIDE".equals(settings.get("speedSource")));}
+    long revision(){return Data.longNumber(settings.get("revision"));}
+    void send(String key,Object value){if(projecting)return;if(!canEdit(key)){update(settings,busy);return;}Map<String,Object> changes=new LinkedHashMap<String,Object>();changes.put(key,value);update(settings,true);submit.accept(changes);}
+    void openPalette(){if(!canEdit("playerListPalette"))return;if(paletteDialog!=null && paletteDialog.isShowing()){paletteDialog.toFront();return;}paletteDialog=new NativeOptionsPalette(this,Data.list(Data.map(settings.get("values")).get("playerListPalette")));paletteDialog.setVisible(true);}
+    @Override public void dispose(){if(paletteDialog!=null)paletteDialog.dispose();super.dispose();}
     void update(Map<String,Object> settings,boolean busy){boolean rebuildLists=this.settings==null || !Objects.equals(this.settings.get("values"),settings.get("values")) || !Objects.equals(this.settings.get("leagueCountries"),settings.get("leagueCountries"));this.settings=settings;this.busy=busy;projecting=true;try{
         Map<String,Object> values=Data.map(settings.get("values")),pending=Data.map(settings.get("pendingValues")),reasons=Data.map(settings.get("unavailableReasons"));java.util.List<Object> supported=Data.list(settings.get("supportedKeys"));boolean host=Boolean.TRUE.equals(settings.get("canEdit"));
         for(Map.Entry<String,JComponent> entry:controls.entrySet()){String key=entry.getKey().split(":")[0];JComponent control=entry.getValue();Object value=values.get(key);boolean speed=key.endsWith("SpeedIndex");control.setEnabled(host && !busy && supported.contains(key) && !(speed && "CLI_OVERRIDE".equals(settings.get("speedSource"))));
@@ -53,6 +59,7 @@ final class NativeSessionOptions extends JDialog {
         if(rebuildLists){JTable countries=(JTable)Data.get(panel,"JG");DefaultTableModel model=new DefaultTableModel(new Object[]{"Ver","País"},0){@Override public boolean isCellEditable(int r,int c){return false;}};for(Object raw:Data.list(settings.get("leagueCountries"))){Map<String,Object> row=Data.map(raw);model.addRow(new Object[]{Data.list(values.get("watchedLeagueCountryIds")).contains(row.get("id")),row.get("label")});}countries.setModel(model);
         DefaultTableModel watch=new DefaultTableModel(new Object[]{"Ver partidas"},0),results=new DefaultTableModel(new Object[]{"Ver só resultados"},0);for(Object raw:Data.list(settings.get("nonHumanCompetitions"))){Map<String,Object> row=Data.map(raw);(Boolean.TRUE.equals(Data.map(values.get("nonHumanCompetitionPlayback")).get(row.get("id")))?watch:results).addRow(new Object[]{row.get("label")});}((JTable)Data.get(panel,"afq")).setModel(readOnly(watch));((JTable)Data.get(panel,"afr")).setModel(readOnly(results));}
         notice.setText((host?"Configurações da sessão":"Configurações controladas pelo host")+" — "+settings.get("effectiveTickMillis")+" ms ("+settings.get("speedSource")+"). Checkpoints de recuperação sempre ativos.");panel.setBackground(best.aq.E(Data.number(values.get("windowThemeIndex")),1));panel.repaint();
+        if(paletteDialog!=null && paletteDialog.isDisplayable())paletteDialog.updateAuthority();
     }finally{projecting=false;}}
     private static DefaultTableModel readOnly(DefaultTableModel source){return new DefaultTableModel(source.getDataVector(),source.getColumnCount()==1?new Vector<Object>(Arrays.asList(source.getColumnName(0))):new Vector<Object>()){@Override public boolean isCellEditable(int r,int c){return false;}};}
     static void refreshWindows(){int theme=c.a.vM().getCorTema();if(previousTheme>=0 && previousTheme!=theme)for(Window window:Window.getWindows())retheme(window,previousTheme,theme);previousTheme=theme;for(Window window:Window.getWindows())if(window.isShowing())window.repaint();}

@@ -2,6 +2,19 @@
 
 Status: aberta, aguardando investigação e reprodução. Relato registrado em 6 de novembro de 2026. Esta etapa é documental; nenhuma correção foi implementada.
 
+## Checkpoint de investigação executada — 08/11/2026
+
+O agente de requisitos reproduziu dois comportamentos no painel nativo online real, por snapshots controlados, em execução headless e **muted** (sem reprodução física). Probe externo `AuditAudio.java`, log `result-audio.txt`, em `C:/Users/Julio/AppData/Local/Temp/brasfoot-audit-training-6e_ixo3p`, sobre o JAR nativo e `build/classes` da principal. Nenhum fonte/teste/pacote foi alterado.
+
+1. Criar painel e apresentar como primeiro snapshot `SECOND_HALF`, half=2, sem eventos; depois `FINISHED`, half=2, também sem eventos. `emittedSounds()` foi `[0,1]`: intervalo e fim juntos, apesar de a entrada ter ocorrido depois do intervalo. Repetir o snapshot final manteve `[0,1]`, portanto não houve duplicação por snapshot idêntico nesse cenário.
+2. Em partida com os dois clubes marcados como IA, o wrapper nativo retornou `ei()=false`. Após snapshot inicial sem evento e outro com gol, `emittedSounds()` registrou `[2]` (o clube coincidia com supportedClub padrão do probe). O painel online solicita som sem consultar o escopo humano do wrapper.
+
+Causas delimitadas: `NativeMatchPanel.project` inicializa `intervalSounded=false`, não o ajusta ao primeiro snapshot e o testa na próxima mudança de status com half=2; assim, entrada/reconstrução no segundo tempo pode emitir som histórico de intervalo ao terminar. No nativo, os sons de gol/expulsão/contusão são condicionados a `components.v.ei()` (`analysis/decompiled/a/dV.java:739–767`), que representa presença de clube humano (`components/v.java:25–29,63–65`). O online percorre todos os jogos exibidos e emite sem essa condição (`NativeMatchPanel.java:88`). Em folga, a lista pode incluir todos os jogos da data (`NativeClient.rebuildRound`), ampliando esse desvio de escopo.
+
+Esses fatos são confirmados no pedido de emissão do painel e no rastreamento nativo; **não** comprovam ainda que sejam a única causa do relato do usuário nem ausência/presença de sobreposição audível real. `muted(true)` impede chamar o dispositivo, mas o registrador interno ainda conta a intenção. Não declarar testes de som físico aprovados a partir desse probe.
+
+Correção futura deve estabelecer baseline de transições ao primeiro snapshot/reconexão e preservar o escopo nativo das partidas humanas, documentando se haverá adaptação deliberada por clube apoiado. Testar entrada no primeiro tempo, intervalo, segundo tempo e fim; painel reconstruído; snapshots repetidos; jogos somente IA e mistura de técnicos. Emissão composta legítima de pênalti permanece a comparar com o consumidor de resolução nativo antes de eliminar chamadas.
+
 ## Relato e comportamento esperado
 
 O usuário relata sons em momentos nos quais aparentemente não aconteceu nada e a impressão de que o mesmo áudio toca mais de uma vez. O caminho de uso informado nesta sessão é `Brasfoot-Online.cmd`, após o rebuild do pacote.

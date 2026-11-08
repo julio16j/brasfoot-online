@@ -21,6 +21,13 @@ public final class VisualModel {
     public List<I> matches(){return matches;}
     public ah club(int id){return clubs.get(id);}
     public al coach(int id){return coaches.get(id);}
+    /** Safe during lineup editing: refresh training without replacing draft roster objects. */
+    public void updateTraining(Map<String,Object> state){
+        for(Object raw:Data.list(Data.map(state.get("game")).get("visualClubs"))){Map<String,Object> row=Data.map(raw);ah club=clubs.get(Data.number(row.get("clubId")));if(club==null)continue;
+            if(row.containsKey("trainingFocus"))club.bZ(Data.number(row.get("trainingFocus")));
+            if(row.containsKey("trainingAssistant"))club.M(Boolean.TRUE.equals(row.get("trainingAssistant")));
+        }
+    }
     static File clubAssetFile(File root,String asset)throws IOException{
         if(asset==null || asset.trim().isEmpty() || asset.equals(".") || asset.equals("..") || !asset.matches("[^\\\\/:*?\"<>|\\p{Cntrl}]+"))throw new IOException("Invalid club asset: "+asset);
         File directory=new File(root,"game/Brasfoot22-23/teams").getCanonicalFile();
@@ -80,6 +87,7 @@ public final class VisualModel {
             }
             List<Object> t=Data.list(row.get("tactics"));int[] settings=new int[4];for(int i=0;i<4;i++)settings[i]=Data.number(t.get(i));club.k(settings);
             if(row.containsKey("trainingFocus"))club.bZ(Data.number(row.get("trainingFocus")));
+            if(row.containsKey("trainingAssistant"))club.M(Boolean.TRUE.equals(row.get("trainingAssistant")));
             if(row.get("stadium") instanceof Map){Map<String,Object> stadiumRow=Data.map(row.get("stadium"));List<Object> capacities=Data.list(stadiumRow.get("seats")),prices=Data.list(stadiumRow.get("prices"));int[] seats=new int[4],costs=new int[4];for(int i=0;i<4;i++){seats[i]=Data.number(capacities.get(i));costs[i]=Data.number(prices.get(i));}
                 best.v stadium=club.ev();if(stadium==null){int total=0;for(int value:seats)total+=value;stadium=new best.v(String.valueOf(stadiumRow.get("name")),total,club);}
                 stadium.i(String.valueOf(stadiumRow.get("name")));stadium.a(seats);stadium.b(costs);stadium.o(Boolean.TRUE.equals(stadiumRow.get("suggestedPrices")));club.a(stadium);

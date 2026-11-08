@@ -1,5 +1,7 @@
 # Investigação dos botões de escalação desabilitados
 
+Atualização de 08/11/2026: o critério 1 foi implementado em `impl/escalacao-folga` e incorporado ao conjunto da principal. Os três acessos seguem o mesmo bloqueio, a folga é explícita e o próximo confronto aparece como consulta. Ver [registro e matriz](implementacao-escalacao-folga.md) e [validação integrada](integracao-main-2026-11-08.md). A task permanece aberta para critérios 2/3; o diagnóstico histórico abaixo descreve o estado anterior.
+
 Data: 6 de novembro de 2026. Escopo: análise da captura enviada, rastreamento do código local e consulta aos resultados já existentes da investigação dos calendários. Não houve alteração de código, execução de nova carreira ou acesso ao save da captura.
 
 ## Conclusão

@@ -1,5 +1,7 @@
 # Brasfoot Online
 
+Atualizações de 08/11/2026: auxiliar de treino com confirmação pelo host, persistência e processamento nativo; explicação de folgas e bloqueio coerente dos três acessos de escalação; acesso às Preferências pelo menu nativo e F3. Consulte o [registro de integração, validação e limites](docs/integracao-main-2026-11-08.md).
+
 ## Estado verificado das telas de preparação
 
 **Revisado em 5 de novembro de 2026.** O fluxo multiplayer de carreira roda em uma instância autoritativa no host. A criação da sessão, a preparação, as partidas, o calendário e as ações de gestão usam o estado do host para manter os clientes sincronizados.
@@ -59,7 +61,7 @@ Os testes Python ficam em `tools/tests/`. Os testes Java ficam em `tests/brasfoo
 
 O [índice da documentação](docs/README.md) reúne o [mapa da implementação](docs/mapa-implementacao.md), as pendências e o histórico de [problemas resolvidos](docs/resolvidos/README.md).
 
-As [configurações online](docs/especificacao/spec-configuracoes-online.md) têm edição exclusiva do host. A tela Configurações sincroniza velocidades, som, cores, tema e abertura da escalação no intervalo. Veja o [progresso da implementação e as opções ainda bloqueadas](docs/implementacao-configuracoes-online.md). Validação específica: `python tools/tests/test_session_options.py`.
+As [configurações online](docs/especificacao/spec-configuracoes-online.md) têm edição exclusiva do host. Use o botão nativo **Opções → Preferências** ou **F3** para ajustar velocidades, som, cores, tema e abertura da escalação no intervalo. O botão adicional Configurações foi removido; veja a [implementação do acesso nativo](docs/implementacao-opcoes-nativas-online.md) e as [opções ainda bloqueadas](docs/implementacao-configuracoes-online.md). Validação específica: `python tools/tests/test_session_options.py`.
 
 A [investigação dos calendários de outras ligas](docs/task-calendarios.md) registra os problemas encontrados, os cenários exercitados e a ordem proposta de implementação. Para reproduzir o diagnóstico local, execute `python tools/investigate_calendars.py` após compilar o adaptador.
 

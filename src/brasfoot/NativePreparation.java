@@ -12,6 +12,9 @@ import java.util.function.Consumer;
 /** The original club dashboard, with network actions in place of local career actions. */
 public final class NativePreparation {
     private NativePreparation() { }
+    public static void lineupAvailability(JPanel panel,boolean enabled,String reason){
+        JButton scale=(JButton)Data.get(panel,"HU");scale.setEnabled(enabled);scale.setToolTipText(reason);
+    }
     @SuppressWarnings("unchecked")
     public static JPanel create(JFrame frame,ah club,I match,Runnable lineup){
         return create(frame,club,match,lineup,action->{ });
@@ -28,6 +31,7 @@ public final class NativePreparation {
         Map<String,ActionListener[]> nativeActions=new LinkedHashMap<String,ActionListener[]>();
         for(String field:fields)nativeActions.put(field,((JButton)Data.get(original,field)).getActionListeners());
         disconnect(original);
+        routePreferences(original,menu);
         JButton scale=(JButton)Data.get(original,"HU");scale.setEnabled(true);scale.addActionListener(e->lineup.run());
         for(String field:fields){JButton button=(JButton)Data.get(original,field);button.setEnabled(true);button.setToolTipText(null);
             if(field.equals("HV"))button.addActionListener(e->menu.accept("Estádio"));
@@ -43,6 +47,20 @@ public final class NativePreparation {
         table.setComponentPopupMenu(actions);
         table.getSelectionModel().addListSelectionListener(e->{if(!e.getValueIsAdjusting() && table.getSelectedRow()>=0){Object player=table.getValueAt(table.convertRowIndexToModel(table.getSelectedRow()),0);if(player instanceof F)original.s((F)player);}});
         return original;
+    }
+    private static void routePreferences(a.eg original,Consumer<String> menu){
+        JPopupMenu popup=(JPopupMenu)Data.get(original,"Hy");int preferences=0;
+        for(Component child:popup.getComponents())if(child instanceof JMenuItem){
+            JMenuItem item=(JMenuItem)child;String label=item.getText();
+            if("Preferências".equals(label)){
+                preferences++;for(ActionListener action:item.getActionListeners())item.removeActionListener(action);
+                item.setAccelerator(null);item.setEnabled(true);item.addActionListener(event->menu.accept("Opções"));
+            }else if(!"Sobre o Brasfoot".equals(label)){
+                for(ActionListener action:item.getActionListeners())item.removeActionListener(action);
+                item.setAccelerator(null);item.setEnabled(false);item.setToolTipText("Esta ação local não está integrada à sessão online");
+            }
+        }
+        if(preferences!=1)throw new IllegalStateException("Item nativo Preferências indisponível nesta versão");
     }
     private static void disconnect(Component item){
         if(item instanceof JComponent){JComponent c=(JComponent)item;c.getActionMap().clear();for(int condition:new int[]{0,1,2})c.getInputMap(condition).clear();c.setComponentPopupMenu(null);}

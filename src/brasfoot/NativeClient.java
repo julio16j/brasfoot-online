@@ -38,9 +38,11 @@ public final class NativeClient {
     private final JPanel screens=new JPanel(new CardLayout());
     private long displayedRound=-1;
     private NativeMatchPanel nativePanel;
+    private JPanel preparationPanel;
     private boolean audioEnabled=true;
     private JCheckBox audio;
     private NativeSessionOptions optionsDialog;
+    private NativeTraining trainingDialog;
     private boolean optionsRequest;
     private String ownRosterKey="";
     private volatile Map<String,Object> latest;
@@ -49,6 +51,7 @@ public final class NativeClient {
     private long halftimeDialogRound=-1;
     private JDialog editor;
     private boolean connected,closed,testing,autoTest,testReady,testComplete,keepTestHost,testNativeEditor;
+    private boolean testNativeOptions;
     private Path capture;
     private Path preparationCapture;
     private volatile Throwable failure;
@@ -151,6 +154,7 @@ public final class NativeClient {
         SwingUtilities.invokeLater(()->{try{gameScreen(snapshot);}catch(Throwable error){showError(error);}});
     }
     private void gameScreen(Map<String,Object> snapshot)throws Exception{
+        optionsRequest=false;if(optionsDialog!=null){optionsDialog.dispose();optionsDialog=null;}
         visual=new VisualModel(root.toFile(),snapshot);c.a.vH();
         SessionOptions.project(Data.map(snapshot.get("sessionOptions")));
         rebuildRound(snapshot);
@@ -159,14 +163,28 @@ public final class NativeClient {
         careerMenu.addActionListener(e->openCareerMenu("Gestão da carreira"));
         substitutions.addActionListener(e->openSubstitution());
         audio=new JCheckBox("Áudio original");audio.addActionListener(e->{Map<String,Object> changes=new LinkedHashMap<String,Object>();changes.put("soundsEnabled",audio.isSelected());sendOptions(changes);});controls.add(audio);
-        JButton options=new JButton("Configurações");options.addActionListener(e->{if(optionsDialog==null || !optionsDialog.isDisplayable())optionsDialog=new NativeSessionOptions(frame,Data.map(latest.get("sessionOptions")),this::sendOptions);optionsDialog.update(Data.map(latest.get("sessionOptions")),optionsRequest);optionsDialog.setVisible(true);});controls.add(options);
+        frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0),"online-options");
+        frame.getRootPane().getActionMap().put("online-options",new AbstractAction(){public void actionPerformed(ActionEvent event){openNativeOptions();}});
         JButton copy=new JButton("Token de reconexão");copy.addActionListener(e->JOptionPane.showMessageDialog(frame,new JTextField(token),"Guarde o token desta sessão",JOptionPane.INFORMATION_MESSAGE));controls.add(copy);controls.add(preparation);
         auto.addActionListener(e->autoLineup());lineup.addActionListener(e->openLineup());ready.addActionListener(e->setReady(!isReady()));
         body.add(controls,BorderLayout.NORTH);body.add(screens,BorderLayout.CENTER);
         frame.setTitle("Brasfoot Online — "+own(snapshot).get("club")+(server!=null?" (host)":""));body.revalidate();body.repaint();frame.validate();accept(snapshot);
         if(preparationCapture!=null)capture(preparationCapture);
+        if(testNativeOptions)verifyNativeOptionsEntry();
         if(autoTest)autoLineup();
     }
+    private void verifyNativeOptionsEntry(){
+        SwingUtilities.invokeLater(()->{try{
+            if(optionsDialog==null || !optionsDialog.isShowing())throw new AssertionError("F3 did not open native preferences");
+            NativeSessionOptions opened=optionsDialog;openNativeOptions();if(opened!=optionsDialog)throw new AssertionError("Duplicate preferences window");
+            if(!(opened.getContentPane().getComponent(0) instanceof a.fB))throw new AssertionError("Preferences panel is not native");
+            assertNoAdditionalOptions(body);opened.dispose();
+        }catch(Throwable error){showError(error);}});
+        Object key=frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).get(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0));
+        frame.getRootPane().getActionMap().get(key).actionPerformed(new ActionEvent(frame,ActionEvent.ACTION_PERFORMED,"F3"));
+        System.out.println("OPTIONS_NATIVE F3=true singleDialog=true additionalButton=false");
+    }
+    private static void assertNoAdditionalOptions(Component component){if(component instanceof JButton && "Configurações".equals(((JButton)component).getText()))throw new AssertionError("Additional settings button remains");if(component instanceof Container)for(Component child:((Container)component).getComponents())assertNoAdditionalOptions(child);}
     private void rebuildRound(Map<String,Object> snapshot)throws Exception{
         if(editor!=null){editor.dispose();editor=null;}
         visual.rebuild(snapshot);screens.removeAll();
@@ -179,8 +197,13 @@ public final class NativeClient {
         JPanel stadium=new components.E(null,0);stadium.setLayout(new GridBagLayout());
         GridBagConstraints layout=new GridBagConstraints();layout.weighty=1;layout.fill=GridBagConstraints.VERTICAL;layout.anchor=GridBagConstraints.NORTH;stadium.add(nativePanel,layout);screens.add(stadium,"MATCH");
         I next=visual.preparationMatch(coachId);
-        if(owner.fg()!=null && next!=null)screens.add(NativePreparation.create(frame,owner.fg(),next,()->openLineup(),this::openCareerMenu),"PREPARING");
-        else screens.add(new JLabel("Sem partida nesta data. Aguarde os demais técnicos.",SwingConstants.CENTER),"PREPARING");
+        preparationPanel=null;
+        if(owner.fg()!=null && next!=null){
+            preparationPanel=NativePreparation.create(frame,owner.fg(),next,()->openLineup(),this::openCareerMenu);
+            JPanel dashboard=new JPanel(new BorderLayout());
+            if(ownMatch==null){JLabel notice=new JLabel("Sem partida nesta data. Próximo confronto abaixo — somente consulta.",SwingConstants.CENTER);notice.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));dashboard.add(notice,BorderLayout.NORTH);}
+            dashboard.add(preparationPanel,BorderLayout.CENTER);screens.add(dashboard,"PREPARING");
+        }else screens.add(new JLabel("Sem partida nesta data. Nenhum próximo confronto disponível.",SwingConstants.CENTER),"PREPARING");
         displayedRound=Data.longNumber(Data.map(snapshot.get("round")).get("round"));ownRosterKey=rosterKey(snapshot);screens.revalidate();screens.repaint();
     }
     private String rosterKey(Map<String,Object> snapshot){
@@ -190,6 +213,7 @@ public final class NativeClient {
     }
     private void openCareerMenu(String action){
         if(latest==null)return;
+        if("Opções".equals(action)){openNativeOptions();return;}
         if("Procura".equalsIgnoreCase(action)){openNativeTransferSearch();return;}
         if("Times".equalsIgnoreCase(action)){openNativeTransferMarket();return;}
         if("Estádio".equalsIgnoreCase(action)){openNativeStadium();return;}
@@ -205,12 +229,29 @@ public final class NativeClient {
             })));
         },null);
     }
+    private void openNativeOptions(){
+        if(latest==null || !connected || closed)return;
+        if(optionsDialog!=null && optionsDialog.isShowing()){optionsDialog.toFront();return;}
+        if(optionsDialog==null || !optionsDialog.isDisplayable())optionsDialog=new NativeSessionOptions(frame,Data.map(latest.get("sessionOptions")),this::sendOptions);
+        optionsDialog.update(Data.map(latest.get("sessionOptions")),optionsRequest);optionsDialog.setVisible(true);
+    }
     private void openNativeStadium(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;I fixture=visual.preparationMatch(coachId);
         int competitionType=fixture==null?0:fixture.hy().b();
         NativeStadium.open(frame,owner.fg(),competitionType,(fields,success)->command("/management",fields,success));
     }
-    private void openNativeTraining(){al owner=visual.coach(coachId);if(owner!=null && owner.fg()!=null)NativeTraining.open(frame,owner.fg(),(fields,success)->command("/management",fields,success));}
+    private void openNativeTraining(){al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
+        if(trainingDialog==null || !trainingDialog.isDisplayable())trainingDialog=new NativeTraining(frame,owner.fg(),this::sendTraining);
+        trainingDialog.update(owner.fg(),trainingAvailable());trainingDialog.setVisible(true);
+    }
+    private boolean trainingAvailable(){return latest!=null && !Boolean.TRUE.equals(latest.get("storageFailed")) && "PREPARING".equals(Data.map(latest.get("round")).get("phase")) && !isReady();}
+    private void sendTraining(Map<String,String> fields,Runnable success,Runnable onFailure){
+        fields.put("round",String.valueOf(Data.map(latest.get("round")).get("round")));fields.put("revision",String.valueOf(ownRound().get("revision")));
+        final SessionApi connection=api;
+        network.execute(()->{try{Map<String,Object> result=connection.call("/management",fields);SwingUtilities.invokeLater(()->{if(closed || api!=connection)return;accept(result);success.run();});}
+            catch(Throwable error){Map<String,Object> confirmed=null;try{confirmed=connection.call("/state",null);}catch(Exception ignored){}final Map<String,Object> restored=confirmed;
+                SwingUtilities.invokeLater(()->{if(closed || api!=connection)return;if(restored!=null)accept(restored);onFailure.run();showError(error);});}});
+    }
     private void openNativeTransferSearch(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
         int mode=c.a.SR.isHabilidadeIndividual()?2:1;
@@ -266,24 +307,29 @@ public final class NativeClient {
             if(optionsDialog!=null && optionsDialog.isDisplayable())optionsDialog.update(settings,optionsRequest);
             NativeSessionOptions.refreshWindows();
             if(displayedRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) || ((editor==null || !editor.isDisplayable()) && !ownRosterKey.equals(rosterKey(snapshot))))rebuildRound(snapshot);
-            if(editor==null || !editor.isDisplayable())projectModel(snapshot);
+            if(editor==null || !editor.isDisplayable())projectModel(snapshot);else visual.updateTraining(snapshot);
+            if(trainingDialog!=null && trainingDialog.isDisplayable())trainingDialog.update(visual.coach(coachId).fg(),trainingAvailable());
             nativePanel.project(snapshot);
-            String phase=(String)Data.map(snapshot.get("round")).get("phase");boolean edit=phase.equals("PREPARING") && !isReady() && (editor==null || !editor.isDisplayable());
+            String phase=(String)Data.map(snapshot.get("round")).get("phase");String blocked=lineupBlockReason();boolean edit=blocked==null;
             ((CardLayout)screens.getLayout()).show(screens,phase.equals("PREPARING")?"PREPARING":"MATCH");
             advance.setVisible(Boolean.TRUE.equals(Data.map(snapshot.get("game")).get("career")) && Boolean.TRUE.equals(snapshot.get("host")));advance.setEnabled(phase.equals("FINISHED"));
             Map<String,Object> livePlayback=Data.map(snapshot.get("playback"));String liveStatus=String.valueOf(livePlayback.get("status"));Map<String,Object> liveLineup=Data.map(own(snapshot).get("liveLineup"));
             boolean halftime=phase.equals("HALF_TIME");boolean playing=halftime || (phase.equals("RUNNING") && (liveStatus.equals("FIRST_HALF") || liveStatus.equals("SECOND_HALF")));
             substitutions.setVisible(playing);substitutions.setEnabled(playing && Data.number(own(snapshot).get("substitutionsRemaining"))>0 && !Data.list(liveLineup.get("bench")).isEmpty());
             auto.setEnabled(edit);lineup.setEnabled(edit);ready.setVisible(phase.equals("PREPARING") || halftime);ready.setEnabled((phase.equals("PREPARING") && (editor==null || !editor.isDisplayable())) || halftime);
+            auto.setToolTipText(blocked);lineup.setToolTipText(blocked);
+            if(preparationPanel!=null)NativePreparation.lineupAvailability(preparationPanel,edit,blocked);
             ready.setText(halftime?(isReady()?"Retirar pronto (2º tempo)":"Pronto para o 2º tempo"):(isReady()?"Retirar Pronto":"Pronto"));
-            if(!Boolean.TRUE.equals(own(snapshot).get("hasMatch"))){auto.setEnabled(false);lineup.setEnabled(false);}
+            boolean hasMatch=Boolean.TRUE.equals(own(snapshot).get("hasMatch"));
             int readyCount=0;for(Object raw:Data.list(Data.map(snapshot.get("round")).get("coaches")))if(Boolean.TRUE.equals(Data.map(raw).get("ready")))readyCount++;
-            preparation.setText(Data.map(snapshot.get("game")).get("date")+" — "+readyCount+"/"+Data.list(Data.map(snapshot.get("round")).get("coaches")).size()+" prontos");
+            preparation.setText(Data.map(snapshot.get("game")).get("date")+(hasMatch?"":" — Sem partida nesta data")+" — "+readyCount+"/"+Data.list(Data.map(snapshot.get("round")).get("coaches")).size()+" prontos");
             Map<String,Object> live=Data.map(snapshot.get("playback"));
             if(Boolean.TRUE.equals(snapshot.get("storageFailed")))status.setText("O host pausou a sessão por falha ao gravar o save.");
             else if(phase.equals("FINISHED"))status.setText("Fim de jogo — resultado salvo. O host pode avançar para a próxima rodada.");
             else if(phase.equals("FAILED"))status.setText("Partida interrompida: "+live.get("failure"));
             else if(halftime){int halftimeReady=0;for(Object raw:Data.list(Data.map(snapshot.get("round")).get("coaches")))if(Boolean.TRUE.equals(Data.map(raw).get("ready")))halftimeReady++;status.setText("Intervalo — ajustes de escalação liberados; "+halftimeReady+"/"+Data.list(Data.map(snapshot.get("round")).get("coaches")).size()+" prontos para o segundo tempo.");}
+            else if(phase.equals("PREPARING"))status.setText(!hasMatch?"Sem partida nesta data. Confirme Pronto para aguardar os jogos dos demais clubes.":blocked==null?"Prepare a escalação do jogo desta data e confirme Pronto.":blocked);
+            else if(!hasMatch && phase.equals("RUNNING"))status.setText("Sem partida nesta data. A lista mostra todos os jogos desta data; aguarde a conclusão.");
             if(!halftime)halftimeDialogRound=-1;
             else if(halftimeDialogRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) && (editor==null || !editor.isDisplayable())){halftimeDialogRound=Data.longNumber(Data.map(snapshot.get("round")).get("round"));if(testing && autoTest)setReady(true);else if(Boolean.TRUE.equals(Data.map(settings.get("values")).get("openLineupAtHalfTime"))){I intervalMatch=visual.ownMatch(coachId);if(intervalMatch!=null)openMatchDetail(intervalMatch);}}
             if(testing && phase.equals("FINISHED"))finishTest(snapshot);
@@ -293,7 +339,8 @@ public final class NativeClient {
         if(optionsRequest || latest==null)return;Map<String,Object> settings=Data.map(latest.get("sessionOptions"));if(!Boolean.TRUE.equals(settings.get("canEdit")))return;
         optionsRequest=true;if(optionsDialog!=null)optionsDialog.update(settings,true);audio.setEnabled(false);
         Map<String,String> fields=new LinkedHashMap<String,String>();fields.put("optionsRevision",String.valueOf(settings.get("revision")));fields.put("changes",Json.write(changes));
-        network.execute(()->{try{Map<String,Object> result=api.call("/session-options",fields);SwingUtilities.invokeLater(()->{optionsRequest=false;accept(result);});}catch(Throwable error){Map<String,Object> confirmed=null;try{confirmed=api.call("/state",null);}catch(Exception ignored){}final Map<String,Object> restored=confirmed;SwingUtilities.invokeLater(()->{optionsRequest=false;if(restored!=null)accept(restored);else if(optionsDialog!=null)optionsDialog.update(Data.map(latest.get("sessionOptions")),false);showError(error);});}});
+        final SessionApi connection=api;
+        network.execute(()->{try{Map<String,Object> result=connection.call("/session-options",fields);SwingUtilities.invokeLater(()->{if(api!=connection || closed)return;optionsRequest=false;accept(result);});}catch(Throwable error){Map<String,Object> confirmed=null;try{confirmed=connection.call("/state",null);}catch(Exception ignored){}final Map<String,Object> restored=confirmed;SwingUtilities.invokeLater(()->{if(api!=connection || closed)return;optionsRequest=false;if(restored!=null)accept(restored);else accept(latest);showError(error);});}});
     }
     @SuppressWarnings("unchecked")
     private void projectModel(Map<String,Object> snapshot){
@@ -316,10 +363,18 @@ public final class NativeClient {
         network.execute(()->{try{Map<String,Object> snapshot=api.call(path,fields);SwingUtilities.invokeLater(()->{accept(snapshot);if(success!=null)success.run();});}
             catch(Throwable error){failure=error;SwingUtilities.invokeLater(()->{showError(error);if(onFailure!=null)onFailure.run();});}});
     }
-    private void autoLineup(){Map<String,Object> suggestion=Data.map(own(latest).get("suggestion"));Map<String,String> data=new LinkedHashMap<String,String>();data.put("starters",Data.csv(Data.list(suggestion.get("starters"))));data.put("bench",Data.csv(Data.list(suggestion.get("bench"))));command("/lineup",data,()->{status.setText("Escalação enviada. Você pode ajustar na tela original antes do Pronto.");if(autoTest && !testReady){testReady=true;if(testNativeEditor)openLineup();else setReady(true);}});}
+    private String lineupBlockReason(){
+        if(latest==null)return "Entre em uma sessão para escalar.";
+        if(!Data.map(latest.get("round")).get("phase").equals("PREPARING"))return "Escalação disponível na preparação da data.";
+        if(!Boolean.TRUE.equals(own(latest).get("hasMatch")))return "Sem partida nesta data. A escalação fica disponível no dia do jogo.";
+        if(isReady())return "Retire o Pronto para editar a escalação.";
+        if(editor!=null && editor.isDisplayable())return "Conclua ou feche a janela de escalação aberta.";
+        return null;
+    }
+    private void autoLineup(){String reason=lineupBlockReason();if(reason!=null){status.setText(reason);return;}Map<String,Object> suggestion=Data.map(own(latest).get("suggestion"));Map<String,String> data=new LinkedHashMap<String,String>();data.put("starters",Data.csv(Data.list(suggestion.get("starters"))));data.put("bench",Data.csv(Data.list(suggestion.get("bench"))));command("/lineup",data,()->{status.setText("Escalação enviada. Você pode ajustar na tela original antes do Pronto.");if(autoTest && !testReady){testReady=true;if(testNativeEditor)openLineup();else setReady(true);}});}
     private void setReady(boolean value){Map<String,String> data=new LinkedHashMap<String,String>();data.put("ready",String.valueOf(value));String path=Data.map(latest.get("round")).get("phase").equals("HALF_TIME")?"/halftime-ready":"/ready";command(path,data,null);}
-    private void openLineup(){if(latest==null || !Data.map(latest.get("round")).get("phase").equals("PREPARING") || isReady())return;I match=visual.ownMatch(coachId);al coach=visual.coach(coachId);if(coach==null || match==null)return;
-        editor=NativeLineup.open(frame,coach.fg(),match,(form,success)->command("/lineup",form,()->{success.run();if(testing && testNativeEditor)setReady(true);}));editor.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){editor=null;if(latest!=null)accept(latest);}});editor.setVisible(!testing);
+    private void openLineup(){String reason=lineupBlockReason();if(reason!=null){status.setText(reason);return;}I match=visual.ownMatch(coachId);al coach=visual.coach(coachId);if(coach==null || match==null){status.setText("Partida atual indisponível. Aguarde a atualização da sessão.");return;}
+        editor=NativeLineup.open(frame,coach.fg(),match,(form,success)->command("/lineup",form,()->{success.run();if(testing && testNativeEditor)setReady(true);}));editor.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){editor=null;if(latest!=null)accept(latest);}});accept(latest);editor.setVisible(!testing);
         if(testing && testNativeEditor){
             a.bz original=(a.bz)((JScrollPane)editor.getContentPane().getComponent(0)).getViewport().getView();
             ((JComboBox<?>)Data.get(original,"Bg")).setSelectedIndex(1);
@@ -354,6 +409,7 @@ public final class NativeClient {
         SwingUtilities.invokeLater(()->{NativeClient client=new NativeClient(root);client.testing=options.containsKey("--test-token") || options.containsKey("--test-create");client.keepTestHost=options.containsKey("--test-create");client.autoTest=options.containsKey("--test-auto");client.testNativeEditor=options.containsKey("--test-native-editor");client.capture=options.containsKey("--capture")?Paths.get(options.get("--capture")):null;client.frame.setVisible(!client.testing);client.frame.addNotify();client.frame.validate();
             Runtime.getRuntime().addShutdownHook(new Thread(()->{client.network.shutdownNow();if(client.server!=null)client.server.destroy();}));
             if(options.containsKey("--port"))client.port.setText(options.get("--port"));
+            client.testNativeOptions=options.containsKey("--test-native-options");
             if(options.containsKey("--capture-preparation"))client.preparationCapture=Paths.get(options.get("--capture-preparation"));
             if(options.containsKey("--address"))client.address.setText(options.get("--address"));
             if(options.containsKey("--test-create"))SwingUtilities.invokeLater(()->client.create.doClick());

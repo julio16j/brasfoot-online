@@ -263,6 +263,8 @@ public final class SessionHost {
                 Map<String,String> data=form(exchange);required(data,"action");
                 long expectedRound=Long.parseLong(required(data,"round")),revision=Long.parseLong(required(data,"revision"));
                 Set<Integer> affected=management.affectedCoaches(coach,data);
+                boolean training="training-focus".equals(data.get("action")) || "training-assistant".equals(data.get("action"));
+                Runnable rollback=training?management.trainingRollback(coach):()->{};
                 Map<Integer,List<best.F>> before=rosterIdentities();
                 final Map<String,Object>[] result=new Map[1];
                 round.management(coach,expectedRound,revision,affected,()->{
@@ -271,7 +273,8 @@ public final class SessionHost {
                     for(Integer id:before.keySet())if(!before.get(id).equals(after.get(id)))changed.add(id);
                     if(!changed.isEmpty()){game.invalidateLineups(changed);round.invalidatePreparation(changed,coach);}
                 });
-                persist();Map<String,Object> response=state(coach);response.put("command",result[0]);reply(exchange,200,response);return;
+                try{persist();}catch(Exception failure){rollback.run();cachedGame=null;throw failure;}
+                Map<String,Object> response=state(coach);response.put("command",result[0]);reply(exchange,200,response);return;
             }
             if(path.equals("/halftime-ready") && method.equals("POST")){
                 if(storageFailed)throw new IllegalStateException("Host storage unavailable");

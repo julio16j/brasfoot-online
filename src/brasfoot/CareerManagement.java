@@ -120,6 +120,8 @@ public final class CareerManagement {
             stadium.o(suggested);if(!suggested)stadium.b(prices);result.put("status","STADIUM_SETTINGS_UPDATED");
         } else if(action.equals("training-focus")){
             int focus=number(data,"focus");if(focus<0 || focus>1)throw new IllegalArgumentException("Invalid native training focus");own(coachId).bZ(focus);result.put("status","TRAINING_UPDATED");result.put("focus",focus);
+        } else if(action.equals("training-assistant")){
+            boolean enabled=bool(data,"enabled");own(coachId).M(enabled);result.put("status","TRAINING_UPDATED");result.put("enabled",enabled);
         } else if(action.equals("job")){
             al coach=coach(coachId);if(coach.fg()!=null)throw new IllegalStateException("You already manage a club");int clubId=number(data,"clubId");
             if(!jobs(coach).contains(clubId))throw new IllegalStateException("Club has not offered this position");ah club=state.x(clubId);
@@ -129,6 +131,7 @@ public final class CareerManagement {
         return result;
     }
     private static int asking(F player){return Math.max(1,player.fl()>0?player.fl():player.fk());}
+    public Runnable trainingRollback(int coachId){ah club=own(coachId);boolean assistant=club.ll();int focus=club.lm();return ()->{club.M(assistant);club.bZ(focus);};}
     static boolean nativeListedPurchase(boolean listed,int amount,int asking){return listed && amount>=asking;}
     static boolean nativeOfferAccepted(int nativeResult){return nativeResult==1;}
     static boolean nativeOfferCountered(int nativeResult){return nativeResult==6 || nativeResult==7;}
