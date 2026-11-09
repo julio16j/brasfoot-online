@@ -83,6 +83,7 @@ public final class VisualModel {
                 player.setCr1(Data.number(p.get("skill1")));player.setCr2(Data.number(p.get("skill2")));player.setStatus(Data.number(p.get("status")));player.a(Boolean.TRUE.equals(p.get("star")));player.j(Boolean.TRUE.equals(p.get("worldClass")));
                 player.as(Data.number(p.get("slot")));if(p.containsKey("injuryUntilMillis"))player.d(Data.longNumber(p.get("injuryUntilMillis")));
                 Data.set(player,"et",Data.number(p.get("salary")));Data.set(player,"eu",Data.number(p.get("value")));if(p.containsKey("contractEndMillis"))Data.set(player,"eJ",Data.longNumber(p.get("contractEndMillis")));
+                if(p.containsKey("forSale"))player.c((Boolean)p.get("forSale"));if(p.containsKey("askingPrice"))player.ag(Data.number(p.get("askingPrice")));if(p.containsKey("loanAvailable"))player.g((Boolean)p.get("loanAvailable"));
                 if(p.containsKey("suspensions"))projectSuspensions(player,Data.list(p.get("suspensions")));
                 club.kc().add(player);
             }

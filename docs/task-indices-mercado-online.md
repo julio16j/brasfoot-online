@@ -1,6 +1,6 @@
 # Índices locais da Procura e de Times
 
-Status: parcial em `main`; correções de seleção após ordenação e overflow numérico integradas. Fonte/completude dos candidatos e validação de interface/retomada permanecem abertas. Diagnóstico original em 08/11/2026.
+Status: parcial em `main`; seleção após ordenação, validação de preço e projeção de listagem/preço/condição de empréstimo integradas. Fonte/completude dos candidatos e validação de interface/retomada permanecem abertas. Diagnóstico original em 08/11/2026.
 
 ## Caminho rastreado
 
@@ -21,6 +21,8 @@ No fallback sem `.ban`, `new ah()` também não registra o clube em P. Além dis
 O comando `list` modifica `F.c(forSale)` e `F.ag(amount)` no host; a consulta separada `CareerManagement.playerRow` publica `forSale` e `askingPrice`. Esses campos não existem em `GameAdapter.visualClub` nem são aplicados em `VisualModel.updateClubs`. Não confundir `value`/fk com o preço pedido fl: são campos distintos (`best/F.java:267–285,413–419`).
 
 O consumidor nativo depende exatamente desses dados: `iA.sG` habilita Comprar por `F.ft()` e bloqueia negociados por empréstimo `F.gl()` (`a/iA.java:539–548`); `NativeTransferMarket.purchase` calcula o pedido a partir de fl e só usa fk como fallback. `af.i` também filtra a opção de venda por ft (`best/af.java:125–190`). O campo de empréstimo não é projetado em visualClub, embora exista no DTO de gestão. Assim, uma alteração autoritativa da lista/preço ou condição de empréstimo não é propagada explicitamente aos objetos usados pelas telas; valores do asset/default não certificam o estado da carreira. A validação do host continua necessária e pode recusar um comando feito com informação visual obsoleta.
+
+Correção integrada: `GameAdapter.visualClub` publica `forSale`, `askingPrice` e `loanAvailable`; `VisualModel` aplica esses valores no objeto nativo em vez de confiar no asset. `AvailabilityProjectionTest` verifica lista, preço pedido e disponibilidade de empréstimo em snapshot e projeção. Falta exercitar filtros/botões e atualização por outro cliente após listar/deslistar.
 
 Aceite adicional: listar/deslistar, alterar preço mantendo o valor estimado, conferir habilitação/realce/filtro e proposta em outro cliente, renovar a consulta e retomar o save. Validar também atleta emprestado originado de save compatível; empréstimos novos continuam indisponíveis no online.
 

@@ -283,6 +283,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             player.put("age",p.getIdade());player.put("strength",p.fi());player.put("fitness",p.fp());player.put("side",p.getLado());
             player.put("skill1",p.getCr1());player.put("skill2",p.getCr2());player.put("status",p.getStatus());player.put("star",p.ff());player.put("worldClass",p.gm());
             player.put("salary",p.fj());player.put("value",p.fk());player.put("contractDays",p.fR());
+            player.put("forSale",p.ft());player.put("askingPrice",p.fl());player.put("loanAvailable",p.fz());
             player.put("playerId",p.gD());player.put("country",p.getPais());player.put("injuryUntilMillis",p.fo());player.put("contractEndMillis",Data.longNumber(Data.get(p,"eJ")));
             player.put("suspensions",suspensionRows(p));
             player.put("seasonStats",scalarFields(p,new String[]{"fh","fi"}));
