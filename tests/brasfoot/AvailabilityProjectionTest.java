@@ -1,42 +1,53 @@
 package brasfoot;
 
 import best.F;
+import best.H;
 import best.I;
 import best.ah;
 import java.io.File;
 import java.util.*;
 
-/** Keeps medical, contract and competition-ban state distinct in the visual projection. */
+/** Checks that a client projection preserves exact medical, contract and competition state. */
 public final class AvailabilityProjectionTest {
     private static void check(boolean value,String message){if(!value)throw new AssertionError(message);}
+    @SuppressWarnings("unchecked")
     public static void main(String[] args)throws Exception{
-        File root=new File(args[0]);GameAdapter game=CareerEngine.create(root,new String[]{"Corinthians","Palmeiras"});
-        check(!game.currentMatches().isEmpty(),"Fixture is available for a competition-specific suspension");
-        I fixture=game.currentMatches().get(0);ah hostClub=fixture.hc();F hostPlayer=(F)hostClub.kc().get(0);
-        long gameDate=Data.longNumber(game.snapshot().get("dateMillis"));
-        long injuryEnd=gameDate+7L*24L*60L*60L*1000L;
-        long contractEnd=gameDate-24L*60L*60L*1000L;
-        hostPlayer.d(injuryEnd);Data.set(hostPlayer,"eJ",contractEnd);
-        hostPlayer.c(Boolean.TRUE);hostPlayer.ag(123000);hostPlayer.g(Boolean.TRUE);
-        hostPlayer.aJ(31);hostPlayer.aM(32);hostPlayer.aN(33);hostPlayer.aO(34);hostPlayer.aI(35);hostPlayer.aK(36);hostPlayer.aL(37);c.a.SR.setHabilidadeIndividual(true);
-        Map<String,Object> state=new LinkedHashMap<String,Object>();state.put("game",game.snapshot());state.put("playback",new MatchPlayback(game.currentMatches(),true).snapshot());
-        check(Boolean.TRUE.equals(Data.map(state.get("game")).get("individualSkills")),"Snapshot carries the host's individual-skills mode");
-        Map<String,Object> visualClub=null;for(Object raw:Data.list(Data.map(state.get("game")).get("visualClubs")))if(Data.number(Data.map(raw).get("clubId"))==hostClub.lk())visualClub=Data.map(raw);
-        Map<String,Object> visualPlayer=null;for(Object raw:Data.list(visualClub.get("players"))){Map<String,Object> row=Data.map(raw);if(hostPlayer.gD()>=0?Data.number(row.get("playerId"))==hostPlayer.gD():hostPlayer.getNome().equals(row.get("name")))visualPlayer=row;}
-        check(Data.longNumber(visualPlayer.get("injuryUntilMillis"))==injuryEnd,"Snapshot carries the real injury deadline: expected="+injuryEnd+" actual="+visualPlayer.get("injuryUntilMillis")+" playerId="+hostPlayer.gD());
-        check(Data.longNumber(visualPlayer.get("contractEndMillis"))==contractEnd,"Snapshot carries the exact expired contract deadline");
-        check(Boolean.TRUE.equals(visualPlayer.get("forSale"))&&Data.number(visualPlayer.get("askingPrice"))==123000&&Boolean.TRUE.equals(visualPlayer.get("loanAvailable")),"Snapshot carries authoritative sale, price and loan-listing fields");
-        check(Data.list(visualPlayer.get("suspensions")).size()==Data.list(Data.get(hostPlayer,"eS")).size(),"Snapshot carries professional suspension records");
-        VisualModel model=new VisualModel(root,state);F projected=null;for(Object raw:model.club(hostClub.lk()).kc()){F candidate=(F)raw;if(hostPlayer.gD()>=0?candidate.gD()==hostPlayer.gD():hostPlayer.getNome().equals(candidate.getNome()))projected=candidate;}
-        check(c.a.SR.P().size()==Data.list(Data.map(state.get("game")).get("visualClubs")).size(),"Native club index contains exactly clubs from the current projection");
-        int expectedIndexedPlayers=0;for(Object raw:Data.list(Data.map(state.get("game")).get("visualClubs")))expectedIndexedPlayers+=model.club(Data.number(Data.map(raw).get("clubId"))).kc().size();
-        check(c.a.SR.O().size()==expectedIndexedPlayers&&c.a.SR.O().contains(projected),"Native search index contains reconstructed current players and no extra asset entries");
-        check(projected!=null,"Professional player is projected");check(projected.fo()==injuryEnd,"Projection preserves actual injury deadline");
-        check(Data.longNumber(Data.get(projected,"eJ"))==contractEnd,"Projection does not extend an expired contract");
-        check(Boolean.TRUE.equals(projected.ft())&&projected.fl()==123000&&Boolean.TRUE.equals(projected.fz()),"Projection uses authoritative listing state instead of asset defaults");
-        check(c.a.SR.isHabilidadeIndividual()&&projected.gK()==31&&projected.gN()==32&&projected.gO()==33&&projected.gP()==34&&projected.gJ()==35&&projected.gL()==36&&projected.gM()==37,"Projection preserves all seven individual skills and host mode");
-        check(Data.list(Data.get(projected,"eS")).size()==Data.list(Data.get(hostPlayer,"eS")).size(),"Projection rehydrates professional suspension records");
-        check(hostPlayer.fo()==injuryEnd&&Data.longNumber(Data.get(hostPlayer,"eJ"))==contractEnd,"Client projection does not mutate host player state");
-        System.out.println("PASS distinct injury, exact contract expiry and competition-specific professional suspension projection");
+        File root=new File(args[0]);GameAdapter adapter=Fixture.create(new File(root,"game/Brasfoot22-23/teams/abcrn_bra.ban"),new File(root,"game/Brasfoot22-23/teams/corinthians_bra.ban"));
+        ah home=((best.al)c.a.SR.M().get(0)).fg();F player=(F)home.kc().get(0);long now=c.a.SR.bb().getTimeInMillis();
+
+        Map<String,Object> restGame=adapter.snapshot();Data.list(restGame.get("matches")).clear();Map<String,Object> rest=new LinkedHashMap<String,Object>();rest.put("game",restGame);Map<String,Object> noPlayback=new LinkedHashMap<String,Object>();noPlayback.put("matches",new ArrayList<Object>());rest.put("playback",noPlayback);
+        Map<String,Object> coach=Data.map(Data.list(restGame.get("coaches")).get(0));Map<String,Object> coachPlayer=Data.map(Data.list(coach.get("players")).get(0));coachPlayer.put("eligible",false);coachPlayer.put("eligibilityContext",null);
+        player.d(now+1234567L);Data.set(player,"eJ",now-987654L);
+        player.c(Boolean.TRUE);player.ag(123000);player.g(Boolean.TRUE);player.aJ(31);player.aM(32);player.aN(33);player.aO(34);player.aI(35);player.aK(36);player.aL(37);c.a.SR.setHabilidadeIndividual(true);
+        f.a firstCompetition=new f.a();firstCompetition.setNome("Copa Homonima");firstCompetition.F(1,0);firstCompetition.az(101);
+        f.a secondCompetition=new f.a();secondCompetition.setNome("Copa Homonima");secondCompetition.F(3,0);secondCompetition.az(202);
+        I current=adapter.currentMatches().get(0);current.hy().setNome("Copa Homonima");Data.set(current.hy(),"tR",3);current.hy().az(202);
+        H suspension=new H();suspension.m(current.hy());Data.set(suspension,"ca",3);Data.set(suspension,"cb",0);suspension.gY();((List<Object>)Data.get(player,"eS")).add(suspension);
+        Map<String,Object> game=adapter.snapshot();
+        I first=new I(null,0,home,(ah)((best.al)c.a.SR.M().get(1)).fg(),0,firstCompetition,null);I second=new I(null,0,home,(ah)((best.al)c.a.SR.M().get(1)).fg(),0,secondCompetition,null);
+        Map<String,Object> state=new LinkedHashMap<String,Object>();state.put("game",game);
+        Map<String,Object> playback=new MatchPlayback(Arrays.asList(first,second),false).snapshot();List<Object> rows=Data.list(playback.get("matches"));Map<String,Object> firstRow=Data.map(rows.get(0)),secondRow=Data.map(rows.get(1));firstRow.put("competitionKey","id:101");secondRow.put("competitionKey","id:202");playback.put("matches",rows);state.put("playback",playback);
+        VisualModel restVisual=new VisualModel(root,rest);F restPlayer=(F)restVisual.club(home.lk()).kc().get(0);
+        check(restPlayer.fo()==0 && !restPlayer.fP(),"No fixture context must not invent an injury");
+        check(coachPlayer.get("eligibilityContext")==null,"Rest-day eligibility context must be explicit null");
+        VisualModel visual=new VisualModel(root,state);F projected=(F)visual.club(home.lk()).kc().get(0);List<I> matches=visual.matches();
+        check(projected.fo()==now+1234567L,"Exact injury deadline must survive projection");
+        check(Data.longNumber(Data.get(projected,"eJ"))==now-987654L,"Expired contract deadline must survive projection");
+        Map<String,Object> visualPlayer=null;for(Object raw:Data.list(game.get("visualClubs"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("clubId"))==home.lk()){visualPlayer=Data.map(Data.list(row.get("players")).get(0));break;}}
+        check(Boolean.TRUE.equals(visualPlayer.get("forSale"))&&Data.number(visualPlayer.get("askingPrice"))==123000&&Boolean.TRUE.equals(visualPlayer.get("loanAvailable")),"Snapshot preserves authoritative transfer listing fields");
+        check(c.a.SR.isHabilidadeIndividual()&&projected.gK()==31&&projected.gN()==32&&projected.gO()==33&&projected.gP()==34&&projected.gJ()==35&&projected.gL()==36&&projected.gM()==37,"Projection preserves all individual skills and mode");
+        check(c.a.SR.P().size()==Data.list(game.get("visualClubs")).size(),"Native club index contains exactly projected clubs");
+        Map<String,Object> coachRow=Data.map(Data.list(game.get("coaches")).get(0));Map<String,Object> hostPlayer=Data.map(Data.list(coachRow.get("players")).get(0));Map<String,Object> context=Data.map(hostPlayer.get("eligibilityContext"));
+        check(Boolean.TRUE.equals(context.get("injured"))&&Boolean.TRUE.equals(context.get("suspended"))&&Boolean.TRUE.equals(context.get("contractExpired")),"Snapshot must preserve separate simultaneous availability reasons");
+        check(matches.size()==2 && matches.get(0).hy()!=matches.get(1).hy(),"Homonymous competitions with distinct IDs must remain distinct");
+        check(matches.get(0).hy().b()==1 && matches.get(1).hy().b()==3,"Competition types must not overwrite each other");
+        check(!projected.c(matches.get(0).hy()) && projected.c(matches.get(1).hy()),"Suspension must remain bound to its exact competition object");
+        projected.d(0L);Data.set(projected,"eJ",now+86400000L);check(projected.a(matches.get(0),false)&&!projected.a(matches.get(1),false),"Native lineup eligibility must honor competition-scoped suspension");
+        Data.set(projected,"eS",new ArrayList<Object>());Data.set(projected,"eJ",now-1L);check(!projected.a(matches.get(1),false),"Exact expired contract must continue to block native selection");
+        VisualModel reconnected=new VisualModel(root,Data.parse(Json.write(state)));F reconnectedPlayer=(F)reconnected.club(home.lk()).kc().get(0);
+        check(reconnectedPlayer.fo()==now+1234567L&&Data.longNumber(Data.get(reconnectedPlayer,"eJ"))==now-987654L,"Serialized reconnect snapshot must retain exact deadlines");
+        check(!reconnectedPlayer.c(reconnected.matches().get(0).hy())&&reconnectedPlayer.c(reconnected.matches().get(1).hy()),"Reconnect must bind suspension to canonical competition identity again");
+        check(player.fo()==now+1234567L&&Data.longNumber(Data.get(player,"eJ"))==now-987654L,"Client projection must not mutate host medical state");
+        System.out.println("PASS rest-day health, exact injury and contract deadlines, and competition-scoped suspension projection");
     }
 }

@@ -104,7 +104,8 @@ public final class GameAdapter implements RoundCoordinator.Actions {
                 F player=null;for(F candidate:roster)if(candidate.gD()==id){player=candidate;break;}
                 if(player==null || player.fg()!=club || !player.a(match,false))throw new IllegalArgumentException("Special role player is unavailable");
                 if(role<3){
-                    if(!starting.contains(roster.indexOf(player)))throw new IllegalArgumentException("Special role player must be a starter");
+                    F previous=role==0?club.ke():role==1?club.kd():club.lq();
+                    if(!starting.contains(roster.indexOf(player)) && player!=previous)throw new IllegalArgumentException("Special role player must be a starter");
                 } else {
                     int slot=-1;for(int i=0;i<starters.length;i++)if(roster.get(starters[i])==player){slot=slots[i];break;}
                     if(slot<=14 || slot==17)throw new IllegalArgumentException("False nine is only available in eligible native pitch cells");
@@ -249,6 +250,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
                     p.put("age",player.getIdade());p.put("strength",player.fi());p.put("fitness",player.fp());p.put("side",player.getLado());
                     p.put("skill1",player.getCr1());p.put("skill2",player.getCr2());p.put("status",player.getStatus());p.put("star",player.ff());p.put("worldClass",player.gm());
                     p.put("injuryUntilMillis",player.fo());p.put("contractEndMillis",Data.longNumber(Data.get(player,"eJ")));
+                    p.put("eligibilityContext",eligibilityContext(player,match));
                     p.put("eligible", match != null && player.a(match, false)); players.add(p);
                 }
             }
@@ -312,6 +314,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         row.put("players",players);List<Object> youth=new ArrayList<Object>();int youthIndex=0;for(Object raw:club.ky())youth.add(youthRow((F)raw,youthIndex++));row.put("youth",youth);return row;
     }
     private static List<Object> suspensionRows(F player){List<Object> cards=new ArrayList<Object>();for(Object raw:Data.list(Data.get(player,"eS"))){best.H suspension=(best.H)raw;best.at competition=suspension.gS();if(competition==null && suspension.gX()<0)continue;Map<String,Object> record=new LinkedHashMap<String,Object>();record.put("competitionId",suspension.gX());record.put("competitionKey",competition==null?"id:"+suspension.gX():CompetitionIdentity.key(competition));record.put("competition",competition==null?"":competition.getNome());record.put("competitionType",competition==null?0:competition.b());int[] count=suspension.gW();record.put("yellowCards",count[0]);record.put("redCards",count[1]);cards.add(record);}return cards;}
+    private static Object eligibilityContext(F player,I match){if(match==null)return null;best.at competition=match.hy();Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("homeId",match.hc().lk());result.put("awayId",match.hd().lk());result.put("competitionId",competition==null?-1:competition.gD());result.put("competitionKey",CompetitionIdentity.key(competition));result.put("injured",player.fP());result.put("suspended",competition!=null&&competition.b()!=0&&player.c(competition));long contractEnd=Data.longNumber(Data.get(player,"eJ"));result.put("contractExpired",player.fg()!=null&&Boolean.TRUE.equals(player.fg().jZ())&&contractEnd<c.a.SR.bb().getTime().getTime());result.put("eligible",player.a(match,false));return result;}
     private static Map<String,Object> youthRow(F player,int index){Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("index",index);row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("age",player.getIdade());row.put("country",player.getPais());row.put("side",player.getLado());row.put("skill1",player.getCr1());row.put("skill2",player.getCr2());row.put("development",player.fE());row.put("cpe",player.fD());row.put("junior",Boolean.TRUE.equals(player.fC()));row.put("strength",player.fi());row.put("salary",player.fj());row.put("value",player.fk());row.put("injuryUntilMillis",player.fo());row.put("contractEndMillis",Data.longNumber(Data.get(player,"eJ")));row.put("suspensions",suspensionRows(player));return row;}
     private Map<String,Object> liveLineup(I match,int side){Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("starters",livePlayers(side==0?match.hp():match.hq()));result.put("bench",livePlayers(side==0?match.hn():match.ho()));result.put("substitutionsRemaining",match.aR(side));return result;}
     private static List<Object> livePlayers(List<?> players){List<Object> result=new ArrayList<Object>();for(Object raw:players){F player=(F)raw;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("slot",player.fT());result.add(row);}return result;}
