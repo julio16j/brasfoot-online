@@ -22,7 +22,7 @@ public final class NativeTransferMarket {
         JButton buy=(JButton)Data.get(panel,"FN"),offer=(JButton)Data.get(panel,"MK"),loan=(JButton)Data.get(panel,"MJ");
         replaceLocalHandler(buy,(event)->purchase(owner,dialog,panel,buyer,buy,submit));
         replaceLocalHandler(offer,(event)->makeOffer(owner,dialog,panel,buyer,submit));
-        replaceLocalHandler(loan,null);loan.setEnabled(false);loan.setToolTipText("Empréstimos ainda não estão integrados à sessão online.");
+        replaceLocalHandler(loan,(event)->requestLoan(owner,dialog,panel,buyer,loan,submit));loan.setEnabled(true);loan.setToolTipText("Solicitar empréstimo do jogador selecionado");
         Dimension size=marketSize();dialog.add(panel);dialog.setSize(size);dialog.setPreferredSize(size);dialog.setResizable(false);
         dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
     }
@@ -44,6 +44,16 @@ public final class NativeTransferMarket {
         F player=panel.sE();if(player==null)return;
         if(player.fg()==null || player.fg()==buyer){JOptionPane.showMessageDialog(dialog,"Selecione um jogador de outro clube.","Proposta",JOptionPane.INFORMATION_MESSAGE);return;}
         NativeTransferSearch.showOffer(owner,dialog,player,buyer,submit);
+    }
+
+    private static void requestLoan(JFrame owner,JDialog dialog,a.iA panel,ah buyer,JButton button,NativeTransferSearch.Submit submit){
+        F player=panel.sE();if(player==null)return;ah seller=player.fg();
+        if(seller==null || seller==buyer){JOptionPane.showMessageDialog(dialog,"Selecione um jogador de outro clube.","Empréstimo",JOptionPane.INFORMATION_MESSAGE);return;}
+        if(player.gl() || !player.fz()){JOptionPane.showMessageDialog(dialog,"Este jogador não está disponível para empréstimo.","Empréstimo",JOptionPane.INFORMATION_MESSAGE);return;}
+        int answer=JOptionPane.showConfirmDialog(dialog,"Solicitar " + player.getNome() + " por empréstimo?","Empréstimo",JOptionPane.YES_NO_OPTION);
+        if(answer!=JOptionPane.YES_OPTION)return;
+        Map<String,String> request=new java.util.LinkedHashMap<String,String>();request.put("action","loan-request");request.put("playerId",String.valueOf(player.gD()));request.put("sellerClubId",String.valueOf(seller.lk()));
+        button.setEnabled(false);submit.send(request,()->{dialog.dispose();JOptionPane.showMessageDialog(owner,"Solicitação de empréstimo enviada.","Empréstimo",JOptionPane.INFORMATION_MESSAGE);},()->button.setEnabled(true));
     }
 
     static void replaceLocalHandler(AbstractButton button,ActionListener hostAction){

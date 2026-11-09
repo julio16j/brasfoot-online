@@ -9,6 +9,7 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Progresso de implementação](estado-agente-implementacao.md) | Entregas em branches e checkpoint de parada solicitado pelo usuário |
 | [Implementação da folga](implementacao-escalacao-folga.md) | Coerência dos acessos; automação e planejamento antecipado pendentes |
 | [Implementação do auxiliar](implementacao-treino-auxiliar-completo.md) | Comando autoritativo, confirmação, persistência e treino nativo |
+| [Implementação PN-07: empréstimos](implementacao-emprestimos-online.md) | Listagem, solicitação IA/humana, aceite/recusa, devolução, projeção e retomada HTTP; compra definitiva bloqueada |
 | [Auditoria do agente de requisitos](estado-agente-requisitos.md) | Rodada de 08/11/2026: inventário nativo, evidências, limitações e retomada |
 | [Paridade nativa](task-paridade-nativa.md) | Backlog aberto PN-01 a PN-12, prioridades e dependências |
 | [Treino do auxiliar](task-treino-auxiliar-online.md) | Implementação e validação técnica registradas; limites e aceite explícitos |

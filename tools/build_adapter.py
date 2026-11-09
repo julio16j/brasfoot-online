@@ -33,3 +33,4 @@ if a.test or a.test_transfer:
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.NativeTransferSearchTest'], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.NativeTransferMarketTest'], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.CareerManagementOfferTest'], check=True, cwd=ROOT)
+    subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.CareerManagementLoanTest', str(ROOT)], check=True, cwd=ROOT)

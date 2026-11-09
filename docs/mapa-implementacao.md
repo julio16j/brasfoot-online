@@ -6,6 +6,7 @@ O conjunto atual incorpora Opções/Preferências/F3 e paleta nativa, coerência
 
 - [Folgas](implementacao-escalacao-folga.md): mensagens e três acessos coerentes; automação e escalação antecipada pendentes.
 - [Auxiliar](implementacao-treino-auxiliar-completo.md): comando separado do foco, confirmação, snapshot, persistência e precedência semanal nativa; correção com editor aberto preserva rascunho.
+- [PN-07 — empréstimos](implementacao-emprestimos-online.md): listagem, solicitação IA/humana, aceite/recusa, devolução nativa e retomada HTTP integradas; compra definitiva e avisos online permanecem limitados.
 - [Lesões fictícias](task-projecao-lesoes-online.md), [juniores](task-juniores-nativos-online.md), áudio e demais lacunas permanecem abertas. O lote não implementa paridade completa.
 
 Complementos estáticos posteriores à integração: [crédito bancário/contabilidade](task-financas-nativas-online.md) sem protocolo; [compra direta de listado](task-compra-listados-online.md) omite a aceitação nativa do atleta; [biblioteca de táticas e padrão](task-taticas-salvas-online.md) sem persistência online. Esses achados não significam nova implementação ou execução de testes do jogo; o usuário restringiu a investigação atual à leitura de código.

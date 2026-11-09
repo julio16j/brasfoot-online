@@ -9,8 +9,8 @@ import javax.swing.table.DefaultTableModel;
 /** Career overview and explicit management commands for the multiplayer host. */
 public final class NativeCareerDialogs {
     public interface Command { void submit(Map<String,String> fields,Runnable success); }
-    private static final String[] ACTIONS={"renew","promote","list","offer","respond","sell","job"};
-    private static final String[] LABELS={"Renovar contrato","Promover jogador da base","Colocar/retirar da lista","Fazer proposta","Responder proposta","Vender para clube da IA","Aceitar emprego"};
+    private static final String[] ACTIONS={"renew","promote","list","loan-list","loan-return","offer","loan-request","respond","sell","job"};
+    private static final String[] LABELS={"Renovar contrato","Promover jogador da base","Colocar/retirar da lista","Disponibilizar/retirar para empréstimo","Devolver empréstimo","Fazer proposta","Pedir empréstimo","Responder proposta","Vender para clube da IA","Aceitar emprego"};
     private NativeCareerDialogs() { }
 
     public static void open(JFrame owner,String requested,Map<String,Object> overview,Map<String,Object> management,Command command){
@@ -41,16 +41,18 @@ public final class NativeCareerDialogs {
         JPanel root=new JPanel(new BorderLayout(10,10));root.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
         JComboBox<Choice> action=new JComboBox<Choice>();for(int i=0;i<ACTIONS.length;i++)action.addItem(new Choice(ACTIONS[i],LABELS[i]));
         selectRequested(action,requested);
-        JComboBox<Choice> player=new JComboBox<Choice>(),youth=new JComboBox<Choice>(),market=new JComboBox<Choice>(),offers=new JComboBox<Choice>(),jobs=new JComboBox<Choice>();
+        JComboBox<Choice> player=new JComboBox<Choice>(),youth=new JComboBox<Choice>(),market=new JComboBox<Choice>(),loans=new JComboBox<Choice>(),offers=new JComboBox<Choice>(),jobs=new JComboBox<Choice>();
         fill(player,list(data,"players"),"playerId","name",true);fill(youth,list(data,"youth"),"playerId","name",true);fill(market,list(data,"market"),"playerId","name",true);
         fill(offers,list(data,"offers"),"offerId","player",false);fill(jobs,list(data,"jobs"),"clubId","club",false);
+        fill(loans,list(data,"loans"),"playerId","name",false);
         JTextField price=new JTextField("100000",10);JComboBox<String> days=new JComboBox<String>(new String[]{"180","365","730","1095"});
-        JComboBox<String> sale=new JComboBox<String>(new String[]{"true","false"}),accept=new JComboBox<String>(new String[]{"true","false"});
+        JComboBox<String> sale=new JComboBox<String>(new String[]{"true","false"}),accept=new JComboBox<String>(new String[]{"true","false"}),available=new JComboBox<String>(new String[]{"true","false"});
         JPanel fields=new JPanel(new GridLayout(0,2,8,8));fields.add(new JLabel("Operação"));fields.add(action);
         fields.add(new JLabel("Jogador do elenco"));fields.add(player);fields.add(new JLabel("Jogador da base"));fields.add(youth);
-        fields.add(new JLabel("Jogador do mercado"));fields.add(market);fields.add(new JLabel("Proposta"));fields.add(offers);fields.add(new JLabel("Clube com vaga"));fields.add(jobs);
+        fields.add(new JLabel("Jogador do mercado"));fields.add(market);fields.add(new JLabel("Empréstimo ativo"));fields.add(loans);fields.add(new JLabel("Proposta"));fields.add(offers);fields.add(new JLabel("Clube com vaga"));fields.add(jobs);
         fields.add(new JLabel("Valor (transferência)"));fields.add(price);fields.add(new JLabel("Duração do contrato (dias)"));fields.add(days);
         fields.add(new JLabel("Colocar à venda"));fields.add(sale);fields.add(new JLabel("Aceitar proposta"));fields.add(accept);
+        fields.add(new JLabel("Disponível para empréstimo"));fields.add(available);
         root.add(fields,BorderLayout.NORTH);
         JTextArea details=new JTextArea(9,40);details.setEditable(false);details.setText("Saldo do clube: "+value(data.get("balance"))+"\n\n"+describe("Elenco",list(data,"players"))+describe("Base",list(data,"youth"))+describe("Propostas",list(data,"offers"))+describe("Empregos",list(data,"jobs")));root.add(new JScrollPane(details),BorderLayout.CENTER);
         JPanel buttons=new JPanel(new FlowLayout(FlowLayout.RIGHT));JButton submit=new JButton("Enviar comando"),close=new JButton("Fechar");buttons.add(submit);buttons.add(close);root.add(buttons,BorderLayout.SOUTH);close.addActionListener(e->dialog.dispose());
@@ -59,7 +61,10 @@ public final class NativeCareerDialogs {
                 case "renew":request.put("playerId",id(player));request.put("days",(String)days.getSelectedItem());break;
                 case "promote":request.put("playerId",id(youth));break;
                 case "list":request.put("playerId",id(player));request.put("forSale",(String)sale.getSelectedItem());request.put("price",price.getText().trim());break;
+                case "loan-list":request.put("playerId",id(player));request.put("available",(String)available.getSelectedItem());break;
+                case "loan-return":request.put("playerId",id(loans));break;
                 case "offer":{Choice target=choice(market);request.put("playerId",id(market));request.put("sellerClubId",String.valueOf(target.extra));request.put("price",price.getText().trim());break;}
+                case "loan-request":{Choice target=choice(market);request.put("action","loan-request");request.put("playerId",id(market));request.put("sellerClubId",String.valueOf(target.extra));break;}
                 case "respond":request.put("offerId",id(offers));request.put("accept",(String)accept.getSelectedItem());break;
                 case "sell":request.put("playerId",id(player));request.put("price",price.getText().trim());break;
                 case "job":request.put("clubId",id(jobs));break;
