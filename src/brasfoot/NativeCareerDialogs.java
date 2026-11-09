@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 
 /** Career overview and explicit management commands for the multiplayer host. */
 public final class NativeCareerDialogs {
-    public interface Command { void submit(Map<String,String> fields,Runnable success); }
+    public interface Command { void submit(Map<String,String> fields,Runnable success,Runnable failure); }
     private static final String[] ACTIONS={"renew","promote","list","loan-list","loan-return","offer","loan-request","respond","sell","job"};
     private static final String[] LABELS={"Renovar contrato","Promover jogador da base","Colocar/retirar da lista","Disponibilizar/retirar para empréstimo","Devolver empréstimo","Fazer proposta","Pedir empréstimo","Responder proposta","Vender para clube da IA","Aceitar emprego"};
     private NativeCareerDialogs() { }
@@ -70,7 +70,7 @@ public final class NativeCareerDialogs {
                 case "job":request.put("clubId",id(jobs));break;
                 default:throw new IllegalArgumentException("Operação desconhecida");
             }
-            submit.setEnabled(false);command.submit(request,()->{dialog.dispose();JOptionPane.showMessageDialog(ownerOf(dialog),"Comando aplicado à carreira.","Brasfoot Online",JOptionPane.INFORMATION_MESSAGE);});
+            submitCommand(command,request,submit,()->{dialog.dispose();JOptionPane.showMessageDialog(ownerOf(dialog),"Comando aplicado à carreira.","Brasfoot Online",JOptionPane.INFORMATION_MESSAGE);});
         }catch(Exception error){JOptionPane.showMessageDialog(dialog,error.getMessage(),"Carreira",JOptionPane.WARNING_MESSAGE);}});
         return root;
     }
@@ -82,6 +82,7 @@ public final class NativeCareerDialogs {
         if(!found)players.setSelectedIndex(-1);
         if(action!=null&&action.equals("list"))sale.setSelectedItem(value.startsWith("retirar")?"false":"true");
     }
+    static void submitCommand(Command command,Map<String,String> request,JButton button,Runnable success){button.setEnabled(false);try{command.submit(request,success,()->button.setEnabled(true));}catch(RuntimeException error){button.setEnabled(true);throw error;}}
     private static JFrame ownerOf(JDialog dialog){return (JFrame)SwingUtilities.getWindowAncestor(dialog.getOwner());}
     private static String describe(String title,List<Object> rows){StringBuilder out=new StringBuilder(title).append(":\n");for(Object raw:rows){Map<String,Object> row=Data.map(raw);out.append("• ").append(value(row.get("name")!=null?row.get("name"):row.get("player"))).append("  ").append(value(row.get("club"))).append("\n");}return out.append("\n").toString();}
     private static void fill(JComboBox<Choice> combo,List<Object> rows,String id,String label,boolean club){for(Object raw:rows){Map<String,Object> row=Data.map(raw);combo.addItem(new Choice(String.valueOf(row.get(id)),String.valueOf(row.get(label)),club?String.valueOf(row.get("clubId")):null));}}

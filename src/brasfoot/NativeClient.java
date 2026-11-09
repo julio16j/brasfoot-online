@@ -229,11 +229,11 @@ public final class NativeClient {
         work(()->{
             Map<String,Object> overview=api.call("/overview",null);
             Map<String,Object> management=career?api.call("/management",null):new LinkedHashMap<String,Object>();
-            SwingUtilities.invokeLater(()->NativeCareerDialogs.open(frame,action,overview,management,(fields,success)->command("/management",fields,()->{
+            SwingUtilities.invokeLater(()->NativeCareerDialogs.open(frame,action,overview,management,(fields,success,failure)->command("/management",fields,()->{
                 if(success!=null)success.run();Map<String,Object> result=Data.map(latest.get("command"));String operation=fields.get("action"),outcome=String.valueOf(result.get("status"));
                 if("offer".equals(operation) && "PENDING".equals(outcome))status.setText("Proposta enviada; a transferência aguarda a resposta do técnico vendedor.");
                 else if("COMPLETED".equals(outcome) || "ACCEPTED".equals(outcome))status.setText("Transferência concluída; jogador e saldo atualizados.");
-            })));
+            },failure)));
         },null);
     }
     private void openNativeYouth(){

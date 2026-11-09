@@ -1,6 +1,6 @@
 # Seleção de jogador e intenção no menu de gestão
 
-Status: parcial em `main`; leitura da linha visual após ordenação e preservação da intenção/ID no formulário corrigidas. Confirmação real na janela nativa permanece pendente. Diagnóstico original em 08/11/2026.
+Status: parcial em `main`; linha ordenada, intenção/ID e recuperação do formulário após rejeição estão cobertas por teste. Confirmação via janela nativa/HTTP permanece pendente. Diagnóstico original em 08/11/2026.
 
 ## Menu contextual e detalhe do jogador
 
@@ -22,7 +22,7 @@ Colocar e Retirar são ambos mapeados para `list`; agora Colocar seleciona `sale
 
 ## Contrato e aceite pendentes
 
-O ciclo do formulário também tem limite de erro: Enviar é desabilitado antes de `Command.submit`, cuja assinatura só recebe callback de sucesso. O uso por NativeClient chama command sem callback de falha; o tratamento genérico mostra erro, mas não reabilita esse botão. Após uma rejeição remota, corrigir campos e reenviar na mesma janela não tem caminho explícito; fechar/reabrir continua sendo uma recuperação possível. Validar esse cenário separadamente da seleção e preservar o rascunho quando for seguro. Nenhuma rejeição de UI foi executada agora.
+O formulário agora recebe callback explícito de falha; a rejeição reabilita Enviar e preserva as seleções do diálogo. `NativeCareerDialogsTest` simula a falha e confirma botão habilitado e ID do rascunho preservado. Ainda falta confirmar rejeição remota e reenvio na janela nativa.
 
 Representar operação e ID como dados separados; usar uma única conversão de linha e preservar a identidade até o formulário e o pedido ao host. Pré-selecionar o atleta pelo ID, inclusive após reordenar o elenco recebido. Se o jogador não estiver mais disponível, apresentar essa condição e atualizar a consulta, sem escolher silenciosamente outro. Definir `forSale=false` ao retirar e `true` ao colocar, usando preço pedido atual quando pertinente. Manter a confirmação explícita antes de mutação.
 
