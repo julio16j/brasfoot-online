@@ -24,8 +24,9 @@ public final class NativeClubSelection {
     public static final class CoachChoice {
         public final int clubId;
         public final String clubName;
+        public final String clubAsset;
         public final String coachName;
-        CoachChoice(int clubId,String clubName,String coachName){this.clubId=clubId;this.clubName=clubName;this.coachName=coachName;}
+        CoachChoice(int clubId,String clubName,String clubAsset,String coachName){this.clubId=clubId;this.clubName=clubName;this.clubAsset=clubAsset;this.coachName=coachName;}
     }
     private NativeClubSelection() { }
 
@@ -51,7 +52,7 @@ public final class NativeClubSelection {
                 original.or();
             }
             List<CoachChoice> selected=new ArrayList<CoachChoice>();
-            for(Object raw:c.a.SR.M()){al coach=(al)raw;ah club=coach.fg();if(club!=null)selected.add(new CoachChoice(club.lk(),club.getNome(),coach.dS()));}
+            for(Object raw:c.a.SR.M()){al coach=(al)raw;ah club=coach.fg();if(club!=null)selected.add(new CoachChoice(club.lk(),club.getNome(),club.jY(),coach.dS()));}
             if(selected.isEmpty()){warn(dialog,"Adicione pelo menos um técnico antes de iniciar.");return;}
             result[0]=selected;dialog.dispose();
         }catch(Exception failure){warn(dialog,failure.getMessage());}});

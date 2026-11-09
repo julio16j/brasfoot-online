@@ -1,6 +1,6 @@
 # Paridade com o Brasfoot nativo local
 
-Status: aberta; primeira rodada documental em 08/11/2026. Nenhuma funcionalidade implementada nesta rodada. Requisitos: [spec](especificacao/spec-paridade-nativa.md). Evidências, inventário e retomada: [relatório do agente](estado-agente-requisitos.md).
+Status: aberta; primeira rodada documental em 08/11/2026, com entregas parciais posteriores em branches. Requisitos: [spec](especificacao/spec-paridade-nativa.md). Evidências e inventário: [relatório do agente](estado-agente-requisitos.md); progresso de implementação: [relatório de branches](estado-agente-implementacao.md).
 
 ## Objetivo e prioridade
 
@@ -9,7 +9,7 @@ Comprovar os fluxos da versão 22–23 incluída no repositório desde a interfa
 | ID | Prioridade / classificação | Trabalho e evidência | Dependências e aceite |
 | --- | --- | --- | --- |
 | PN-01 | Implementado; validação técnica e limites registrados | [Auxiliar online](implementacao-treino-auxiliar-completo.md), [task](task-treino-auxiliar-online.md) | Comando, projeção, persistência e motor cobertos; aceite de uso e limites permanecem explícitos |
-| PN-02 | P1 / bug confirmado e integração parcial | Geração por países ocorre antes da seleção final, barreiras de folga e navegação; reutilizar [calendários](task-calendarios.md) | Validar criação por IDs e países mistos antes de automatizar datas; preservar jogo de outro técnico |
+| PN-02 | Parcial; geração de ligas e criação internacional corrigidas em branch | [Implementação e matriz](implementacao-calendario-paises.md); pendências e diagnóstico histórico em [calendários](task-calendarios.md) | Brasil, Espanha, Inglaterra, Alemanha, Itália, França, Argentina e sessão Brasil + Espanha; barreiras de folga, navegação, transição de temporada e migração de saves pendentes; não integrado à principal |
 | PN-03 | Parcial: coerência da interface implementada | [Escalação na folga](task-escalacao.md), [entrega](implementacao-escalacao-folga.md) | Três acessos e mensagens cobertos; automação/planejamento antecipado continuam pendentes |
 | PN-04 | P1 / desvios de emissão confirmados, relato audível ainda em investigação | [Áudio repetido](task-audio-eventos-repetidos.md), [contrato](especificacao/spec-audio-eventos-online.md) | Baseline tardio e escopo IA reproduzidos anteriormente; validar identidade e efeito físico quando execução estiver autorizada |
 | PN-05 | P2 / parcial | Doze opções bloqueadas, incluindo avisos, leilão e filtros; [registro existente](implementacao-configuracoes-online.md) | Integrar consumidor efetivo e destinatários; não apenas habilitar setters |

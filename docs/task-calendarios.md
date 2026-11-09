@@ -1,5 +1,7 @@
 # Investigação dos calendários de ligas
 
+Atualização de implementação em 09/11/2026: a primeira etapa de PN-02 foi implementada e validada em branch. [Registro](implementacao-calendario-paises.md). A geração de competições agora ocorre depois da seleção de países em carreiras novas; o caminho de nome aceita clubes estrangeiros e a interface transporta referências estáveis de assets. Testes reais cobrem Brasil, Espanha, Inglaterra, Alemanha, Itália, França, Argentina e combinação Brasil + Espanha. Esta entrega parcial não resolve barreiras/avanço de datas sem humanos, consultas e ordenação do calendário, transição de temporada ou saves existentes. O diagnóstico histórico abaixo descreve a ordem anterior à correção.
+
 Data: 6 de novembro de 2026. Escopo: código local, motor original incluído no projeto e carreiras descartáveis. Nenhum save existente foi carregado ou alterado. Esta etapa acrescenta diagnóstico e planejamento; não muda regras do jogo.
 
 Complemento estático de 08/11/2026: [marcação de amistosos na carreira](especificacao/spec-amistosos-carreira-online.md). O acesso nativo depende de datas futuras do host, ausentes da projeção de uma única data; o modo avulso `--demo` não equivale a agendamento na carreira. Contrato e critérios próprios registrados, sem executar o jogo nem alterar o planejamento de geração de ligas abaixo.
