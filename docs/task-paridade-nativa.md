@@ -23,6 +23,8 @@ Comprovar os fluxos da versão 22–23 incluída no repositório desde a interfa
 
 ## Validação e encerramento
 
+Complemento P1 de 09/11 para PN-12/PN-11: [referências nativas na retomada](task-persistencia-referencias-nativas.md). O adaptador omite preparação/reconexão de H→competição e ap→jogador usada pelo salvamento nativo. A biblioteca distribuída omite campos transient por padrão, confirmado por leitura estática dos bytes. É pendência do host após retomada, distinta da correção da projeção médica/disciplinar; sem roundtrip novo executado nesta investigação.
+
 Complementos de PN-09/PN-11 da continuidade estática: [atributos individuais](task-habilidades-individuais-online.md), [índices e candidatos do mercado](task-indices-mercado-online.md), [seleção e intenção na gestão](task-selecao-gestao-online.md) e [confirmação de preços do estádio](resolvidos/task-precos-estadio-online.md). As tasks distinguem desvios comprovados no código, contracasos lógicos e validações dinâmicas ainda pendentes. Nenhuma implementação foi solicitada ao agente parado.
 
 Complemento PN-05/PN-11: [resultado de pênaltis](task-resultado-penaltis-online.md). Host publica campos diferentes do consumidor; disputa humana também usa o sorteio rápido do ramo nativo IA, em vez da sequência apresentada. Projeção do resultado, algoritmo esportivo e opção de apresentação são critérios separados, ainda sem validação dinâmica nesta etapa.

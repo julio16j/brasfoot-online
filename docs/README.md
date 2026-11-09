@@ -29,6 +29,7 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Renovação de contratos](task-renovacao-contratos-online.md) | Complemento PN-09: salário e contraproposta ausentes do formulário; cálculo e limites requerem comparação nativa |
 | [Nacionalidade do técnico](task-nacionalidade-tecnico-online.md) | Complemento PN-11: escolha do seletor não chega ao host e nacionalidade não é projetada nos perfis |
 | [Empregos e troca de clube](task-empregos-tecnicos-online.md) | Complemento PN-09/PN-11: suporte ao desempregado não cobre convites ao técnico empregado; persistência dos convites indefinida |
+| [Referências na retomada](task-persistencia-referencias-nativas.md) | P1 proposta: preparação/reconexão nativa de disciplina e histórico omitida; evidência estática do serializer |
 | [Validação da gestão](validacao-gestao-nativa.md) | Execuções independentes de modelo/comando direto e matriz do que ainda falta |
 | [Revisão independente do treino](revisao-independente-treino.md) | JAR da branch e janela real verificados; bloqueio provisório, sem integração à principal |
 | [Revisão independente da folga](revisao-independente-folga.md) | Execuções e capturas do JAR da branch; primeira falha de Robot preservada e repetição aprovada |

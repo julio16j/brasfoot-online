@@ -4,6 +4,12 @@ Estado atual: **pesquisa retomada somente pelo agente de requisitos**, por instr
 
 Restrição mais recente do usuário: **continuar por enquanto somente pelo código, sem executar o jogo**. Não iniciar host, motor, JVM do produto, interface ou testes que os executem. A expressão “depois pode abrir” mantém essa possibilidade para uma autorização posterior; o pedido seguinte de continuar foi aplicado à análise estática. É permitido ler fontes, logs já produzidos e documentar. Verificação de processos do cenário temporário não encontrou instâncias próprias ativas ao interromper. O Agente 2 continua parado.
 
+Retomada contínua em **09/11/2026**: estado atual relido após mudanças externas; main em `4d55640c` contém novas correções e há edições concorrentes em VisualModel, AvailabilityProjectionTest, task de índices e relatório de implementação, além de sessions-stadium-ui. Preservadas integralmente. O estado anterior de outros agentes é histórico: este agente não os reativou nem solicitou implementação e mantém seu escopo exclusivamente de investigação/documentação. Diagnósticos antigos não devem ser reapresentados como estado atual sem conferir as correções presentes.
+
+Novo achado: [persistência de referências nativas](task-persistencia-referencias-nativas.md), P1 proposta. Ag/Af preparam e reconectam H→competição; Ai/Aj cuidam de ap→jogador. saveLocal/readLocalSave atuais não executam esses passos. Parser Python de ZIP/class confirmou serializeTransient=false no Kryo4 distribuído e as guardas de write/read; sem JVM ou save executado. Consequências lógicas e critérios futuros documentados, distinguindo host retomado de projeção cliente. Ai renumera IDs, portanto não foi recomendado copiá-lo indiscriminadamente. Próximo lote: outras referências transitórias e cobertura real dos testes de retomada.
+
+Verificação global de whitespace encontrou problemas no relatório exclusivo de implementação alterado externamente; ele não foi editado por este agente. As próximas verificações serão delimitadas aos documentos tocados aqui, preservando o trabalho concorrente. Não anunciar a checagem global como aprovada.
+
 Rodada 1 concluída documentalmente em 08/11/2026. Paridade nativa continua aberta. Escopo executado: análise e documentação; nenhuma alteração de produção, testes, dependências, pacotes ou saves. As instruções permanecem exclusivamente em `.codex/agente-requisitos.md`.
 
 ## Base e preservação
