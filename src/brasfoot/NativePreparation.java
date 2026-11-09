@@ -37,8 +37,7 @@ public final class NativePreparation {
             if(field.equals("HV"))button.addActionListener(e->menu.accept("Estádio"));
             else if(field.equals("yY"))button.addActionListener(e->menu.accept("Procura"));
             else if(field.equals("Ib"))button.addActionListener(e->menu.accept("Times"));
-            else if(field.equals("HW"))
-                for(ActionListener action:nativeActions.get(field))button.addActionListener(action);
+            else if(field.equals("HW"))button.addActionListener(e->menu.accept("Juniores"));
             else if(field.equals("Id"))button.addActionListener(e->menu.accept("Treino"));
             else for(ActionListener action:nativeActions.get(field))button.addActionListener(action);
         }

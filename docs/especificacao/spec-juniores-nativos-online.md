@@ -1,6 +1,6 @@
 # Academia de juniores online
 
-Status: requisitos abertos para PN-08, revisão de 08/11/2026. Diagnóstico e evidências: [task de juniores](../task-juniores-nativos-online.md). Nenhuma implementação autorizada por este documento ou realizada pelo agente de requisitos.
+Status: requisitos e aceite geral ainda abertos para PN-08, revisão de 09/11/2026. Diagnóstico e evidências: [task de juniores](../task-juniores-nativos-online.md); [implementação parcial validada em branch isolada](../implementacao-juniores-nativos-online.md). Esta implementação é do agente executor, não integra a main e não encerra os critérios pendentes.
 
 ## Percursos atuais distintos
 
@@ -53,7 +53,7 @@ Usar checkpoint nativo e metadados existentes. Para promoção, preservar identi
 
 Lista nativa igual à base do host em criação e retomada; ordenação sem trocar alvo; promoção uma vez e remoção da base; limite de 35 e rejeições sem efeito; dispensa/apelido integrados ou bloqueados; dados atualizados em dois clientes e janela já aberta; IDs não reutilizados; editor/Pronto e troca de clube; falha de armazenamento; JAR distribuído. Testar compra de juniores como fluxo próprio quando houver contrato. O uso de juniores diretamente na escalação continua separado deste escopo.
 
-Nesta fase o usuário restringiu a investigação a código. Esses cenários são critérios futuros, não execuções ou solicitação para reativar o implementador.
+Nota histórica: a restrição à análise estática acima precede a retomada de implementação autorizada pelo usuário em 09/11/2026. Os cenários não devem ser tratados como executados além das evidências explicitadas no [registro PN-08](../implementacao-juniores-nativos-online.md); os itens remanescentes continuam como aceite futuro.
 
 ## Formação por aposentadoria — capacidade relacionada ainda fora do recorte
 

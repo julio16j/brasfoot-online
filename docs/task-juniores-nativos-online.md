@@ -1,6 +1,6 @@
 # Juniores nativos sem projeção autoritativa
 
-Status: aberta, P1 proposta; 08/11/2026. Origem PN-08 e auditoria dos callbacks restaurados PN-11. Não há implementação nesta investigação.
+Status: PN-08 parcialmente integrada na `main`, 09/11/2026. Projecao, promocao e retomada em outro processo validadas; criterios de falha HTTP, janela aberta e Pronto permanecem. Ver [registro da implementacao](implementacao-juniores-nativos-online.md).
 
 Requisitos detalhados: [spec da academia nativa](especificacao/spec-juniores-nativos-online.md).
 
@@ -21,6 +21,12 @@ A academia nativa pode listar jogadores do recurso inicial em vez da carreira e 
 Critérios: identidade estável dos juniores; lista nativa igual à consulta autoritativa após criação, promoção e retomada; seleção por ID após atualização; promoção pelo host com limites/elegibilidade e persistência; dispensa/apelido integrados ou explicitamente indisponíveis; rejeições restauram estado confirmado; nenhuma mutação de confirmação somente local; teste com dois clientes e janela real; testar pacote combinado após integração. Reutilizar PN-08 para o uso direto de juniores na escalação, que é capacidade diferente.
 
 Dependências: contrato de gestão, revisão por técnico, projeção completa da base e acesso nativo. Task aberta até implementação e validação pertinente; mudanças em worktree separada não significam integração à principal.
+
+## Implementação PN-08 em branch isolada — 09/11/2026
+
+Implementados na branch `impl/juniores-nativos-v2`: projeção autoritativa de `ky()` com ID, país, lado, características, desenvolvimento e CPE; identidade preservada e academia nativa ligada ao comando `promote` do host. Dispensar, propor compra e definir apelido ficam explicitamente desativados por não haver contrato online equivalente. O registro [implementacao-juniores-nativos-online.md](implementacao-juniores-nativos-online.md) discrimina cenários, hashes e limites. A academia foi aberta e capturada em janela real; promoção foi exercitada contra host persistido e projetada em segundo cliente. Isso não encerra a task nem integra a branch.
+
+Pendências de aceite: injeção de falha real de armazenamento durante promoção, retomada após reinício do host, atualização de uma janela já aberta e invalidação do rascunho de escalação/Pronto após promoção. O uso direto de juniores na escalação, compra de juniores e formação por aposentadoria continuam fora deste recorte.
 
 ## Atualização após integração e limite da execução gráfica
 

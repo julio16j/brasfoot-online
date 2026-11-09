@@ -50,10 +50,13 @@ public final class NativeClient {
     private int coachId;
     private long halftimeDialogRound=-1;
     private JDialog editor;
-    private boolean connected,closed,testing,autoTest,testReady,testComplete,keepTestHost,testNativeEditor;
+    private boolean connected,closed,testing,autoTest,testReady,testComplete,keepTestHost,testNativeEditor,testYouth,testYouthStarted;
     private boolean testNativeOptions;
     private Path capture;
     private Path preparationCapture;
+    private Path testYouthCapture;
+    private Integer testYouthObserve;
+    private Integer testYouthObserveClub;
     private volatile Throwable failure;
     private static final class CoachChoice {
         final int id;final String label;final boolean claimed;
@@ -171,6 +174,8 @@ public final class NativeClient {
         frame.setTitle("Brasfoot Online — "+own(snapshot).get("club")+(server!=null?" (host)":""));body.revalidate();body.repaint();frame.validate();accept(snapshot);
         if(preparationCapture!=null)capture(preparationCapture);
         if(testNativeOptions)verifyNativeOptionsEntry();
+        if(testYouth && !testYouthStarted){testYouthStarted=true;new Thread(this::exerciseNativeYouth,"native-youth-window-test").start();}
+        if(testYouthObserve!=null){int expected=testYouthObserve,clubId=testYouthObserveClub==null?visual.coach(coachId).fg().lk():testYouthObserveClub;SwingUtilities.invokeLater(()->{ah observed=visual.club(clubId);boolean professional=false,youth=false;if(observed!=null){for(Object raw:observed.kc())if(((F)raw).gD()==expected)professional=true;for(Object raw:observed.ky())if(((F)raw).gD()==expected)youth=true;}if(!professional||youth){showError(new AssertionError("Guest projection did not receive the promoted junior identity"));return;}System.out.println("YOUTH_OBSERVER_PASS playerId="+expected);close();System.exit(0);});}
         if(autoTest)autoLineup();
     }
     private void verifyNativeOptionsEntry(){
@@ -214,6 +219,7 @@ public final class NativeClient {
     private void openCareerMenu(String action){
         if(latest==null)return;
         if("Opções".equals(action)){openNativeOptions();return;}
+        if("Juniores".equals(action)){openNativeYouth();return;}
         if("Procura".equalsIgnoreCase(action)){openNativeTransferSearch();return;}
         if("Times".equalsIgnoreCase(action)){openNativeTransferMarket();return;}
         if("Estádio".equalsIgnoreCase(action)){openNativeStadium();return;}
@@ -229,6 +235,28 @@ public final class NativeClient {
             })));
         },null);
     }
+    private void openNativeYouth(){
+        if(!Boolean.TRUE.equals(Data.map(latest.get("game")).get("career"))){JOptionPane.showMessageDialog(frame,"A academia de juniores exige uma carreira online.","Juniores",JOptionPane.INFORMATION_MESSAGE);return;}
+        al owner=visual.coach(coachId);if(owner==null||owner.fg()==null)return;ah club=owner.fg();
+        NativeYouth.open(frame,club,(playerId,dialog,button)->{Map<String,String> fields=new LinkedHashMap<String,String>();fields.put("action","promote");fields.put("playerId",String.valueOf(playerId));
+            command("/management",fields,()->{dialog.dispose();status.setText("Junior promovido pelo host; elenco e base atualizados.");if(testYouth){System.out.println("YOUTH_PROMOTION_PASS playerId="+playerId);close();System.exit(0);}},()->button.setEnabled(true));});
+    }
+    private void exerciseNativeYouth(){try{
+        if(preparationPanel==null || !Boolean.TRUE.equals(Data.map(latest.get("game")).get("career")))throw new AssertionError("Career preparation panel unavailable");
+        JButton access=(JButton)Data.get(preparationPanel,"HW");Robot robot=new Robot();robot.setAutoDelay(100);frame.setAlwaysOnTop(true);frame.toFront();frame.requestFocus();clickRobot(robot,access);
+        JDialog dialog=null;long deadline=System.currentTimeMillis()+5000;while(dialog==null&&System.currentTimeMillis()<deadline){dialog=findYouthDialog();Thread.sleep(50);}if(dialog==null)throw new AssertionError("Native academy did not open from HW");
+        a.ds panel=(a.ds)dialog.getContentPane().getComponent(0);JTable table=(JTable)Data.get(panel,"FR");JButton promote=(JButton)Data.get(panel,"FQ");
+        if(table.getColumnCount()!=11||table.getRowCount()!=visual.club(visual.coach(coachId).fg().lk()).ky().size())throw new AssertionError("Native academy does not show the projected host base");
+        if(!promote.isEnabled()||((JButton)Data.get(panel,"FP")).isEnabled()||((JButton)Data.get(panel,"FO")).isEnabled()||((JButton)Data.get(panel,"FN")).isEnabled())throw new AssertionError("Unsupported academy actions are not locked");
+        if(testYouthCapture!=null){Rectangle bounds=dialog.getBounds();ImageIO.write(robot.createScreenCapture(bounds),"png",testYouthCapture.toFile());}
+        SwingUtilities.invokeAndWait(()->table.setRowSelectionInterval(0,0));clickRobot(robot,promote);JDialog confirmation=null;deadline=System.currentTimeMillis()+5000;while(confirmation==null&&System.currentTimeMillis()<deadline){confirmation=findOptionDialog();Thread.sleep(50);}if(confirmation==null)throw new AssertionError("Native promotion confirmation did not open");clickRobot(robot,firstButton(confirmation));
+    }catch(Throwable error){SwingUtilities.invokeLater(()->showError(error));}}
+    private static JDialog findYouthDialog(){for(Window window:Window.getWindows())if(window instanceof JDialog&&window.isShowing()&&containsClass(((JDialog)window).getContentPane(),a.ds.class))return (JDialog)window;return null;}
+    private static JDialog findOptionDialog(){for(Window window:Window.getWindows())if(window instanceof JDialog&&window.isShowing()&&containsOption(((JDialog)window).getContentPane()))return (JDialog)window;return null;}
+    private static boolean containsClass(Container container,Class<?> type){if(type.isInstance(container))return true;for(Component component:container.getComponents())if(component instanceof Container&&containsClass((Container)component,type))return true;return false;}
+    private static boolean containsOption(Container container){if(container instanceof JOptionPane)return true;for(Component component:container.getComponents())if(component instanceof Container&&containsOption((Container)component))return true;return false;}
+    private static JButton firstButton(Container container){for(Component component:container.getComponents()){if(component instanceof JButton)return (JButton)component;if(component instanceof Container){try{return firstButton((Container)component);}catch(IllegalStateException ignored){}}}throw new IllegalStateException("Option dialog has no button");}
+    private static void clickRobot(Robot robot,Component component)throws Exception{Point[] point={null};SwingUtilities.invokeAndWait(()->{point[0]=component.getLocationOnScreen();point[0].translate(component.getWidth()/2,component.getHeight()/2);});robot.mouseMove(point[0].x,point[0].y);robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);robot.waitForIdle();}
     private void openNativeOptions(){
         if(latest==null || !connected || closed)return;
         if(optionsDialog!=null && optionsDialog.isShowing()){optionsDialog.toFront();return;}
@@ -406,7 +434,7 @@ public final class NativeClient {
         Map<String,String> options=new HashMap<String,String>();for(int i=0;i<args.length;i++){if(i+1>=args.length)throw new IllegalArgumentException("Missing option value");options.put(args[i],args[++i]);}
         Path root=Paths.get(options.getOrDefault("--root",".")).toAbsolutePath().normalize();System.setProperty("user.dir",root.resolve("game/Brasfoot22-23").toString());
         UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        SwingUtilities.invokeLater(()->{NativeClient client=new NativeClient(root);client.testing=options.containsKey("--test-token") || options.containsKey("--test-create");client.keepTestHost=options.containsKey("--test-create");client.autoTest=options.containsKey("--test-auto");client.testNativeEditor=options.containsKey("--test-native-editor");client.capture=options.containsKey("--capture")?Paths.get(options.get("--capture")):null;client.frame.setVisible(!client.testing);client.frame.addNotify();client.frame.validate();
+        SwingUtilities.invokeLater(()->{NativeClient client=new NativeClient(root);client.testing=options.containsKey("--test-token") || options.containsKey("--test-create");client.keepTestHost=options.containsKey("--test-create");client.autoTest=options.containsKey("--test-auto");client.testNativeEditor=options.containsKey("--test-native-editor");client.testYouth=options.containsKey("--test-youth");client.testYouthCapture=options.containsKey("--test-youth-capture")?Paths.get(options.get("--test-youth-capture")):null;client.testYouthObserve=options.containsKey("--test-youth-observe")?Integer.valueOf(options.get("--test-youth-observe")):null;client.testYouthObserveClub=options.containsKey("--test-youth-observe-club")?Integer.valueOf(options.get("--test-youth-observe-club")):null;client.capture=options.containsKey("--capture")?Paths.get(options.get("--capture")):null;client.frame.setVisible(!client.testing||client.testYouth);if(client.testYouth){client.frame.setAlwaysOnTop(true);client.frame.toFront();}client.frame.addNotify();client.frame.validate();
             Runtime.getRuntime().addShutdownHook(new Thread(()->{client.network.shutdownNow();if(client.server!=null)client.server.destroy();}));
             if(options.containsKey("--port"))client.port.setText(options.get("--port"));
             client.testNativeOptions=options.containsKey("--test-native-options");

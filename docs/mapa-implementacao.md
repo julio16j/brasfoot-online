@@ -8,7 +8,8 @@ O conjunto atual incorpora Opções/Preferências/F3 e paleta nativa, coerência
 - [Auxiliar](implementacao-treino-auxiliar-completo.md): comando separado do foco, confirmação, snapshot, persistência e precedência semanal nativa; correção com editor aberto preserva rascunho.
 - [PN-07 — empréstimos](implementacao-emprestimos-online.md): listagem, solicitação IA/humana, aceite/recusa, devolução nativa e retomada HTTP integradas; compra definitiva e avisos online permanecem limitados.
 - [PN-02 — países do calendário](implementacao-calendario-paises.md): geração seletiva das ligas dos países escolhidos e criação internacional integradas na `main`; navegação por calendário continua pendente.
-- [Lesões fictícias](task-projecao-lesoes-online.md), [juniores](task-juniores-nativos-online.md), áudio e demais lacunas permanecem abertas. O lote não implementa paridade completa.
+- [Juniores](implementacao-juniores-nativos-online.md): projeção e promoção implementadas/validadas parcialmente na branch `impl/juniores-nativos-v2`, ainda não integradas e com aceite pendente.
+- [Lesões fictícias](task-projecao-lesoes-online.md), áudio e demais lacunas permanecem abertas. O lote não implementa paridade completa.
 
 Complementos estáticos posteriores à integração: [crédito bancário/contabilidade](task-financas-nativas-online.md) sem protocolo; [compra direta de listado](task-compra-listados-online.md) omite a aceitação nativa do atleta; [biblioteca de táticas e padrão](task-taticas-salvas-online.md) sem persistência online. Esses achados não significam nova implementação ou execução de testes do jogo; o usuário restringiu a investigação atual à leitura de código.
 

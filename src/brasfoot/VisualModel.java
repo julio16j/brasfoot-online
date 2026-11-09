@@ -13,6 +13,7 @@ public final class VisualModel {
     private final Map<Integer,al> coaches=new LinkedHashMap<Integer,al>();
     private final List<I> matches=new ArrayList<I>();
     private final Map<Integer,I> upcoming=new HashMap<Integer,I>();
+    private final Map<String,f.a> competitions=new LinkedHashMap<String,f.a>();
     private final File root;
     public VisualModel(File root,Map<String,Object> state)throws Exception{
         this.root=root;new best.M(true);best.n.cU();c.a.SR=new best.f();c.a.afQ=new best.ay();
@@ -40,6 +41,7 @@ public final class VisualModel {
         Map<String,Object> game=Data.map(state.get("game"));
         c.a.SR.R().clear();best.a day=new best.a();day.a().setTimeInMillis(Data.longNumber(game.get("dateMillis")));c.a.SR.R().add(day);c.a.SR.l(0);
         c.a.SR.k(Data.number(game.get("season")));c.a.SR.I(Data.number(game.get("year")));
+        matches.clear();competitions.clear();for(Object raw:Data.list(Data.map(state.get("playback")).get("matches")))competition(Data.map(raw));for(Object raw:Data.list(game.get("upcoming")))competition(Data.map(raw));
         updateClubs(game);
         c.a.SR.M().clear();
         for(Object raw:Data.list(game.get("coaches"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("coachId"));
@@ -47,22 +49,20 @@ public final class VisualModel {
             ah club=row.get("clubId")==null?null:clubs.get(Data.number(row.get("clubId")));coach.n(club);coach.k(true);
             if(club!=null){Data.set(club,"mZ",coach);Data.set(club,"na",id);club.k(true);}c.a.SR.M().add(coach);
         }
-        matches.clear();Map<String,f.a> competitions=new LinkedHashMap<String,f.a>();
         for(Object raw:Data.list(Data.map(state.get("playback")).get("matches"))){Map<String,Object> row=Data.map(raw);
-            String name=(String)row.get("competition");f.a competition=competitions.get(name);
-            if(competition==null){competition=new f.a();competition.setNome(name);competitions.put(name,competition);}
-            if(row.containsKey("competitionType"))Data.set(competition,"tR",Data.number(row.get("competitionType")));
+            f.a competition=competition(row);
             I match=new I(null,0,clubs.get(Data.number(row.get("homeId"))),clubs.get(Data.number(row.get("awayId"))),0,competition,null);matches.add(match);
             if(row.containsKey("phaseLabel"))match.o((String)row.get("phaseLabel"));
         }
         upcoming.clear();
-        for(Object raw:Data.list(game.get("upcoming"))){Map<String,Object> row=Data.map(raw);f.a competition=new f.a();competition.setNome((String)row.get("competition"));
+        for(Object raw:Data.list(game.get("upcoming"))){Map<String,Object> row=Data.map(raw);f.a competition=competition(row);
             I next=new I(null,0,clubs.get(Data.number(row.get("homeId"))),clubs.get(Data.number(row.get("awayId"))),0,competition,null);
             if(row.containsKey("phaseLabel"))next.o((String)row.get("phaseLabel"));
             day.h().remove(next);upcoming.put(Data.number(row.get("coachId")),next);
         }
         update(state);
     }
+    private f.a competition(Map<String,Object> row){String key=row.containsKey("competitionKey")?String.valueOf(row.get("competitionKey")):row.containsKey("competitionId")?"id:"+Data.number(row.get("competitionId")):"legacy:"+String.valueOf(row.get("competition"))+":"+Data.number(row.get("competitionType"));f.a result=competitions.get(key);if(result==null){result=new f.a();result.setNome((String)row.get("competition"));if(row.containsKey("competitionType"))Data.set(result,"tR",Data.number(row.get("competitionType")));if(row.containsKey("competitionId"))result.az(Data.number(row.get("competitionId")));competitions.put(key,result);}return result;}
     @SuppressWarnings("unchecked")
     private void updateClubs(Map<String,Object> game)throws Exception{
         for(Object raw:Data.list(game.get("visualClubs"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("clubId"));ah club=clubs.get(id);
@@ -85,6 +85,7 @@ public final class VisualModel {
                 Data.set(player,"et",Data.number(p.get("salary")));Data.set(player,"eu",Data.number(p.get("value")));player.a(Math.max(1,Data.number(p.get("contractDays"))),true);
                 club.kc().add(player);
             }
+            if(row.containsKey("youth")){List<F> previousYouth=new ArrayList<F>(club.ky());club.ky().clear();for(Object value:Data.list(row.get("youth"))){Map<String,Object> p=Data.map(value);int playerId=Data.number(p.get("playerId"));F player=null;for(Iterator<F> it=previousYouth.iterator();it.hasNext();){F candidate=it.next();if(playerId>=0&&candidate.gD()==playerId){player=candidate;it.remove();break;}}if(player==null)player=new F();player.n(club);player.az(playerId);player.setNome((String)p.get("name"));player.setPosicao(Data.number(p.get("position")));player.setPais(Data.number(p.get("country")));player.setIdade(Data.number(p.get("age")));player.setLado(Data.number(p.get("side")));player.setCr1(Data.number(p.get("skill1")));player.setCr2(Data.number(p.get("skill2")));player.ad(Data.number(p.get("strength")));player.ao(Data.number(p.get("cpe")));player.ap(Data.number(p.get("development")));player.ae(Data.number(p.get("salary")));Data.set(player,"eu",Data.number(p.get("value")));player.h(Boolean.TRUE.equals(p.get("junior")));if(p.containsKey("injuryUntilMillis"))player.d(Data.longNumber(p.get("injuryUntilMillis")));if(p.containsKey("contractEndMillis"))Data.set(player,"eJ",Data.longNumber(p.get("contractEndMillis")));if(p.containsKey("suspensions")){List<Object> records=new ArrayList<Object>();for(Object rawRecord:Data.list(p.get("suspensions"))){Map<String,Object> record=Data.map(rawRecord);String key=String.valueOf(record.get("competitionKey"));f.a competition=competitions.get(key);if(competition==null){Map<String,Object> synthetic=new LinkedHashMap<String,Object>();synthetic.put("competitionKey",key);synthetic.put("competitionId",record.get("competitionId"));synthetic.put("competition",record.get("competition"));synthetic.put("competitionType",record.get("competitionType"));competition=competition(synthetic);}best.H suspension=new best.H();suspension.m(competition);Data.set(suspension,"ca",Data.number(record.get("yellowCards")));Data.set(suspension,"cb",Data.number(record.get("redCards")));suspension.gY();records.add(suspension);}Data.set(player,"eS",records);}club.ky().add(player);}}
             List<Object> t=Data.list(row.get("tactics"));int[] settings=new int[4];for(int i=0;i<4;i++)settings[i]=Data.number(t.get(i));club.k(settings);
             if(row.containsKey("trainingFocus"))club.bZ(Data.number(row.get("trainingFocus")));
             if(row.containsKey("trainingAssistant"))club.M(Boolean.TRUE.equals(row.get("trainingAssistant")));

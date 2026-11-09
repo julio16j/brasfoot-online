@@ -103,6 +103,7 @@ public final class SessionHost {
         result.put("viewerCoachId", viewerCoach); result.put("demo", demo); result.put("simulationImplemented", true);
         result.put("host",tokens.get(hostToken)==viewerCoach);
         result.put("storageFailed", storageFailed); result.put("checkpoint", checkpoint);
+        if(game.isCareer())management.ensureIds();
         if(cachedGame==null || cachedSequence!=playback.sequence() || cachedCheckpoint!=checkpoint){
             cachedPlayback=playback.snapshot();cachedGame=presentedGame(cachedPlayback);
             cachedSequence=playback.sequence();cachedCheckpoint=checkpoint;
@@ -263,8 +264,7 @@ public final class SessionHost {
                 Map<String,String> data=form(exchange);required(data,"action");
                 long expectedRound=Long.parseLong(required(data,"round")),revision=Long.parseLong(required(data,"revision"));
                 Set<Integer> affected=management.affectedCoaches(coach,data);
-                boolean training="training-focus".equals(data.get("action")) || "training-assistant".equals(data.get("action"));
-                Runnable rollback=training?management.trainingRollback(coach):()->{};
+                Runnable rollback=management.rollback(coach,data);
                 Map<Integer,List<best.F>> before=rosterIdentities();
                 final Map<String,Object>[] result=new Map[1];
                 round.management(coach,expectedRound,revision,affected,()->{

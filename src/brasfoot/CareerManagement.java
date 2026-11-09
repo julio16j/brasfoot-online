@@ -3,6 +3,9 @@ package brasfoot;
 import best.F;
 import best.ah;
 import best.al;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /** Explicit online commands that apply the original career transactions on the host. */
@@ -23,7 +26,7 @@ public final class CareerManagement {
         return result;
     }
     /** The native ID field is saved with the player, so roster edits never change a command target. */
-    private void ensureIds(){Set<Integer> used=new HashSet<Integer>();List<F> players=allPlayers();for(F player:players)nextPlayer=Math.max(nextPlayer,player.gD()+1);
+    synchronized void ensureIds(){Set<Integer> used=new HashSet<Integer>();List<F> players=allPlayers();for(F player:players)nextPlayer=Math.max(nextPlayer,player.gD()+1);
         for(F player:players){if(player.gD()<0 || !used.add(player.gD())){player.az(nextPlayer++);used.add(player.gD());}}
     }
     private F player(int id){ensureIds();for(F player:allPlayers())if(player.gD()==id)return player;throw new IllegalArgumentException("Player no longer exists");}
@@ -159,6 +162,17 @@ public final class CareerManagement {
     private Object invokeLoan(Object raw,String method){try{return raw.getClass().getMethod(method).invoke(raw);}catch(Exception failure){throw new IllegalStateException("Native loan contract is unavailable",failure);}}
     private Map<String,Object> loanRow(Object loan){F player=(F)invokeLoan(loan,"x");ah source=(ah)invokeLoan(loan,"tP"),destination=player==null?null:player.fg();Map<String,Object> row=playerRow(player);row.put("sourceClubId",source==null?null:source.lk());row.put("sourceClub",source==null?null:source.getNome());row.put("destinationClubId",destination==null?null:destination.lk());row.put("destinationClub",destination==null?null:destination.getNome());long due=((Number)invokeLoan(loan,"tO")).longValue();boolean overdue=state.bb().getTimeInMillis()>due;row.put("dueMillis",due);row.put("overdue",overdue);row.put("returnPending",overdue && source!=null && source.jZ() && source.kw()>=35);row.put("returnNoticeSent",Boolean.TRUE.equals(invokeLoan(loan,"tQ")));return row;}
     public Runnable trainingRollback(int coachId){ah club=own(coachId);boolean assistant=club.ll();int focus=club.lm();return ()->{club.M(assistant);club.bZ(focus);};}
+    public Runnable rollback(int coachId,Map<String,String> data){String action=required(data,"action");if(action.equals("training-focus")||action.equals("training-assistant"))return trainingRollback(coachId);if(!action.equals("promote"))return ()->{};
+        ah club=own(coachId);F player=ownedPlayer(coachId,number(data,"playerId"),true);PlayerState savedPlayer=new PlayerState(player);List<Object> youth=new ArrayList<Object>(club.ky()),roster=new ArrayList<Object>(club.kc()),allPlayers=new ArrayList<Object>(state.O()),allYouth=new ArrayList<Object>(state.Q());
+        return ()->{savedPlayer.restore(player);restore(club.ky(),youth);restore(club.kc(),roster);restore(state.O(),allPlayers);restore(state.Q(),allYouth);};
+    }
+    @SuppressWarnings({"rawtypes","unchecked"}) private static void restore(List target,List saved){target.clear();target.addAll(saved);}
+    private static final class PlayerState {
+        private final Map<Field,Object> values=new LinkedHashMap<Field,Object>();
+        PlayerState(F player){for(Class<?> type=player.getClass();type!=null;type=type.getSuperclass())for(Field field:type.getDeclaredFields()){if(Modifier.isStatic(field.getModifiers()))continue;try{field.setAccessible(true);Object value=field.get(player);values.put(field,copy(value));}catch(Exception error){throw new IllegalStateException("Could not capture player for transaction rollback",error);}}}
+        void restore(F player){for(Map.Entry<Field,Object> entry:values.entrySet()){Field field=entry.getKey();Object saved=entry.getValue();try{field.setAccessible(true);Object current=field.get(player);if(current instanceof List && saved instanceof List)CareerManagement.restore((List)current,(List)saved);else if(current instanceof Map && saved instanceof Map){((Map<?,?>)current).clear();((Map)current).putAll((Map)saved);}else field.set(player,saved);}catch(Exception error){throw new IllegalStateException("Could not restore player after failed checkpoint",error);}}}
+        private static Object copy(Object value){if(value instanceof List)return new ArrayList<Object>((List<?>)value);if(value instanceof Map)return new LinkedHashMap<Object,Object>((Map<?,?>)value);if(value!=null&&value.getClass().isArray()){int length=Array.getLength(value);Object clone=Array.newInstance(value.getClass().getComponentType(),length);System.arraycopy(value,0,clone,0,length);return clone;}return value;}
+    }
     static boolean nativeListedPurchase(boolean listed,int amount,int asking){return listed && amount>=asking;}
     static boolean nativeOfferAccepted(int nativeResult){return nativeResult==1;}
     static boolean nativeOfferCountered(int nativeResult){return nativeResult==6 || nativeResult==7;}
@@ -188,7 +202,7 @@ public final class CareerManagement {
         available=new ArrayList<Integer>();if(coach.fg()==null)for(Object raw:c.a.afQ.b(coach,false)){ah club=(ah)raw;if(!club.jZ() && !available.contains(club.lk()))available.add(club.lk());}
         jobOffers.put(coach.lT(),available);return available;
     }
-    private Map<String,Object> playerRow(F player){ah club=player.fg();Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("age",player.getIdade());row.put("strength",player.fi());row.put("salary",player.fj());row.put("value",player.fk());row.put("askingPrice",asking(player));row.put("contractDays",player.fR());row.put("forSale",player.ft());row.put("loanAvailable",player.fz());row.put("clubId",club==null?null:club.lk());row.put("club",club==null?null:club.getNome());row.put("humanOwner",humanOwner(club));row.put("loaned",player.gl());return row;}
+    private Map<String,Object> playerRow(F player){ah club=player.fg();Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("age",player.getIdade());row.put("country",player.getPais());row.put("side",player.getLado());row.put("skill1",player.getCr1());row.put("skill2",player.getCr2());row.put("development",player.fE());row.put("cpe",player.fD());row.put("junior",Boolean.TRUE.equals(player.fC()));row.put("strength",player.fi());row.put("salary",player.fj());row.put("value",player.fk());row.put("askingPrice",asking(player));row.put("contractDays",player.fR());row.put("contractEndMillis",Data.longNumber(Data.get(player,"eJ")));row.put("injuryUntilMillis",player.fo());row.put("forSale",player.ft());row.put("loanAvailable",player.fz());row.put("clubId",club==null?null:club.lk());row.put("club",club==null?null:club.getNome());row.put("humanOwner",humanOwner(club));row.put("loaned",player.gl());return row;}
     public Map<String,Object> snapshot(int coachId){al coach=coach(coachId);ensureIds();ah own=coach.fg();Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("clubId",own==null?null:own.lk());result.put("balance",own==null?0L:own.kb());
         List<Object> squad=new ArrayList<Object>(),youth=new ArrayList<Object>(),market=new ArrayList<Object>(),pending=new ArrayList<Object>(),jobs=new ArrayList<Object>(),loans=new ArrayList<Object>();
         if(own!=null){for(Object raw:own.kc())squad.add(playerRow((F)raw));for(Object raw:own.ky())youth.add(playerRow((F)raw));}

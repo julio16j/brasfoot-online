@@ -221,7 +221,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         for(I match:currentMatches()) {
             Map<String,Object> frozen=frozenMatches!=null && !match.hc().jZ() && !match.hd().jZ()?Data.map(frozenMatches.get(matches.size())):null;
             Map<String,Object> m=new LinkedHashMap<String,Object>();
-            m.put("home",match.hc().getNome());m.put("away",match.hd().getNome());m.put("homeId",match.hc().lk());m.put("awayId",match.hd().lk());
+            m.put("home",match.hc().getNome());m.put("away",match.hd().getNome());m.put("homeId",match.hc().lk());m.put("awayId",match.hd().lk());m.put("competition",match.hy()==null?"Partida":match.hy().getNome());m.put("competitionId",match.hy()==null?-1:match.hy().gD());m.put("competitionKey",CompetitionIdentity.key(match.hy()));m.put("competitionType",match.hy()==null?0:match.hy().b());
             m.put("homeStarters",frozen==null?livePlayers(match.hp()):frozen.get("homeStarters"));m.put("homeBench",frozen==null?livePlayers(match.hn()):frozen.get("homeBench"));m.put("awayStarters",frozen==null?livePlayers(match.hq()):frozen.get("awayStarters"));m.put("awayBench",frozen==null?livePlayers(match.ho()):frozen.get("awayBench"));
             m.put("homeGoals",match.hu());m.put("awayGoals",match.hw());m.put("played",match.e());matches.add(m);
         }
@@ -232,7 +232,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         for(Map.Entry<Integer,al> entry:coaches.entrySet()){
             I fixture=upcoming(entry.getValue().fg());if(fixture==null)continue;
             visible.add(fixture.hc());visible.add(fixture.hd());Map<String,Object> next=new LinkedHashMap<String,Object>();
-            next.put("coachId",entry.getKey());next.put("homeId",fixture.hc().lk());next.put("awayId",fixture.hd().lk());next.put("competition",fixture.hy().getNome());upcoming.add(next);
+            next.put("coachId",entry.getKey());next.put("homeId",fixture.hc().lk());next.put("awayId",fixture.hd().lk());next.put("competition",fixture.hy().getNome());next.put("competitionId",fixture.hy().gD());next.put("competitionKey",CompetitionIdentity.key(fixture.hy()));next.put("competitionType",fixture.hy().b());upcoming.add(next);
             next.put("phaseLabel",fixture.hG());
         }
         result.put("upcoming",upcoming);
@@ -263,8 +263,9 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             player.put("seasonStats",scalarFields(p,new String[]{"fh","fi"}));
             player.put("eligible",fixture!=null && p.a(fixture,false));players.add(player);
         }
-        row.put("players",players);return row;
+        row.put("players",players);List<Object> youth=new ArrayList<Object>();int youthIndex=0;for(Object raw:club.ky())youth.add(youthRow((F)raw,youthIndex++));row.put("youth",youth);return row;
     }
+    private static Map<String,Object> youthRow(F player,int index){Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("index",index);row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("age",player.getIdade());row.put("country",player.getPais());row.put("side",player.getLado());row.put("skill1",player.getCr1());row.put("skill2",player.getCr2());row.put("development",player.fE());row.put("cpe",player.fD());row.put("junior",Boolean.TRUE.equals(player.fC()));row.put("strength",player.fi());row.put("salary",player.fj());row.put("value",player.fk());row.put("injuryUntilMillis",player.fo());row.put("contractEndMillis",Data.longNumber(Data.get(player,"eJ")));List<Object> cards=new ArrayList<Object>();for(Object raw:Data.list(Data.get(player,"eS"))){best.H suspension=(best.H)raw;best.at competition=suspension.gS();if(competition==null && suspension.gX()<0)continue;Map<String,Object> record=new LinkedHashMap<String,Object>();record.put("competitionId",suspension.gX());record.put("competitionKey",competition==null?"id:"+suspension.gX():CompetitionIdentity.key(competition));record.put("competition",competition==null?"":competition.getNome());record.put("competitionType",competition==null?0:competition.b());int[] count=suspension.gW();record.put("yellowCards",count[0]);record.put("redCards",count[1]);cards.add(record);}row.put("suspensions",cards);return row;}
     private Map<String,Object> liveLineup(I match,int side){Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("starters",livePlayers(side==0?match.hp():match.hq()));result.put("bench",livePlayers(side==0?match.hn():match.ho()));result.put("substitutionsRemaining",match.aR(side));return result;}
     private static List<Object> livePlayers(List<?> players){List<Object> result=new ArrayList<Object>();for(Object raw:players){F player=(F)raw;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("playerId",player.gD());row.put("name",player.getNome());row.put("position",player.getPosicao());row.put("slot",player.fT());result.add(row);}return result;}
     private static int[] projectSeats(best.B project){return (int[])Data.get(project,"dJ");}
