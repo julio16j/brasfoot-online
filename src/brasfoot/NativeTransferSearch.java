@@ -41,7 +41,7 @@ public final class NativeTransferSearch {
 
     private static void offerSelected(JFrame owner,JDialog searchDialog,a.gx search,JTable table,ah buyer,Submit submit){
         int selected=table.getSelectedRow();if(selected<0)return;
-        Object row=table.getValueAt(table.convertRowIndexToModel(selected),0);if(!(row instanceof F))return;
+        Object row=valueAtSelectedRow(table,0);if(!(row instanceof F))return;
         F player=(F)row;ah seller=player.fg();if(seller==null || seller==buyer){JOptionPane.showMessageDialog(searchDialog,"Selecione um jogador de outro clube.","Transferências",JOptionPane.INFORMATION_MESSAGE);return;}
         showOffer(owner,searchDialog,player,buyer,submit);
     }
@@ -55,7 +55,7 @@ public final class NativeTransferSearch {
         send.addActionListener(event->{
             try{
                 send.setEnabled(false);submitOffer(submit,player.gD(),seller.lk(),amount.getText(),()->{offerDialog.dispose();parent.dispose();},()->send.setEnabled(true));
-            }catch(Exception error){JOptionPane.showMessageDialog(offerDialog,error.getMessage(),"Proposta",JOptionPane.WARNING_MESSAGE);}
+            }catch(Exception error){send.setEnabled(true);JOptionPane.showMessageDialog(offerDialog,error.getMessage(),"Proposta",JOptionPane.WARNING_MESSAGE);}
         });
         offerDialog.add(panel);offerDialog.setSize(373,300);offerDialog.setPreferredSize(new Dimension(373,300));offerDialog.setResizable(false);
         offerDialog.setLocationRelativeTo(owner);offerDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);offerDialog.setVisible(true);
@@ -65,10 +65,12 @@ public final class NativeTransferSearch {
 
     static int parseNativePrice(String entered){
         if(entered==null || !entered.trim().matches("[0-9]+"))throw new IllegalArgumentException("Informe um valor válido.");
-        long parsed;try{parsed=Long.parseLong(entered.trim())*1000L;}catch(NumberFormatException error){throw new IllegalArgumentException("O valor informado está fora do limite.",error);}
+        long parsed;try{parsed=Math.multiplyExact(Long.parseLong(entered.trim()),1000L);}catch(NumberFormatException|ArithmeticException error){throw new IllegalArgumentException("O valor informado está fora do limite.",error);}
         if(parsed<=0 || parsed>Integer.MAX_VALUE)throw new IllegalArgumentException("O valor informado está fora do limite.");
         return (int)parsed;
     }
+
+    static Object valueAtSelectedRow(JTable table,int column){int selected=table.getSelectedRow();return selected<0?null:table.getValueAt(selected,column);}
 
     static Map<String,String> offerRequest(int playerId,int sellerClubId,int amount){
         if(playerId<0 || sellerClubId<0 || amount<=0)throw new IllegalArgumentException("Invalid transfer offer details");

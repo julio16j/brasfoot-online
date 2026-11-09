@@ -1,6 +1,6 @@
 # Índices locais da Procura e de Times
 
-Status: aberta; complemento PN-09/PN-11, P2 proposta. Inconsistência de reconstrução identificada por código em 08/11/2026. Não houve execução de jogo ou teste nesta etapa.
+Status: parcial em `main`; correções de seleção após ordenação e overflow numérico integradas. Fonte/completude dos candidatos e validação de interface/retomada permanecem abertas. Diagnóstico original em 08/11/2026.
 
 ## Caminho rastreado
 
@@ -32,13 +32,15 @@ Contracaso lógico: ordem visual para modelo `[1,2,0]`; selecionar a primeira li
 
 Usar uma única conversão: índice visual com `table.getValueAt`, ou índice convertido com `table.getModel().getValueAt`. Conferir também o atleta no diálogo e no comando final. O host valida ID e vendedor atual (`CareerManagement.java:48–49`), mas isso não identifica qual linha o usuário pretendia selecionar; não declarar que essa validação corrige o erro de seleção.
 
+Correção integrada: `NativeTransferSearch` agora centraliza a leitura da linha visual pela própria `JTable`; o detalhe selecionado usa a mesma rota. `NativeTransferSearchTest` cria uma tabela ordenada em ordem inversa e confirma que a seleção visual retorna a linha correspondente. Ainda falta exercitar a janela nativa e confirmar o atleta exibido no diálogo/comando.
+
 ### Normalização do valor da proposta
 
 Na mesma rota, `parseNativePrice` faz `Long.parseLong(entered)*1000L` antes de verificar faixa de int (`NativeTransferSearch.java:65–69`). A multiplicação long pode transbordar sem NumberFormatException. Contracaso aritmético: a entrada `18446744073709552` cabe em long, mas multiplicada por 1000 com sinal de 64 bits resulta em 384, que passa pela verificação de faixa atual. O pedido gerado usa um valor diferente do texto digitado. Isso não contorna saldo/aceitação do host e não comprova uma transferência real; é um desvio da validação do formulário.
 
 Confirmado apenas por leitura da expressão e cálculo Python da aritmética de 64 bits, sem executar Java/jogo. Validar antes de multiplicar ou usar multiplicação com detecção de overflow, incluindo teto normal em milhares e entradas long que fazem wrap para positivo. `NativeTransferSearchTest` cobre 2147484, mas não esse caso de long. Além disso, o botão Enviar é desabilitado antes do parse no listener; uma rejeição síncrona do valor só mostra a mensagem e não o reabilita no catch. O callback de falha só existe depois de uma submissão válida. Acrescentar correção do valor e nova tentativa na mesma janela ao aceite futuro.
 
-Definir uma fonte autoritativa de pesquisa/catálogo e atualizar os modelos nativos com IDs estáveis, sem depender dos elencos estáticos dos arquivos de apresentação. Se forem mantidos índices locais, reconciliar clube, elenco e índices globais como uma única projeção; não conservar atleta removido nem omitir objeto novo. Distinguir universo pesquisável de clubes carregados para apresentar a rodada. Respeitar os filtros nativos e a visibilidade prevista, sem expor resultados futuros durante playback.
+Correção integrada para preço: `parseNativePrice` usa multiplicação com detecção de overflow; o teste inclui o valor longo que antes podia retornar preço incorreto. Erros síncronos reabilitam Enviar, permitindo corrigir e tentar novamente na mesma janela. Definir uma fonte autoritativa de pesquisa/catálogo e atualizar os modelos nativos com IDs estáveis, sem depender dos elencos estáticos dos arquivos de apresentação. Se forem mantidos índices locais, reconciliar clube, elenco e índices globais como uma única projeção; não conservar atleta removido nem omitir objeto novo. Distinguir universo pesquisável de clubes carregados para apresentar a rodada. Respeitar os filtros nativos e a visibilidade prevista, sem expor resultados futuros durante playback.
 
 Aceite futuro: buscar atleta de clube fora da rodada; incluir promovido/contratado; excluir dispensado ou vendido do clube anterior; conferir jogador, vendedor e ID da proposta; repetir após reconexão/retomada e em fallback sem asset. Verificar dois clientes e os modos de [habilidades individuais](task-habilidades-individuais-online.md). A proposta deve continuar validada pelo host; reparar a lista visual não substitui validação da transação.
 

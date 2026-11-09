@@ -2,6 +2,8 @@ package brasfoot;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /** Unit coverage for native offer confirmation and removal of the local-only double-click action. */
 public final class NativeTransferSearchTest {
@@ -20,6 +22,10 @@ public final class NativeTransferSearchTest {
         rejects(()->NativeTransferSearch.parseNativePrice("-1"),"Negative price must be rejected");
         rejects(()->NativeTransferSearch.parseNativePrice("0"),"Zero price must be rejected");
         rejects(()->NativeTransferSearch.parseNativePrice("2147484"),"Overflowing price must be rejected");
+        rejects(()->NativeTransferSearch.parseNativePrice("18446744073709552"),"Long multiplication wraparound must be rejected");
+
+        JTable sorted=new JTable(new DefaultTableModel(new Object[][]{{"A"},{"B"},{"C"}},new Object[]{"Player"}));sorted.setAutoCreateRowSorter(true);sorted.getRowSorter().toggleSortOrder(0);sorted.getRowSorter().toggleSortOrder(0);sorted.setRowSelectionInterval(0,0);
+        check("C".equals(NativeTransferSearch.valueAtSelectedRow(sorted,0)),"Selected visual row must be converted by JTable exactly once after sorting");
 
         Map<String,String> request=NativeTransferSearch.offerRequest(41,7,125000);
         check("offer".equals(request.get("action")),"Transfer must use the host offer operation");

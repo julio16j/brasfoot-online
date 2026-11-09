@@ -42,9 +42,9 @@ public final class NativePreparation {
             else for(ActionListener action:nativeActions.get(field))button.addActionListener(action);
         }
         JPopupMenu actions=new JPopupMenu();
-        for(String action:new String[]{"Renovar contrato","Colocar à venda","Retirar da lista de transferências"}){JMenuItem item=new JMenuItem(action);item.addActionListener(e->{int selected=table.getSelectedRow();if(selected>=0){F player=(F)table.getValueAt(table.convertRowIndexToModel(selected),0);menu.accept(action+":"+player.gD());}});actions.add(item);}
+        for(String action:new String[]{"Renovar contrato","Colocar à venda","Retirar da lista de transferências"}){JMenuItem item=new JMenuItem(action);item.addActionListener(e->{Object value=NativeTransferSearch.valueAtSelectedRow(table,0);if(value instanceof F){F player=(F)value;menu.accept(action+":"+player.gD());}});actions.add(item);}
         table.setComponentPopupMenu(actions);
-        table.getSelectionModel().addListSelectionListener(e->{if(!e.getValueIsAdjusting() && table.getSelectedRow()>=0){Object player=table.getValueAt(table.convertRowIndexToModel(table.getSelectedRow()),0);if(player instanceof F)original.s((F)player);}});
+        table.getSelectionModel().addListSelectionListener(e->{if(!e.getValueIsAdjusting()){Object player=NativeTransferSearch.valueAtSelectedRow(table,0);if(player instanceof F)original.s((F)player);}});
         return original;
     }
     private static void routePreferences(a.eg original,Consumer<String> menu){

@@ -1,12 +1,14 @@
 # Seleção de jogador e intenção no menu de gestão
 
-Status: aberta, P2 proposta, complemento PN-09/PN-11; desvios identificados por inspeção em 08/11/2026. Sem execução de jogo, janela ou teste nesta etapa.
+Status: parcial em `main`; leitura da linha visual da tabela após ordenação corrigida. Intenção/ID no formulário e confirmação real permanecem pendentes. Diagnóstico original em 08/11/2026.
 
 ## Menu contextual e detalhe do jogador
 
 `NativePreparation.create` instala o popup Renovar contrato / Colocar à venda / Retirar da lista e um listener de seleção (`src/brasfoot/NativePreparation.java:45–48`). Ambos usam `table.getValueAt(table.convertRowIndexToModel(selected),0)`. A tabela nativa Iy possui sorter (`analysis/decompiled/a/eg_0.java:772–773`). O índice já convertido é novamente interpretado como linha visual por JTable, como no problema da [Procura](task-indices-mercado-online.md).
 
 Exemplo lógico `[1,0]`: selecionar a primeira linha mostra o jogador do modelo 1; o listener encontra o modelo 0. Isso pode desalinhar o detalhe `original.s(F)` e o ID anexado ao menu. Não foi reproduzido graficamente nesta rodada.
+
+Correção integrada: ambos os listeners usam a linha visual selecionada pela própria `JTable`, aplicando a conversão do sorter uma única vez. O teste ordena uma tabela em ordem inversa e valida o valor da linha selecionada. Falta confirmar o detalhe e o menu contextual na janela nativa.
 
 ## Intenção perdida no diálogo de gestão
 
