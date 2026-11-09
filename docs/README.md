@@ -22,7 +22,7 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Habilidades individuais](task-habilidades-individuais-online.md) | Complemento PN-09/PN-11: modo cliente fixado em força geral; atributos e filtros sem projeção completa |
 | [Índices da Procura e de Times](task-indices-mercado-online.md) | Complemento PN-09/PN-11: candidatos dependem de índices registrados pelos assets, sem reconciliação completa com o host |
 | [Seleção no menu de gestão](task-selecao-gestao-online.md) | Complemento PN-09/PN-11: conversão duplicada, ID contextual ignorado e retirada com intenção inicial invertida |
-| [Preços do estádio](task-precos-estadio-online.md) | Complemento PN-09: confirmação nativa desviada e rascunho compartilhado com snapshots |
+| [Preços do estádio](resolvidos/task-precos-estadio-online.md) | Complemento PN-09: confirmação nativa desviada e rascunho compartilhado com snapshots |
 | [Resultado de disputa de pênaltis](task-resultado-penaltis-online.md) | Complemento PN-05/PN-11: nomes de campos do host e do painel divergem; resultado não aplicado ao objeto nativo |
 | [Ajustes durante a partida](task-ajustes-partida-online.md) | Complemento PN-09/PN-11/PN-12: expulsões, banco e validação integral de substituições múltiplas |
 | [Estatísticas dos jogadores](task-estatisticas-jogadores-online.md) | Complemento PN-11: colunas nativas dependem de campos e históricos que o snapshot parcial não transporta |

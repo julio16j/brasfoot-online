@@ -43,6 +43,7 @@ public final class NativeClient {
     private JCheckBox audio;
     private NativeSessionOptions optionsDialog;
     private NativeTraining trainingDialog;
+    private JDialog stadiumDialog;
     private boolean optionsRequest;
     private String ownRosterKey="";
     private volatile Map<String,Object> latest;
@@ -266,7 +267,7 @@ public final class NativeClient {
     private void openNativeStadium(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;I fixture=visual.preparationMatch(coachId);
         int competitionType=fixture==null?0:fixture.hy().b();
-        NativeStadium.open(frame,owner.fg(),competitionType,(fields,success)->command("/management",fields,success));
+        stadiumDialog=NativeStadium.openWithPriceSubmit(frame,owner.fg(),competitionType,(fields,success)->command("/management",fields,success),(fields,success,failure)->command("/management",fields,()->{Map<String,Object> response=Data.map(latest.get("command"));if("STADIUM_SETTINGS_UPDATED".equals(response.get("status")))success.run();else failure.accept(new IllegalStateException(String.valueOf(response.get("message"))));},()->failure.accept(new IllegalStateException("Host rejected the stadium update"))));
     }
     private void openNativeTraining(){al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
         if(trainingDialog==null || !trainingDialog.isDisplayable())trainingDialog=new NativeTraining(frame,owner.fg(),this::sendTraining);
@@ -336,6 +337,7 @@ public final class NativeClient {
             NativeSessionOptions.refreshWindows();
             if(displayedRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) || ((editor==null || !editor.isDisplayable()) && !ownRosterKey.equals(rosterKey(snapshot))))rebuildRound(snapshot);
             if(editor==null || !editor.isDisplayable()){projectModel(snapshot);al youthOwner=visual.coach(coachId);if(youthOwner!=null)NativeYouth.refreshOpenWindows(youthOwner.fg());}else visual.updateTraining(snapshot);
+            if(stadiumDialog!=null && stadiumDialog.isDisplayable()){al stadiumOwner=visual.coach(coachId);if(stadiumOwner!=null)NativeStadium.WindowState.refresh(stadiumDialog,stadiumOwner.fg());}
             if(trainingDialog!=null && trainingDialog.isDisplayable())trainingDialog.update(visual.coach(coachId).fg(),trainingAvailable());
             nativePanel.project(snapshot);
             String phase=(String)Data.map(snapshot.get("round")).get("phase");String blocked=lineupBlockReason();boolean edit=blocked==null;

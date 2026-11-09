@@ -76,7 +76,7 @@ Validação independente inicial de 08/11: [treino](especificacao/spec-treino-au
 
 ## Evidência de validação
 
-Diagnósticos estáticos adicionais: [seleção da gestão](task-selecao-gestao-online.md), [preços do estádio](task-precos-estadio-online.md), [resultado de pênaltis](task-resultado-penaltis-online.md) e [ajustes durante a partida](task-ajustes-partida-online.md). Essas pendências não foram certificadas pelas execuções históricas abaixo; as tasks registram separadamente código, contracasos e validação dinâmica futura.
+Diagnósticos estáticos adicionais: [seleção da gestão](task-selecao-gestao-online.md), [preços do estádio](resolvidos/task-precos-estadio-online.md), [resultado de pênaltis](task-resultado-penaltis-online.md) e [ajustes durante a partida](task-ajustes-partida-online.md). Essas pendências não foram certificadas pelas execuções históricas abaixo; as tasks registram separadamente código, contracasos e validação dinâmica futura.
 
 Complementos estáticos de 08/11, sem nova execução do jogo: [habilidades individuais](task-habilidades-individuais-online.md) identifica modo cliente fixado em força geral e ausência dos sete atributos; [índices da Procura/Times](task-indices-mercado-online.md) rastreia a diferença entre elencos projetados e índices globais registrados pelos assets. Os testes de encaminhamento de propostas citados acima não certificam esses dois contratos. Reprodução dinâmica e integração permanecem pendentes.
 

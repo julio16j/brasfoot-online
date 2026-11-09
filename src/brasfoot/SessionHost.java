@@ -31,6 +31,9 @@ public final class SessionHost {
     private final String hostToken;
     private final boolean demo;
     private long checkpoint;
+    private HttpServer httpServer;
+    private ExecutorService httpExecutor;
+    private int httpPort=-1;
     private boolean storageFailed;
     private String roundStartSave;
     private Map<String,Object> roundStartManagement;
@@ -59,6 +62,9 @@ public final class SessionHost {
         hostToken = claim(hostCoach);
         persist();
     }
+    public synchronized void startHttp(String bind,int port)throws IOException{if(httpServer!=null)throw new IllegalStateException("Session HTTP endpoint already started");HttpServer server=HttpServer.create(new InetSocketAddress(bind,port),16);server.createContext("/",this::handle);httpExecutor=Executors.newFixedThreadPool(4);server.setExecutor(httpExecutor);server.start();httpServer=server;httpPort=server.getAddress().getPort();}
+    public synchronized int httpPort(){return httpPort;}
+    public synchronized void stopHttp(){if(httpServer!=null){httpServer.stop(0);httpServer=null;httpPort=-1;}if(httpExecutor!=null){httpExecutor.shutdownNow();httpExecutor=null;}}
     private String claim(int coach) {
         if (!game.coachIds().contains(coach)) throw new IllegalArgumentException("Unknown coach");
         if (claimed.contains(coach)) throw new IllegalStateException("Coach already connected");
@@ -376,10 +382,8 @@ public final class SessionHost {
         SessionHost host = new SessionHost(game, root.resolve("sessions"), hostCoach, demo||resumedDemo, Long.parseLong(options.getOrDefault("--tick-ms","0")),recoveredRound,recoveredManagement,recoveredOptions);
         String bind = options.getOrDefault("--bind", "0.0.0.0");
         int port = Integer.parseInt(options.getOrDefault("--port", "8212"));
-        HttpServer server = HttpServer.create(new InetSocketAddress(bind, port), 16);
-        server.createContext("/", host::handle); server.setExecutor(Executors.newFixedThreadPool(4));
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {server.stop(0);host.close();}));
-        server.start();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {host.stopHttp();host.close();}));
+        host.startHttp(bind,port);
         System.out.println("Session listening on " + bind + ":" + port);
         System.out.println("Session directory: " + host.directory);
         System.out.println("Host coach: " + hostCoach);

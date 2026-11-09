@@ -23,3 +23,13 @@ Definir a confirmação e o fechamento mantendo o painel nativo: o rascunho prec
 Aceite: alterar valores e fechar por X e pela moldura; alternar sugerido/manual e receber snapshot antes de confirmar; preencher sugestões; limites por setor; erro de autorização/revisão/gravação sem controles presos; dois clientes; reconexão/save/retomada; comprovar a receita no motor com os valores confirmados. Não confundir sugeridos por competição com tabela de preços manuais persistida. O contexto do próximo confronto em folga ainda requer validação, pois `upcoming` não publica competitionType.
 
 Relacionados: [matriz de gestão](validacao-gestao-nativa.md), [finanças](task-financas-nativas-online.md), [backlog](task-paridade-nativa.md) e [mapa](mapa-implementacao.md). Implementação e validação dinâmica pendentes.
+
+
+
+## Resolucao do fluxo de precos ? 09/11/2026
+
+`NativeStadium` agora mantem os quatro precos e a opcao sugerida em rascunho proprio. Ca conserva a funcao original de preencher valores sugeridos; o X confirma a mudanca pelo host, enquanto fechar pela moldura descarta o rascunho. Snapshots nao substituem os valores editados. Apos resposta de sucesso, o modelo confirmado atualiza; rejeicao HTTP libera o controle e mantem a tela aberta. `CareerManagement.stadiumSettingsRollback` restaura modo e precos se a persistencia falhar.
+
+Validacao: `NativeStadiumWindowTest` abriu o painel nativo real, cotou expansao e enviou preco manual confirmado contra `SessionHost` HTTP; `NativeStadiumPricesTest` verificou isolamento do rascunho; `test_stadium_transactions.py` aprovou checkpoint, conflito Ready (409), persistencia e retomada para precos e obra; `CareerManagementStadiumTest` aprovou cotacao nativa, debito, rejeicao de duplicacao e limites.
+
+Limites PN-09 restantes: saldo insuficiente e rollback por falha de armazenamento de obra/preco, mudanca concorrente em segundo cliente, confirmacao completa das sugestoes por competencia e receita de jogo apos precos manuais ainda nao foram exercitados neste recorte.

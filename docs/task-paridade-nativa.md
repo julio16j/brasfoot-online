@@ -23,7 +23,7 @@ Comprovar os fluxos da versão 22–23 incluída no repositório desde a interfa
 
 ## Validação e encerramento
 
-Complementos de PN-09/PN-11 da continuidade estática: [atributos individuais](task-habilidades-individuais-online.md), [índices e candidatos do mercado](task-indices-mercado-online.md), [seleção e intenção na gestão](task-selecao-gestao-online.md) e [confirmação de preços do estádio](task-precos-estadio-online.md). As tasks distinguem desvios comprovados no código, contracasos lógicos e validações dinâmicas ainda pendentes. Nenhuma implementação foi solicitada ao agente parado.
+Complementos de PN-09/PN-11 da continuidade estática: [atributos individuais](task-habilidades-individuais-online.md), [índices e candidatos do mercado](task-indices-mercado-online.md), [seleção e intenção na gestão](task-selecao-gestao-online.md) e [confirmação de preços do estádio](resolvidos/task-precos-estadio-online.md). As tasks distinguem desvios comprovados no código, contracasos lógicos e validações dinâmicas ainda pendentes. Nenhuma implementação foi solicitada ao agente parado.
 
 Complemento PN-05/PN-11: [resultado de pênaltis](task-resultado-penaltis-online.md). Host publica campos diferentes do consumidor; disputa humana também usa o sorteio rápido do ramo nativo IA, em vez da sequência apresentada. Projeção do resultado, algoritmo esportivo e opção de apresentação são critérios separados, ainda sem validação dinâmica nesta etapa.
 
