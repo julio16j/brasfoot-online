@@ -33,9 +33,9 @@ public class CalendarInvestigation {
    if(found==null)throw new IllegalArgumentException("Unknown club "+name);
    selected.add(found);
   }
-  int[] ids=new int[selected.size()];String[] names=new String[ids.length];
-  for(int i=0;i<ids.length;i++){ids[i]=selected.get(i).lk();names[i]="Diagnostic "+i;}
-  GameAdapter game=CareerEngine.create(root,ids,names);
+  String[] assets=new String[selected.size()],names=new String[assets.length];
+  for(int i=0;i<assets.length;i++){assets[i]=selected.get(i).jY();names[i]="Diagnostic "+i;}
+  GameAdapter game=CareerEngine.createByAssets(root,assets,names);
   Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("selection",args[1]);
   List<Integer> active=new ArrayList<Integer>();
   for(Object raw:c.a.SR.N())active.add(((Z)raw).jc());
