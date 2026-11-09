@@ -19,7 +19,7 @@ jar=DIST/'brasfoot-online.jar'
 with zipfile.ZipFile(jar,'w',zipfile.ZIP_DEFLATED) as archive:
     archive.writestr('META-INF/MANIFEST.MF','\r\n'.join(physical))
     for cls in sorted((ROOT/'build/classes').rglob('*.class')):
-        if cls.name.startswith(('AdapterTest','AudioSmoke','NativeUiSmoke','NativeAudioProjectionTest','LiveLineupAtomicityTest')):continue
+        if cls.name.startswith(('AdapterTest','AudioSmoke','NativeUiSmoke','NativeAudioProjectionTest','SpecialRolesProjectionTest','SpecialRolesWindowTest','LiveLineupAtomicityTest')):continue
         archive.write(cls,cls.relative_to(ROOT/'build/classes').as_posix())
 CMD=r'''@echo off
 setlocal

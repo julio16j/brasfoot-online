@@ -27,6 +27,7 @@ with zipfile.ZipFile(ROOT/'build/host-ui-agent.jar','w') as agent:
     for file in out.glob('brasfoot/HostUiAgent*.class'):
         agent.write(file,file.relative_to(out).as_posix())
 if a.test:
+    subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.SpecialRolesProjectionTest', str(ROOT)], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.NativeAudioProjectionTest', str(ROOT)], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.YouthProjectionTest', str(ROOT)], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.AvailabilityProjectionTest', str(ROOT)], check=True, cwd=ROOT)
