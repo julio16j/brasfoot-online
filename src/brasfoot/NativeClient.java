@@ -431,7 +431,7 @@ public final class NativeClient {
     private void capture(Path path)throws IOException{
         frame.validate();BufferedImage image=new BufferedImage(body.getWidth(),body.getHeight(),BufferedImage.TYPE_INT_RGB);Graphics2D graphics=image.createGraphics();body.printAll(graphics);graphics.dispose();ImageIO.write(image,"png",path.toFile());
     }
-    private void close(){if(closed)return;closed=true;connected=false;network.shutdownNow();a.dV.qb();if(server!=null)server.destroy();frame.dispose();}
+    private void close(){if(closed)return;closed=true;connected=false;network.shutdownNow();if(nativePanel!=null)nativePanel.stopAudio();a.dV.qb();if(server!=null)server.destroy();frame.dispose();}
     public static void main(String[] args)throws Exception{
         Map<String,String> options=new HashMap<String,String>();for(int i=0;i<args.length;i++){if(i+1>=args.length)throw new IllegalArgumentException("Missing option value");options.put(args[i],args[++i]);}
         Path root=Paths.get(options.getOrDefault("--root",".")).toAbsolutePath().normalize();System.setProperty("user.dir",root.resolve("game/Brasfoot22-23").toString());

@@ -19,7 +19,11 @@ public final class NativeMatchPanel extends a.dV {
     private String lastStatus="NOT_STARTED";
     private boolean first=true;
     private boolean intervalSounded;
+    private int lastHalf=1;
     private final java.util.List<Integer> sounds=new ArrayList<Integer>();
+    private final java.util.List<Integer> playedSounds=new ArrayList<Integer>();
+    private static final java.util.List<javax.swing.Timer> pendingAudio=new ArrayList<javax.swing.Timer>();
+    private static long audioTailMillis,audioGeneration;
     private Consumer<I> lineupOpener;
     public NativeMatchPanel(JFrame frame,java.util.List<I> matches) {
         super(frame,720);this.matches=matches;
@@ -42,7 +46,7 @@ public final class NativeMatchPanel extends a.dV {
         if(component instanceof JComponent){JComponent c=(JComponent)component;c.getActionMap().clear();for(int condition:new int[]{0,1,2})c.getInputMap(condition).clear();}
         if(component instanceof Container)for(Component child:((Container)component).getComponents())disableLocalActions(child);
     }
-    public void supportedClub(int id){
+    public void highlightClub(int id){
         for(int index=0;index<qi().size();index++){
             I match=((components.v)qi().get(index)).tR();
             if(match!=null && (match.hc().lk()==id || match.hd().lk()==id)){
@@ -50,19 +54,24 @@ public final class NativeMatchPanel extends a.dV {
             }
         }
     }
-    public void muted(boolean value){mute=value;c.a.SR.setUsaSons(!value);if(value)a.dV.qb();}
-    private void sound(int index){sounds.add(index);if(!mute)dk(index);}
+    public void supportedClub(int id){highlightClub(id);}
+    public void muted(boolean value){mute=value;c.a.SR.setUsaSons(!value);if(value){stopAudio();a.dV.qb();}}
+    private void sound(int index){sounds.add(index);if(!mute){playedSounds.add(index);dk(index);}}
+    private void delayedSound(int index){sounds.add(index);if(mute)return;long now=System.currentTimeMillis();audioTailMillis=Math.max(now+2000L,audioTailMillis+2000L);int delay=(int)Math.min(Integer.MAX_VALUE,audioTailMillis-now);long generation=audioGeneration;final javax.swing.Timer timer=new javax.swing.Timer(delay,event->{pendingAudio.remove((javax.swing.Timer)event.getSource());if(!mute && generation==audioGeneration && c.a.SR.isUsaSons()){playedSounds.add(index);dk(index);}if(pendingAudio.isEmpty())audioTailMillis=0L;});pendingAudio.add(timer);timer.setRepeats(false);timer.start();}
+    public void stopAudio(){audioGeneration++;for(javax.swing.Timer timer:new ArrayList<javax.swing.Timer>(pendingAudio))timer.stop();pendingAudio.clear();audioTailMillis=0L;}
     public java.util.List<Integer> emittedSounds(){return new ArrayList<Integer>(sounds);}
+    public java.util.List<Integer> playedSounds(){return new ArrayList<Integer>(playedSounds);}
     private static F player(ah club,Map<String,Object> event){
         if(event.containsKey("playerId")){if(event.get("playerId")==null)return null;int id=Data.number(event.get("playerId"));for(Object object:club.kc()){F player=(F)object;if(player.gD()==id)return player;}return null;}
         String name=(String)event.get("player");for(Object object:club.kc()){F player=(F)object;if(player.getNome().equals(name))return player;}return null;
     }
+    private static F player(ah club,int id){for(Object object:club.kc()){F player=(F)object;if(player.gD()==id)return player;}return null;}
     @SuppressWarnings("unchecked")
     public void project(Map<String,Object> state){
         Map<String,Object> live=Data.map(state.get("playback"));
         String status=(String)live.get("status");
-        // Do not replay old goal sounds when connecting/reconnecting to an ongoing match.
-        boolean replay=!first;
+        // The first payload is a baseline; its historical event effects must not play.
+        boolean replayEvents=!first;
         java.util.List<Object> rows=new ArrayList<Object>();
         for(I match:matches)for(Object raw:Data.list(live.get("matches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("homeId"))==match.hc().lk() && Data.number(row.get("awayId"))==match.hd().lk()){rows.add(row);break;}}
         for(int index=0;index<rows.size() && index<matches.size();index++){
@@ -77,18 +86,28 @@ public final class NativeMatchPanel extends a.dV {
             Data.set(wrapper,"Pq",match.hu());Data.set(wrapper,"Pr",match.hw());
             wrapper.tW();
             for(Object raw:Data.list(row.get("events"))){
-                Map<String,Object> event=Data.map(raw);String key=index+":"+event.get("id");
-                ah club=null;
-                if(event.containsKey("clubId") && event.get("clubId")!=null){int clubId=Data.number(event.get("clubId"));if(match.hc().lk()==clubId)club=match.hc();else if(match.hd().lk()==clubId)club=match.hd();}
-                else if(match.hc().getNome().equals(event.get("club")))club=match.hc();else if(match.hd().getNome().equals(event.get("club")))club=match.hd();
-                if(club==null || !received.add(key))continue;
-                A original=new A(club==match.hc()?0:1);original.k(club);original.a(Data.number(event.get("type")));
+                Map<String,Object> event=Data.map(raw);
+                if(event.get("clubId")==null)continue;
+                int clubId=Data.number(event.get("clubId"));ah club=clubId==match.hc().lk()?match.hc():clubId==match.hd().lk()?match.hd():null;
+                if(club==null)continue;
+                int type=Data.number(event.get("type"));
+                F actor=player(club,event);
+                F other=event.get("player2Id")==null?null:player(club,Data.number(event.get("player2Id")));
+                if(actor==null || (type==6 && other==null))continue;
+                String key=row.get("id")+":"+event.get("id");if(!received.add(key))continue;
+                A original=new A(club==match.hc()?0:1);original.k(club);original.a(type);
                 original.R(Data.number(event.get("detail")));original.T(Data.number(event.get("half")));
                 original.S(Data.number(event.get("minute"))-(original.en()==2?45:0));
-                original.f(player(club,event));original.p(true);
+                original.f(actor);if(other!=null)original.g(other);original.p(true);
                 match.hE().add(original);wrapper.a(original);
                 if(index==0){JLabel label=(JLabel)Data.get(this,club==match.hc()?"Hj":"Hk");label.setText(original.er());label.setIcon(original.es());}
-                if(replay && wrapper.ei()){int type=original.b();if(type==1){if(original.el()==3)sound(4);sound(Boolean.TRUE.equals(club.jZ())?2:3);}else if(type==3 || type==4)sound(5);else if(type==5)sound(6);else if(type==7)sound(4);}
+                if(replayEvents && wrapper.ei()){
+                    int originalType=original.b();boolean humanScorer=Boolean.TRUE.equals(club.jZ());
+                    if(originalType==1){if(original.el()==3){sound(4);delayedSound(humanScorer?2:3);}else sound(humanScorer?2:3);}
+                    else if(originalType==3 || originalType==4)sound(5);
+                    else if(originalType==5)sound(6);
+                    else if(originalType==7){sound(4);delayedSound(humanScorer?3:2);}
+                }
             }
         }
         if(!rows.isEmpty()){
@@ -106,10 +125,19 @@ public final class NativeMatchPanel extends a.dV {
             JProgressBar progress=(JProgressBar)Data.get(this,"Hf");progress.setMaximum(45);progress.setValue(Math.min(45,Data.number(live.get("halfMinute"))));
             ((JLabel)Data.get(this,"xI")).setText(Boolean.FALSE.equals(row.get("statisticsAvailable"))?"Estatísticas disponíveis ao fim da partida":"<html>Posse: "+Data.list(row.get("possession")).get(0)+"% / "+Data.list(row.get("possession")).get(1)+"%<br>Finalizações: "+Data.list(row.get("shots")).get(0)+" / "+Data.list(row.get("shots")).get(1)+"</html>");
         }
-        if(first)intervalSounded=Data.number(live.get("half"))>=2 || status.equals("HALF_TIME") || status.equals("FINISHED");
-        if(replay && !status.equals(lastStatus)){if(!intervalSounded && status.equals("HALF_TIME")){if(c.a.SR.getVerJanelaSubs()==1 && hasHumanMatch())sound(0);intervalSounded=true;}if(status.equals("FINISHED") && hasHumanMatch())sound(1);}
-        lastStatus=status;first=false;
+        int observedHalf=Data.number(live.get("half"));
+        boolean humanMatch=false;for(Object object:qi())if(((components.v)object).ei()){humanMatch=true;break;}
+        if(first){
+            // The first payload is a baseline. If it already crossed halftime, that transition is history.
+            intervalSounded=observedHalf>=2 || status.equals("HALF_TIME") || status.equals("FINISHED");
+            lastStatus=status;lastHalf=observedHalf;first=false;
+        }else{
+            boolean enteredHalftime=status.equals("HALF_TIME") && !lastStatus.equals("HALF_TIME") && lastHalf==1;
+            boolean enteredSecondHalf=status.equals("SECOND_HALF") && lastStatus.equals("FIRST_HALF") && lastHalf==1 && observedHalf>=2;
+            if(!intervalSounded && humanMatch && (enteredHalftime || enteredSecondHalf) && c.a.SR.getVerJanelaSubs()==1){sound(0);intervalSounded=true;}
+            if(humanMatch && status.equals("FINISHED") && !lastStatus.equals("FINISHED")){if(pendingAudio.isEmpty())sound(1);else delayedSound(1);}
+            lastStatus=status;lastHalf=observedHalf;
+        }
         ((AbstractTableModel)((JTable)Data.get(this,"Hs")).getModel()).fireTableDataChanged();repaint();
     }
-    private boolean hasHumanMatch(){for(Object raw:qi())if(((components.v)raw).ei())return true;return false;}
 }

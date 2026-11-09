@@ -140,6 +140,7 @@ public final class MatchPlayback {
             Map<String,Object> row=new LinkedHashMap<String,Object>();
             row.put("id",index);row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
             row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());
+            row.put("homeHuman",Boolean.TRUE.equals(match.hc().jZ()));row.put("awayHuman",Boolean.TRUE.equals(match.hd().jZ()));
             row.put("competition",match.hy()==null?"Partida":match.hy().getNome());
             row.put("competitionType",match.hy()==null?0:match.hy().b());
             row.put("competitionId",match.hy()==null?-1:match.hy().gD());
@@ -163,7 +164,8 @@ public final class MatchPlayback {
                 e.put("club",event.cu()==null?null:event.cu().getNome());
                 if(event.cu()!=null && event.cu().lk()>=0)e.put("clubId",event.cu().lk());
                 e.put("player",event.eo()==null?null:event.eo().getNome());
-                if(event.eo()!=null && event.eo().gD()>=0)e.put("playerId",event.eo().gD());events.add(e);
+                if(event.eo()!=null && event.eo().gD()>=0)e.put("playerId",event.eo().gD());
+                e.put("player2",event.ep()==null?null:event.ep().getNome());if(event.ep()!=null && event.ep().gD()>=0)e.put("player2Id",event.ep().gD());events.add(e);
             }
             if(concealed){int home=0,away=0;for(Object raw:events){Map<String,Object> event=Data.map(raw);if(Data.number(event.get("type"))==1 && event.get("clubId")!=null){if(match.hc().lk()==Data.number(event.get("clubId")))home++;else if(match.hd().lk()==Data.number(event.get("clubId")))away++;}}row.put("homeGoals",home);row.put("awayGoals",away);
                 for(String key:Arrays.asList("shots","possession","shotsOnTarget","shotsOffTarget","tackles","passErrors","fouls"))row.put(key,Arrays.asList(null,null));
