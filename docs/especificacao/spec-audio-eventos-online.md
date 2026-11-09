@@ -1,6 +1,6 @@
 # Áudio de eventos e transições online
 
-Status: requisitos abertos para PN-04; revisão estática de 08/11/2026 após integração `fd4aa24f`. [Task e evidências anteriores](../task-audio-eventos-repetidos.md). O usuário restringiu a etapa atual a código; nenhuma reprodução sonora nova foi executada.
+Status: requisitos abertos para PN-04; correcoes estaticas integradas em 09/11/2026; reproducao e validacao audivel pendentes. [Task e evidencias](../task-audio-eventos-repetidos.md). Nenhuma nova execucao sonora foi realizada.
 
 ## Referência nativa rastreada
 
@@ -39,10 +39,17 @@ Uma passagem real de primeiro para segundo tempo que chegue sem snapshot interme
 
 ## Escopo e perspectiva
 
-Proposta de paridade: preservar o escopo nativo humano, evitando som de partidas exclusivamente IA apenas por estarem visíveis numa folga. Decidir separadamente se 2/3 distingue todos os clubes humanos como no offline ou o clube acompanhado por cada cliente como no adaptador atual. Até decisão, documentar a diferença e não declarar paridade sonora completa. Filtrar a lista visual não substitui a classificação da origem do som.
+Integrado no painel: preservar o escopo humano de `components.v.ei()` e escolher o som de gol conforme `event.cu().jZ()`, como no consumidor nativo. A apresentacao do placar continua vinculada ao clube acompanhado; essa perspectiva nao determina a origem nem o tipo do som.
 
 ## Critérios de aceite futuros
 
 Cobrir a matriz de transições, eventos duplicados e distintos, dois clubes humanos, humano×IA e somente IA, folga, reconexão e reconstrução, som desligado/ligado e pênalti convertido/perdido. Contagem de solicitações verifica consumo; teste de linha/Clip e reprodução audível verificam o efeito real e eventual sobreposição, quando execução do jogo voltar a estar autorizada. Logs devem distinguir evento, som, minuto/tempo, sequência e clube de origem.
 
 Nenhuma alteração de áudio pode acelerar o relógio, gerar eventos ou recalcular o pênalti no cliente. Testes de WAV decodificado ou Clip aberto não certificam sincronização. A task segue aberta até corrigir e validar o relato pertinente no artefato distribuído.
+
+
+## Correcoes estaticas PN-04
+
+O primeiro snapshot em `HALF_TIME`, segundo tempo ou `FINISHED` estabelece baseline e nao emite transicoes anteriores. A mudanca posterior para `FINISHED` nao emite um intervalo tardio. Eventos de gol, expulsao e contusao so solicitam som quando o wrapper nativo marca presenca humana; tipos de gol usam a flag humana do clube do evento. A transicao de intervalo respeita `VerJanelaSubs` e o fim emite uma vez para a data com jogo humano.
+
+A projecao inclui `clubId` e `playerId` quando disponiveis. O painel resolve o clube por ID e nunca assume que identidade desconhecida seja o visitante; snapshots legados sem IDs continuam usando nomes. Essas mudancas passaram por compilacao, sem execucao de janela/Clip ou reproducao sonora. A matriz de transicoes, reconstrucao, reconexao, efeitos compostos e validacao audivel permanecem como aceite futuro.

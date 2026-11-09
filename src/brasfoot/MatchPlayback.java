@@ -157,9 +157,11 @@ public final class MatchPlayback {
                 e.put("id",i);e.put("type",event.b());e.put("detail",event.el());e.put("half",event.en());
                 e.put("minute",(event.en()==2?45:0)+event.em());
                 e.put("club",event.cu()==null?null:event.cu().getNome());
-                e.put("player",event.eo()==null?null:event.eo().getNome());events.add(e);
+                if(event.cu()!=null && event.cu().lk()>=0)e.put("clubId",event.cu().lk());
+                e.put("player",event.eo()==null?null:event.eo().getNome());
+                if(event.eo()!=null && event.eo().gD()>=0)e.put("playerId",event.eo().gD());events.add(e);
             }
-            if(concealed){int home=0,away=0;for(Object raw:events){Map<String,Object> event=Data.map(raw);if(Data.number(event.get("type"))==1){if(match.hc().getNome().equals(event.get("club")))home++;else away++;}}row.put("homeGoals",home);row.put("awayGoals",away);
+            if(concealed){int home=0,away=0;for(Object raw:events){Map<String,Object> event=Data.map(raw);if(Data.number(event.get("type"))==1 && event.get("clubId")!=null){if(match.hc().lk()==Data.number(event.get("clubId")))home++;else if(match.hd().lk()==Data.number(event.get("clubId")))away++;}}row.put("homeGoals",home);row.put("awayGoals",away);
                 for(String key:Arrays.asList("shots","possession","shotsOnTarget","shotsOffTarget","tackles","passErrors","fouls"))row.put(key,Arrays.asList(null,null));
                 row.put("statisticsAvailable",false);
             }else row.put("statisticsAvailable",true);

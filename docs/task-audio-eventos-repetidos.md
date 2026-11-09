@@ -1,8 +1,16 @@
 # Áudio repetido ou sem evento correspondente
 
-Status: aberta, aguardando investigação e reprodução. Relato registrado em 6 de novembro de 2026. Esta etapa é documental; nenhuma correção foi implementada.
+Status: correcoes de codigo PN-04 integradas; reproducao e validacao audivel pendentes. Revisao de 9 de novembro de 2026. Esta rodada permaneceu restrita a codigo e documentacao.
 
 Contrato consolidado após investigação: [spec de áudio](especificacao/spec-audio-eventos-online.md). Status atual: dois desvios de solicitação de emissão já reproduzidos nos probes abaixo; causa total do relato e reprodução audível ainda não certificadas. Na retomada após integração `fd4aa24f`, a inspeção do código confirmou que o consumo de `NativeMatchPanel` mantém os ramos investigados. A nova restrição do usuário a análise por código impediu novas execuções sonoras; não apresentar os probes anteriores como repetidos no JAR integrado.
+
+## Correcoes de codigo PN-04
+
+`NativeMatchPanel` agora estabelece a transicao como passada quando a primeira observacao ja esta no segundo tempo, intervalo ou fim; receber depois o estado final nao anexa som de intervalo historico. Eventos so pedem audio quando o wrapper original marca a partida como humana. O som de gol usa o sinal nativo do clube do evento (humano/IA), e partidas de IA nao geram sons de eventos apenas por estarem visiveis. O som de intervalo respeita `VerJanelaSubs`; o fim continua uma vez por data com partidas humanas.
+
+`MatchPlayback.snapshot` publica IDs estaveis de clube e jogador quando disponiveis. O painel resolve esses IDs sem confundir homonimos; clube desconhecido nao e tratado como visitante. Nomes continuam como fallback para snapshots antigos sem IDs.
+
+Validacao desta rodada: `python tools/build_adapter.py` compilou com sucesso. Nenhuma janela de jogo, Clip ou reproducao sonora foi executada. A task continua aberta para matriz de transicoes, reconexao, eventos compostos e validacao audivel no pacote/launcher, quando autorizada.
 
 ## Checkpoint de investigação executada — 08/11/2026
 
@@ -15,7 +23,7 @@ Causas delimitadas: `NativeMatchPanel.project` inicializa `intervalSounded=false
 
 Esses fatos são confirmados no pedido de emissão do painel e no rastreamento nativo; **não** comprovam ainda que sejam a única causa do relato do usuário nem ausência/presença de sobreposição audível real. `muted(true)` impede chamar o dispositivo, mas o registrador interno ainda conta a intenção. Não declarar testes de som físico aprovados a partir desse probe.
 
-Correção futura deve estabelecer baseline de transições ao primeiro snapshot/reconexão e preservar o escopo nativo das partidas humanas, documentando se haverá adaptação deliberada por clube apoiado. Testar entrada no primeiro tempo, intervalo, segundo tempo e fim; painel reconstruído; snapshots repetidos; jogos somente IA e mistura de técnicos. Emissão composta legítima de pênalti permanece a comparar com o consumidor de resolução nativo antes de eliminar chamadas.
+A validacao futura deve cobrir entrada no primeiro tempo, intervalo, segundo tempo e fim; painel reconstruido; snapshots repetidos; jogos somente IA e mistura de tecnicos. Emissao composta legitima de penalti ainda deve ser comparada com o consumidor nativo antes de qualquer deduplicacao.
 
 ## Relato e comportamento esperado
 
