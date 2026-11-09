@@ -1,6 +1,6 @@
 # Documentação do Brasfoot Online
 
-Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o planejamento ainda aberto e o histórico de problemas corrigidos.
+Revisado em 9 de novembro de 2026. Este índice separa o estado implementado, o planejamento ainda aberto e o histórico de problemas corrigidos.
 
 | Documento | Conteúdo e estado |
 | --- | --- |
@@ -11,8 +11,11 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Implementação do auxiliar](implementacao-treino-auxiliar-completo.md) | Comando autoritativo, confirmação, persistência e treino nativo |
 | [Implementação PN-07: empréstimos](implementacao-emprestimos-online.md) | Listagem, solicitação IA/humana, aceite/recusa, devolução, projeção e retomada HTTP; compra definitiva bloqueada |
 | [Implementação PN-02: países das ligas](implementacao-calendario-paises.md) | Geração das ligas dos países escolhidos e criação internacional, integrada na main |
+| [Ajustes de escalação ao vivo](implementacao-ajustes-partida-live.md) | Validação completa antes de aplicar substituições e preservação do estado em pedidos inválidos; casos de equipe reduzida e recuperação ainda abertos |
 | [Auditoria do agente de requisitos](estado-agente-requisitos.md) | Rodada de 08/11/2026: inventário nativo, evidências, limitações e retomada |
 | [Paridade nativa](task-paridade-nativa.md) | Backlog aberto PN-01 a PN-12, prioridades e dependências |
+| [Pedido de calendário e seis ligas](task-calendarios.md) | Motor gera as seis ligas; janela nativa perde a agenda futura e seletor tem 43 países. [Spec](especificacao/spec-calendarios-ligas-online.md) |
+| [Pedido de Procura nativa](task-indices-mercado-online.md) | Mesmo atleta encontrado no nativo e ausente na projeção; universo e catálogos incompletos. [Spec](especificacao/spec-pesquisa-jogadores-online.md) |
 | [Treino do auxiliar](task-treino-auxiliar-online.md) | Implementação e validação técnica registradas; limites e aceite explícitos |
 | [Juniores nativos](resolvidos/task-juniores-nativos-online.md) | Projecao da academia corrigida, promocao e rejeicoes validadas; uso direto na escalacao tem escopo proprio |
 | [Lesões na projeção](task-projecao-lesoes-online.md) | Bug confirmado: inelegibilidade/folga vira contusão até prazo fictício |

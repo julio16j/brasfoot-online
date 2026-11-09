@@ -1,6 +1,10 @@
 # Ajustes durante a partida: quantidade, banco e atomicidade
 
-Status: aberta, P1 proposta; complemento de PN-09/PN-11 e disponibilidade PN-12. Diagnóstico estático em 08/11/2026. Nenhuma partida, JVM, janela ou teste executado nesta etapa.
+Status: parcial; validação atômica da escalação ao vivo integrada e validada em 09/11/2026. Equipe reduzida, expulsões, erro de checkpoint e reconexão permanecem abertos. Diagnóstico original em 08/11/2026.
+
+## Recorte integrado
+
+Antes de qualquer troca, `GameAdapter.liveLineup` agora valida fase, onze ativos, slots/táticas, goleiro, unicidade, elegibilidade, banco atual, composição final do banco, reentrada e pareamento goleiro/linha. Todos os pares são pré-validados pelo `MatchPlayback`; somente depois as substituições são aplicadas. O teste de motor verifica que rejeições deixam jogo, clube, sequência e revisão intactos. O teste HTTP confirma 400 sem mudança em rodada/jogo/playback/checkpoint e aceita uma troca válida. Ambos passaram também com o JAR empacotado.
 
 ## Menos de onze após expulsão
 

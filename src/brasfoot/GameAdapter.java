@@ -146,22 +146,41 @@ public final class GameAdapter implements RoundCoordinator.Actions {
     public Map<String,Object> liveLineup(int coach,int[] starters,int[] bench,int[] slots,int[] tactics,MatchPlayback playback){
         ah club=club(coach);if(club==null)throw new IllegalStateException("Choose a club before editing its live lineup");
         I fixture=match(club);if(fixture==null)throw new IllegalStateException("No current match for this club");
-        if(starters.length!=11 || slots.length!=11)throw new IllegalArgumentException("A live lineup needs eleven starters and positions");
+        if(playback==null || !playback.acceptsAdjustments())throw new IllegalStateException("Live lineup adjustments are only available during play");
+        if(starters==null || bench==null || slots==null || starters.length!=11 || slots.length!=11 || bench.length>11)throw new IllegalArgumentException("A live lineup needs eleven starters, positions, and at most eleven substitutes");
+        int[] tacticLimits={best.aq.rB.length,best.aq.rC.length,best.aq.rE.length,best.aq.rD.length};
+        if(tactics==null || tactics.length!=tacticLimits.length)throw new IllegalArgumentException("Need four tactic settings");
+        for(int i=0;i<tactics.length;i++)if(tactics[i]<0 || tactics[i]>=tacticLimits[i])throw new IllegalArgumentException("Invalid tactic");
         List<F> desired=new ArrayList<F>(),reserves=new ArrayList<F>();Set<F> unique=new HashSet<F>();
         for(int index:starters){if(index<0 || index>=club.kc().size())throw new IllegalArgumentException("Invalid starter");F player=(F)club.kc().get(index);if(!unique.add(player))throw new IllegalArgumentException("Duplicate player in lineup");desired.add(player);}
         for(int index:bench){if(index<0 || index>=club.kc().size())throw new IllegalArgumentException("Invalid substitute");F player=(F)club.kc().get(index);if(!unique.add(player))throw new IllegalArgumentException("Duplicate player in lineup");reserves.add(player);}
         Set<Integer> positions=new HashSet<Integer>();for(int slot:slots)if(slot<1 || slot>25 || !positions.add(slot))throw new IllegalArgumentException("Invalid player position");
         boolean home=fixture.hc()==club;int side=home?0:1;List<F> active=home?fixture.hp():fixture.hq(),currentBench=home?fixture.hn():fixture.ho();
+        if(active.size()!=11)throw new IllegalStateException("Live lineup edits for a reduced team are not supported");
+        if(slots[0]!=1 || desired.get(0).getPosicao()!=0)throw new IllegalArgumentException("The goalkeeper must occupy the first lineup position");
+        for(int i=1;i<desired.size();i++)if(desired.get(i).getPosicao()==0)throw new IllegalArgumentException("Only one starting goalkeeper is allowed");
+        Set<F> activeSet=new HashSet<F>(active),benchSet=new HashSet<F>(currentBench);
+        if(activeSet.size()!=active.size() || benchSet.size()!=currentBench.size() || !Collections.disjoint(activeSet,benchSet))throw new IllegalStateException("Current live lineup is inconsistent");
         List<F> outgoing=new ArrayList<F>(),incoming=new ArrayList<F>();for(F player:active)if(!desired.contains(player))outgoing.add(player);for(F player:desired)if(!active.contains(player))incoming.add(player);
         if(outgoing.size()!=incoming.size())throw new IllegalArgumentException("The requested lineup cannot be applied");
         if(outgoing.size()>fixture.aR(side))throw new IllegalStateException("Not enough substitutions remain");
-        for(int i=0;i<outgoing.size();i++)playback.substitute(fixture,side,outgoing.get(i),incoming.get(i));
+        for(F player:incoming){if(!benchSet.contains(player))throw new IllegalArgumentException("Player entering is not in the current bench");if(!player.a(fixture,false))throw new IllegalStateException("Player entering is unavailable");}
+        Set<F> expectedBench=new HashSet<F>(benchSet);expectedBench.removeAll(incoming);expectedBench.addAll(outgoing);
+        if(expectedBench.size()!=reserves.size() || !expectedBench.equals(new HashSet<F>(reserves)))throw new IllegalArgumentException("The live bench must contain the current substitutes and players replaced by this request");
+        Set<F> alreadyExited=new HashSet<F>();for(Object raw:fixture.hE()){best.A event=(best.A)raw;if(event.b()==6 && event.eo()!=null)alreadyExited.add(event.eo());}
+        for(F player:incoming)if(alreadyExited.contains(player))throw new IllegalStateException("A substituted player cannot re-enter the match");
+        List<F> unmatched=new ArrayList<F>(incoming),applyIn=new ArrayList<F>();
+        for(F player:outgoing){F replacement=null;for(F candidate:unmatched)if((player.getPosicao()==0)==(candidate.getPosicao()==0)){replacement=candidate;break;}
+            if(replacement==null)throw new IllegalArgumentException("Every goalkeeper substitution must be paired with a goalkeeper");
+            playback.validateSubstitution(fixture,side,player,replacement);applyIn.add(replacement);unmatched.remove(replacement);
+        }
+        for(int i=0;i<outgoing.size();i++)playback.substitute(fixture,side,outgoing.get(i),applyIn.get(i));
         active.clear();active.addAll(desired);currentBench.clear();currentBench.addAll(reserves);
         List<F> all=home?fixture.hl():fixture.hm();all.clear();all.addAll(desired);
         for(int i=0;i<desired.size();i++){desired.get(i).as(slots[i]);desired.get(i).b(true);}
         for(int i=0;i<reserves.size();i++){reserves.get(i).as(26+i);reserves.get(i).b(true);}
         club.kY().clear();club.kY().addAll(desired);club.kZ().clear();club.kZ().addAll(reserves);
-        if(tactics!=null && tactics.length==4)club.k(tactics);
+        club.k(tactics.clone());
         Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("status","LINEUP_UPDATED");result.put("substitutionsApplied",outgoing.size());result.put("substitutionsRemaining",fixture.aR(side));return result;
     }
     public void ready(int coach, boolean value) {

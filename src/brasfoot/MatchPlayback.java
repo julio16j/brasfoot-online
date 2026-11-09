@@ -49,7 +49,7 @@ public final class MatchPlayback {
     public long sequence(){return sequence;}
     public int half(){return half;}
     public int halfMinute(){return minute;}
-    public synchronized void substitute(I match,int side,F outgoing,F incoming){
+    public synchronized void validateSubstitution(I match,int side,F outgoing,F incoming){
         if(!acceptsAdjustments() || !matches.contains(match))throw new IllegalStateException("This match is not accepting adjustments");
         if(side<0 || side>1)throw new IllegalArgumentException("Invalid team side");
         int remaining=match.aR(side);if(remaining<=0)throw new IllegalStateException("No substitutions remain");
@@ -58,6 +58,10 @@ public final class MatchPlayback {
         if(!bench.contains(incoming))throw new IllegalArgumentException("The player entering is not on the bench");
         if(outgoing==incoming)throw new IllegalArgumentException("Choose two different players");
         if((outgoing.getPosicao()==0)!=(incoming.getPosicao()==0))throw new IllegalArgumentException("A goalkeeper can only be replaced by another goalkeeper");
+    }
+    public synchronized void substitute(I match,int side,F outgoing,F incoming){
+        validateSubstitution(match,side,outgoing,incoming);
+        int remaining=match.aR(side);
         match.a(side,outgoing,incoming,half,minute,outgoing.fT());
         if(match.aR(side)!=remaining-1)throw new IllegalStateException("The original engine did not apply the substitution");
         sequence++;
