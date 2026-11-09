@@ -14,7 +14,7 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Auditoria do agente de requisitos](estado-agente-requisitos.md) | Rodada de 08/11/2026: inventário nativo, evidências, limitações e retomada |
 | [Paridade nativa](task-paridade-nativa.md) | Backlog aberto PN-01 a PN-12, prioridades e dependências |
 | [Treino do auxiliar](task-treino-auxiliar-online.md) | Implementação e validação técnica registradas; limites e aceite explícitos |
-| [Juniores nativos](task-juniores-nativos-online.md) | Projecao e promocao integradas; janela aberta/Pronto ainda requerem cobertura |
+| [Juniores nativos](resolvidos/task-juniores-nativos-online.md) | Projecao da academia corrigida, promocao e rejeicoes validadas; uso direto na escalacao tem escopo proprio |
 | [Lesões na projeção](task-projecao-lesoes-online.md) | Bug confirmado: inelegibilidade/folga vira contusão até prazo fictício |
 | [Finanças e crédito bancário](task-financas-nativas-online.md) | Complemento PN-09: capacidade nativa inventariada; painel contábil e operações bancárias sem integração |
 | [Compra de listado e recusa do atleta](task-compra-listados-online.md) | Complemento PN-09: atalho de compra direta não verifica a aceitação nativa; diagnóstico estático |

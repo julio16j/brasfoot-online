@@ -17,7 +17,7 @@ Origem da conclusão: `CareerManagement.java:109–116`, `NativeStadium.quote`, 
 | Estádio: obra | Débito, duplicação, identidade Kryo e conclusão pelo consumidor aprovados | Janela real → host; saldo insuficiente; autorização/revisão; falha de armazenamento; avanço normal até conclusão; snapshot/reconexão |
 | Estádio: preços | Caminho estático para `stadium-settings` | Valores sugeridos/manuais, limites atômicos e receita real de jogo; persistência e interface |
 | Treino | Entrega integrada; comando, projeção, precedência, ciclo semanal e recuperação constam do [registro atual](implementacao-treino-auxiliar-completo.md) | Respeitar os limites de cobertura e aceite explícitos desse registro; a ausência de comando descrita no checkpoint inicial foi superada |
-| Base | Divergência de projeção executada na [task](task-juniores-nativos-online.md) | Tela nativa roteada ao host; promoção/dispensa/apelido e atualização consistente |
+| Base | Academia projetada do host; promocao autoritativa; dispensa/apelido/compra externa bloqueados | [PN-08 resolvida](resolvidos/task-juniores-nativos-online.md); verificacoes de UI e API aprovadas | Uso direto de juniores na escalacao e capacidade separada |
 | Renovação, lista, venda e emprego | Fontes presentes, sem execução individual nova até este checkpoint | Regras/efeito, revisão e rejeição sem mutação; save/retomada e tela do pacote |
 | Empréstimos | Consumidor e Kryo testados na [spec](especificacao/spec-emprestimos-online.md) | Protocolo, consentimento humano, salários, vencimento normal, interface e avisos |
 

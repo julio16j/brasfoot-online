@@ -68,7 +68,7 @@ Artefato estável anunciado pelo Agente 2 e copiado para pasta temporária isola
 
 Treino teve extensão executada do probe: 365 dias de calendário, ação `aj` em 52 domingos, fila consumida uma vez por `q(0)` e não repetida na segunda chamada (`result-calendar.txt`). A [matriz de gestão](validacao-gestao-nativa.md) registra `AuditStadium.java`: orçamento/débito único, obra duplicada rejeitada, identidade do projeto no Kryo, conclusão por consumidor nativo e ausência de duplicação aprovados. Houve erro de campo no primeiro probe de estádio, corrigido para getter `dT()`; não era falha do produto. Todos os probes/logs ficam no diretório temporário do checkpoint 2 e seus saves são descartáveis.
 
-[Juniores nativos](task-juniores-nativos-online.md): nova lacuna PN-08 confirmada em carreira isolada do Corinthians. Host/consulta de gestão com 8 juniores (7 originais + marcador em memória), projeção com 1 e marcador ausente; callbacks da academia continuam offline. A tentativa inicial em Fixture foi rejeitada por não ser carreira; o teste final usa `CareerEngine.create`. Base/recursos/saves do usuário preservados. Task informada ao Agente 2.
+[Juniores nativos](resolvidos/task-juniores-nativos-online.md): nova lacuna PN-08 confirmada em carreira isolada do Corinthians. Host/consulta de gestão com 8 juniores (7 originais + marcador em memória), projeção com 1 e marcador ausente; callbacks da academia continuam offline. A tentativa inicial em Fixture foi rejeitada por não ser carreira; o teste final usa `CareerEngine.create`. Base/recursos/saves do usuário preservados. Task informada ao Agente 2.
 
 ### Checkpoint 5 — revisão da Entrega 2 e lesões fictícias
 

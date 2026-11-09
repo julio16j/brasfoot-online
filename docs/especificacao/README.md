@@ -9,7 +9,7 @@ Especificações usam o prefixo `spec-` e descrevem requisitos e critérios de a
 | [Empréstimos](spec-emprestimos-online.md) | Consumidor e persistência testados; protocolo, consentimento e cenários restantes abertos |
 | [Papéis na escalação](spec-papeis-escalacao-online.md) | Contrato inicial de faltas, capitão, escanteios e falso 9; consumidores parcialmente rastreados |
 | [Disponibilidade dos jogadores](spec-disponibilidade-jogadores-online.md) | Contrato PN-12: prazo médico real, contrato e elegibilidade contextual separados |
-| [Juniores nativos](spec-juniores-nativos-online.md) | Projeção e promoção implementadas/validadas parcialmente em branch isolada; aceite, operações bloqueadas e integração ainda abertos |
+| [Juniores nativos](spec-juniores-nativos-online.md) | Academia/projecao/promocao concluidas; uso direto na escalacao separado |
 | [Áudio de eventos](spec-audio-eventos-online.md) | Identidade, baseline, escopo e composição de efeitos; diferenças nativas e validações futuras explícitas |
 | [Amistosos na carreira](spec-amistosos-carreira-online.md) | Datas e negociação nativas, disponibilidade autoritativa, termos e consentimento multiplayer ainda abertos |
 | [Configurações online](spec-configuracoes-online.md) | Implementação parcial; ver [progresso e pendências](../implementacao-configuracoes-online.md) |

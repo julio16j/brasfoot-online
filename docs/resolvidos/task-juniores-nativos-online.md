@@ -1,6 +1,6 @@
 # Juniores nativos sem projeção autoritativa
 
-Status: PN-08 parcialmente integrada na `main`, 09/11/2026. Projecao, promocao e retomada em outro processo validadas; criterios de falha HTTP, janela aberta e Pronto permanecem. Ver [registro da implementacao](implementacao-juniores-nativos-online.md).
+Status: problema especifico da projecao autoritativa da academia resolvido e integrado na `main`, 09/11/2026. Projecao, promocao, Pronto, rollback HTTP, janela aberta, concorrencia com editor e retomada validados. Ver [registro da implementacao](../implementacao-juniores-nativos-online.md).
 
 Requisitos detalhados: [spec da academia nativa](especificacao/spec-juniores-nativos-online.md).
 
@@ -37,3 +37,12 @@ O roteiro de promoção **não** produziu comparação final válida de estado/c
 Após instrução do usuário, não houve novas execuções do jogo. A análise estática confirmou caminhos separados: academia HW usa `club.ky()` e callbacks offline; Carreira consulta o host e envia `promote`. Falta integrar o primeiro percurso, não apenas provar o segundo.
 
 Contrato de dados refinado por leitura de `b.N`/`b.ai_0`: a academia precisa de país/lado/características, progresso `fE`/fd e estimativa CPE `fD`/fc, ausentes no `playerRow` atual. A barra de desenvolvimento não é energia e CPE não é o potencial interno `fH`/es. Ver matriz da spec antes de reutilizar os campos da lista de profissionais.
+
+
+## Encerramento do problema de projecao - 09/11/2026
+
+A falha especifica foi corrigida e integrada na main. A academia nativa recebe os dados autoritativos do host por IDs estaveis; promocao usa o comando do host; dispensa, apelido e compra sem contrato multiplayer ficam desativados. Snapshots atualizam uma janela ja aberta, preservando selecao valida.
+
+Validacoes finais: `python tools/build_adapter.py --test`; `python tools/tests/test_youth_transactions.py` (Ready, editor concorrente e rollback real apos falha de armazenamento HTTP); `NativeYouthWindowTest` (refresh em janela real); `python tools/tests/test_youth_session.py` (cliente empacotado, segundo cliente e retomada); `python tools/package_client.py`; PN-02 e PN-07 testadas no pacote combinado. IDs promovidos, elenco/base, checkpoint e rollback foram conferidos.
+
+Limite mantido fora deste problema: usar junior diretamente na escalacao continua em escopo proprio; nao equivale a projecao da academia.

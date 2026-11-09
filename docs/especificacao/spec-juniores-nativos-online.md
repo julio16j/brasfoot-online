@@ -1,6 +1,6 @@
 # Academia de juniores online
 
-Status: requisitos e aceite geral ainda abertos para PN-08, revisão de 09/11/2026. Diagnóstico e evidências: [task de juniores](../task-juniores-nativos-online.md); [implementação parcial validada em branch isolada](../implementacao-juniores-nativos-online.md). Esta implementação é do agente executor, não integra a main e não encerra os critérios pendentes.
+Status: criterios do percurso academia nativa e promocao validados e integrados. Uso direto de juniores na escalacao permanece em requisito separado. Task resolvida: [registro](../resolvidos/task-juniores-nativos-online.md); [implementacao](../implementacao-juniores-nativos-online.md).
 
 ## Percursos atuais distintos
 

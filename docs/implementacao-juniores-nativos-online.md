@@ -1,23 +1,17 @@
 # PN-08 — Academia nativa
 
-Implementação parcial integrada na `main`. Branch de origem: `impl/juniores-nativos-v2`. O escopo integrado cobre a projeção autoritativa dos juniores no painel nativo e a promoção pelo comando do host.
+Implementacao concluida para o problema especifico de projecao/promo??o na `main`. O painel usa a base autoritativa do host, promove pelo comando `/management promote`, atualiza janelas abertas e preserva o rascunho do editor durante mudancas concorrentes. Dispensar, apelidar e comprar base externa continuam desativados; uso de juniores na escalacao e outro escopo.
 
-## Implementação
+## Validação executada
 
-- `CareerManagement` publica IDs estáveis e atributos nativos de jogadores da base; `GameAdapter` projeta a academia completa do host.
-- `VisualModel` atualiza a lista por identidade estável e identidade canônica de competição, sem reconstruir a base a partir de recursos locais.
-- A academia nativa preserva sua tabela e os campos originais. Promoção usa `/management promote`, com persistência e rollback quando o checkpoint falha.
-- Dispensar, comprar base externa e definir apelido ficam indisponíveis na janela nativa. Uso direto de juniores na escalação segue fora deste recorte.
+- `python tools/build_adapter.py --test`: aprovado com `YouthProjectionTest` e as suítes PN-01/02/07 e elenco grande.
+- `python tools/tests/test_youth_transactions.py`: aprovado. Pronto impede a promoção sem alterar elenco/checkpoint; uma falha HTTP injetada na gravação retorna 503, restaura o júnior às listas e preserva o manifesto anterior.
+- `NativeYouthWindowTest`: aprovado. A janela aberta atualiza contagem e jogadores após a promoção, mantém uma seleção válida e desativa Promover quando o elenco profissional chega ao limite de 35.
+- `python tools/tests/test_youth_session.py`: aprovado com cliente empacotado, projeção no segundo cliente e retomada em outro processo.
+- Pacote reconstruído e validado: `python tools/tests/test_youth_session.py`, `test_youth_transactions.py`, `test_career_loans_http.py --packaged` e `test_career_country_selection.py --jar dist/brasfoot-online.jar` aprovados.
 
-## Validações
-
-- `python tools/build_adapter.py --test`: aprovado com `YouthProjectionTest`, PN-01, PN-02, PN-07 e teste de elenco grande.
-- `python tools/tests/test_youth_session.py`: aprovado contra o JAR empacotado. Promoção pelo painel real, checkpoint, projeção no segundo cliente e retomada em processo novo preservaram o ID no elenco profissional e o removeram da base.
-- `python tools/package_client.py`: pacote combinado PN-02/07/08 reconstruído.
-- `NativeYouthWindowTest` capturou a janela e confirmou os controles desativados, mas falhou ao localizar a caixa de confirmação após clique Robot. O roteiro de cliente real acima concluiu a promoção pela interface. A falha isolada do harness não foi atribuída ao produto.
-
-JAR SHA-256: `3ac92c4f75de2ebb2fadfdc88e8eb48651dc42650d99d0e8aa4f9822f9e1aa51`. ZIP: 80.157.343 bytes, SHA-256 `79697fe3315e09b50cbf812dd773403d2dc49eb86d485589feee72e51853b4e4`.
+JAR SHA-256: `bcf94b7939651ba8854d98ad961fe26f36ff67c66d33ad6728c38d62eacf17cd`. ZIP: 80.159.743 bytes, SHA-256 `5794efc0e8871ffe3dedd51cb048d155b585c8d35ed0f41183248cba7215e5d6`.
 
 ## Limites
 
-Não há teste de falha de gravação injetada pela rota HTTP, atualização dinâmica de uma academia já aberta ou conflito de promoção com editor/Pronto. A janela usa o snapshot recebido ao abrir. A tarefa permanece parcial; não declarar paridade completa da academia nem suporte a uso direto de juniores na escalação.
+Limite: a implementacao cobre a academia e o fluxo de promocao descritos nesta task. O uso direto de juniores na escalacao permanece em requisito separado.

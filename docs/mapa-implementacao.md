@@ -56,7 +56,7 @@ Auditoria documental adicional em 08/11/2026: o [relatório de requisitos](estad
 
 Limites adicionais confirmados por inspeção: capitão e batedores bloqueados em `NativeLineup.java:23`; juniores indisponíveis no editor em `:45,53`; seleções e regionais desativados em `CareerEngine.java:42`. A promoção da base já presente não equivale ao uso direto de juniores na escalação.
 
-Auditoria executada posteriormente em 08/11 confirmou [divergência dos juniores nativos](task-juniores-nativos-online.md): academia aberta por HW usa a projeção do clube, cuja base não é sincronizada com `youth` do host. Probe de carreira isolada mostrou 8 juniores no host/gestão e 1 na projeção, sem o marcador criado no host. O comando de promoção existente não certifica esse acesso nativo; sua integração permanece aberta em PN-08.
+PN-08 corrigiu a projecao da academia, promocao autoritativa, refresh de janela, concorrencia com editor e rollback HTTP. [Task resolvida](resolvidos/task-juniores-nativos-online.md); uso direto de juniores na escalacao continua separado.
 
 Outro bug confirmado por execução na principal: [inelegibilidade projetada como lesão](task-projecao-lesoes-online.md), PN-12. Em folga, jogador saudável recebe fim de contusão `Long.MAX_VALUE` na projeção; a janela real mostra cruzes e data fictícia. Não há evidência de alteração médica no save autoritativo. Revisões independentes das branches de [treino](revisao-independente-treino.md) e [folga](revisao-independente-folga.md) não significam integração de seus recortes à principal.
 

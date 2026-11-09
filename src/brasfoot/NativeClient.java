@@ -335,7 +335,7 @@ public final class NativeClient {
             if(optionsDialog!=null && optionsDialog.isDisplayable())optionsDialog.update(settings,optionsRequest);
             NativeSessionOptions.refreshWindows();
             if(displayedRound!=Data.longNumber(Data.map(snapshot.get("round")).get("round")) || ((editor==null || !editor.isDisplayable()) && !ownRosterKey.equals(rosterKey(snapshot))))rebuildRound(snapshot);
-            if(editor==null || !editor.isDisplayable())projectModel(snapshot);else visual.updateTraining(snapshot);
+            if(editor==null || !editor.isDisplayable()){projectModel(snapshot);al youthOwner=visual.coach(coachId);if(youthOwner!=null)NativeYouth.refreshOpenWindows(youthOwner.fg());}else visual.updateTraining(snapshot);
             if(trainingDialog!=null && trainingDialog.isDisplayable())trainingDialog.update(visual.coach(coachId).fg(),trainingAvailable());
             nativePanel.project(snapshot);
             String phase=(String)Data.map(snapshot.get("round")).get("phase");String blocked=lineupBlockReason();boolean edit=blocked==null;
