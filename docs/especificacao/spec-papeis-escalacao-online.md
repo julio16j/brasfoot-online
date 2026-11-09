@@ -21,6 +21,10 @@ Fontes: `a/bz.java:724–746,1001–1014`; `best/ah.java:310–337,2280–2307`.
 
 Capitão e falso 9 também são desenhados por `components/ao.java:187–202`. A busca desta rodada não comprovou efeito esportivo adicional do falso 9 nem do capitão em todos os ramos do motor; aparência e setter não bastam. Essas duas partes exigem confronto com o JAR e testes de consumidor antes de declarar paridade. Não inventar bônus nem alterar o motor para criar um efeito presumido.
 
+Confronto estático posterior com o artefato distribuído: leitura dos constant pools de todas as classes de `dist/lib/brasfoot.jar`, sem iniciar JVM ou executar o jogo. As referências diretas a `best.ah.lr()` aparecem somente em `a/bz`, `a/cD` e `components/ao`; ao campo privado nk, somente em `best/ah`. Referências a `kd()` aparecem em `best/F`, `best/ah`, `a/bz` e `components/ao`, coerentes com transferência, fallback e apresentação encontrados na decompilação. Resultado `C:/Users/Julio/AppData/Local/Temp/brasfoot-audit-integrated-1881dwvb/static-role-references.json`.
+
+Essa inspeção reduz a lacuna de verificação do bytecode registrada anteriormente: não foi encontrado consumidor esportivo direto de falso 9 no JAR local. Não prova ausência de todo caminho reflexivo ou indireto e não constitui teste de efeito de jogo. A implementação de paridade deve conservar escolha, disponibilidade e indicação efetivamente nativas, sem exigir/criar bônus fictício para satisfazer um pressuposto sobre o futebol real.
+
 ## Contrato multiplayer requerido
 
 Transportar IDs estáveis dos quatro papéis na escalação, separadamente dos índices de titulares e do vetor tático. O host valida propriedade, fase/revisão, identidade e elegibilidade nas posições finais do pedido antes de aplicar qualquer campo. Alteração inválida de papel não pode deixar titulares ou táticas parcialmente aplicados. Definir tratamento explícito de manter/limpar seleção; falso 9 admite nulo conforme nativo.

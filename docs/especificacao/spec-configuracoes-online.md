@@ -37,7 +37,7 @@ Inventário baseado em `analysis/decompiled/a/fB.java`, `est/Options.java` e na 
 | Mudanças de técnicos | `showCoachChanges`: booleano | `verMudancaTecnicos` (0/1) | Próxima notificação; não impedir mudanças do motor |
 | Janela de substituição no intervalo | `openLineupAtHalfTime`: booleano | `verJanelaSubs` (0/1) | Próximo intervalo; controla abertura automática, mantendo a barreira de Pronto |
 | Aviso de término de contrato | `contractWarningMode`: inteiro 0–2 | `avisoTerminoContrato` | 0: não; 1: após término; 2: faltando um mês. Aplicar na próxima avaliação de avisos |
-| Ver leilão de jogadores | `showPlayerAuctions`: booleano | `verLeiloes` | Próximo evento de leilão; não eliminar eventos econômicos do motor |
+| Ver leilão de jogadores | `showPlayerAuctions`: booleano | `verLeiloes` | Próximo limite nativo de geração/participação em leilão; efeito econômico e interação no host conforme [contrato](spec-notificacoes-leiloes-online.md) |
 | Atualizar automaticamente contratos encerrados | `autoRenewExpiredContracts`: booleano | `autoRenovaContrato` | Próxima avaliação de contratos; sem renovação retroativa |
 | Cor nos placares humanos | `humanScoreColorsEnabled`: booleano | `usaCorPlacar` | Reapresentar placares nos clientes |
 | Cor selecionada para placares | `humanScoreColorIndex`: inteiro 0–2 | `corPlacar` | Reapresentar placares usando a paleta original |
@@ -249,6 +249,8 @@ Usar relógio e executor controláveis nos testes de agendamento; não depender 
 A entrega completa exige as cinco etapas. “Super rápido” deve controlar de fato o relógio do servidor, os participantes devem consultar os valores efetivos do host e a retomada deve preservar todas as opções e pendências. Nenhuma opção deve aparecer editável sem produzir seu efeito anunciado. Esta especificação não altera o código do jogo.
 
 ## Testes adicionais para o catálogo completo
+
+O [contrato de avisos e leilões](spec-notificacoes-leiloes-online.md) detalha os consumidores rastreados. Refinamento da interpretação do catálogo: no caminho nativo de leilão, a flag condiciona a geração de candidatos e a etapa que pode transferir atletas; não foi demonstrada uma economia de leilão independente da opção. Preservar essa semântica ou declarar explicitamente uma adaptação, sem tratar a chave apenas como exibição passiva. A apresentação de mudanças de técnicos, por sua vez, vem depois da coleta de mudanças do motor.
 
 | Grupo | Verificações obrigatórias |
 | --- | --- |

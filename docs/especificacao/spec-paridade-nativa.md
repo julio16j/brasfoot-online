@@ -25,4 +25,4 @@ A certificação do launcher usa o JAR distribuído. Um teste unitário de negoc
 
 ## Decisões ainda abertas
 
-Definir suporte a seleções e regionais, empréstimos, leilões, capitão/batedores, juniores na escalação e táticas salvas conforme levantamento local; estabelecer precedência do auxiliar sobre foco manual e política de paradas de gestão durante automação das datas. Essas decisões não mudam as specs já existentes de [Opções](spec-opcoes-nativas-online.md), nem encerram as tasks de calendários, folga ou áudio.
+Definir suporte a seleções e regionais, empréstimos, leilões, capitão/batedores, juniores na escalação e táticas salvas conforme levantamento local, além da política de paradas de gestão durante automação das datas. A precedência do auxiliar sobre foco manual já foi rastreada e validada no [contrato de treino](spec-treino-auxiliar-online.md); preservar esse comportamento, com o limite de acesso pelo botão ainda registrado na task correspondente. Essas decisões não mudam as specs já existentes de [Opções](spec-opcoes-nativas-online.md), nem encerram as tasks de calendários, folga ou áudio.

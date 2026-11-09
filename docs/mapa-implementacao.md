@@ -8,6 +8,8 @@ O conjunto atual incorpora Opções/Preferências/F3 e paleta nativa, coerência
 - [Auxiliar](implementacao-treino-auxiliar-completo.md): comando separado do foco, confirmação, snapshot, persistência e precedência semanal nativa; correção com editor aberto preserva rascunho.
 - [Lesões fictícias](task-projecao-lesoes-online.md), [juniores](task-juniores-nativos-online.md), áudio e demais lacunas permanecem abertas. O lote não implementa paridade completa.
 
+Complementos estáticos posteriores à integração: [crédito bancário/contabilidade](task-financas-nativas-online.md) sem protocolo; [compra direta de listado](task-compra-listados-online.md) omite a aceitação nativa do atleta; [biblioteca de táticas e padrão](task-taticas-salvas-online.md) sem persistência online. Esses achados não significam nova implementação ou execução de testes do jogo; o usuário restringiu a investigação atual à leitura de código.
+
 Revisado em 6 de novembro de 2026, com base no código desta pasta de trabalho e nas validações registradas. Este mapa descreve os fontes; não afirma que os pacotes já existentes em `dist/` foram reconstruídos com essas alterações.
 
 Coordenação de 08/11/2026: implementações do Agente 2 em branches/worktrees separadas devem indicar branch/commit e validação, sem serem classificadas como integradas à principal antes da conferência da integração. A atualização dos artefatos distribuídos também exige evidência própria. O relatório de implementação em `docs/estado-agente-implementacao.md` é mantido pelo segundo agente; a auditoria e a retomada de requisitos ficam em [estado do agente de requisitos](estado-agente-requisitos.md).
@@ -43,9 +45,11 @@ O host edita; participantes consultam. `--tick-ms` explícito é uma sobrescrita
 
 Ainda faltam: auto-save adicional; avisos e callbacks nativos de gestão; configuração de renovação automática; apresentação de disputas de pênaltis sem humanos; agrupamento e filtros por país, competição, estaduais e histórico regional. O [registro da implementação](implementacao-configuracoes-online.md) lista as doze chaves e o motivo de bloqueio. A [especificação](especificacao/spec-configuracoes-online.md) mantém os critérios de aceite completos.
 
+Os consumidores foram refinados em [avisos/leilões](especificacao/spec-notificacoes-leiloes-online.md) e [consultas históricas](especificacao/spec-consultas-historicas-online.md). Mensagens podem conter decisões econômicas, e leilões geram disputas/transações. Retrospectos, trocas, confrontos e rankings dependem de coleções não publicadas; manter um callback de janela não certifica dados completos nem autoridade de mutações.
+
 ## Problemas abertos
 
-Auditoria documental adicional em 08/11/2026: o [relatório de requisitos](estado-agente-requisitos.md) rastreia as áreas do código e diferencia evidência histórica de validação nova. O [backlog de paridade](task-paridade-nativa.md) prioriza PN-01 a PN-11 e a [spec geral](especificacao/spec-paridade-nativa.md) define o contrato de certificação. Não foram repetidas suítes nem reconstruídos pacotes nesta auditoria.
+Auditoria documental adicional em 08/11/2026: o [relatório de requisitos](estado-agente-requisitos.md) rastreia as áreas do código e diferencia evidência histórica de validação nova. O [backlog de paridade](task-paridade-nativa.md) prioriza PN-01 a PN-12 e a [spec geral](especificacao/spec-paridade-nativa.md) define o contrato de certificação. Não foram repetidas suítes nem reconstruídos pacotes nesta auditoria.
 
 Limites adicionais confirmados por inspeção: capitão e batedores bloqueados em `NativeLineup.java:23`; juniores indisponíveis no editor em `:45,53`; seleções e regionais desativados em `CareerEngine.java:42`. A promoção da base já presente não equivale ao uso direto de juniores na escalação.
 
@@ -53,9 +57,9 @@ Auditoria executada posteriormente em 08/11 confirmou [divergência dos juniores
 
 Outro bug confirmado por execução na principal: [inelegibilidade projetada como lesão](task-projecao-lesoes-online.md), PN-12. Em folga, jogador saudável recebe fim de contusão `Long.MAX_VALUE` na projeção; a janela real mostra cruzes e data fictícia. Não há evidência de alteração médica no save autoritativo. Revisões independentes das branches de [treino](revisao-independente-treino.md) e [folga](revisao-independente-folga.md) não significam integração de seus recortes à principal.
 
-O treino deve ser classificado como **parcial**: o foco manual percorre o host, mas a caixa do auxiliar mantém listener nativo local sem comando correspondente. Ver [diagnóstico e critérios de aceite](task-treino-auxiliar-online.md). O efeito semanal do foco e a conclusão da obra do estádio ainda precisam de validação individual, incluindo save e retomada. Não há correção implementada por esta revisão.
+Diagnóstico histórico anterior à integração: o treino era parcial porque a caixa do auxiliar mantinha listener local. Essa lacuna foi corrigida e validada no [auxiliar completo](implementacao-treino-auxiliar-completo.md), incorporado em `fd4aa24f`. A [task](task-treino-auxiliar-online.md) preserva histórico e limites. A validação da obra do estádio permanece delimitada na matriz de gestão.
 
-Validação independente posterior em 08/11: [treino](especificacao/spec-treino-auxiliar-online.md) teve consumidor, precedência, quatro combinações Kryo, agenda de 52 domingos e consumo único da fila aprovados; falta o comando completo e o avanço online. [Estádio](validacao-gestao-nativa.md) teve orçamento/débito, rejeição de obra duplicada, identidade Kryo e conclusão pelo consumidor nativo aprovados; faltam interface, HTTP e avanço normal. Esses resultados delimitam as pendências anteriores, sem certificar todos os fluxos.
+Validação independente inicial de 08/11: [treino](especificacao/spec-treino-auxiliar-online.md) teve consumidor, precedência, quatro combinações Kryo, agenda de 52 domingos e consumo único da fila aprovados; o comando completo e o avanço online foram validados posteriormente nos registros da integração. [Estádio](validacao-gestao-nativa.md) teve orçamento/débito, rejeição de obra duplicada, identidade Kryo e conclusão pelo consumidor nativo aprovados; faltam interface, HTTP e avanço normal. Os resultados permanecem separados por cenário e momento.
 
 | Tema | Estado e referência |
 | --- | --- |
@@ -68,6 +72,10 @@ Validação independente posterior em 08/11: [treino](especificacao/spec-treino-
 | Áudio dos eventos | [Task aberta](task-audio-eventos-repetidos.md): usuário relata efeitos sem evento aparente e possível repetição; falta reproduzir e identificar a causa |
 
 ## Evidência de validação
+
+Diagnósticos estáticos adicionais: [seleção da gestão](task-selecao-gestao-online.md), [preços do estádio](task-precos-estadio-online.md), [resultado de pênaltis](task-resultado-penaltis-online.md) e [ajustes durante a partida](task-ajustes-partida-online.md). Essas pendências não foram certificadas pelas execuções históricas abaixo; as tasks registram separadamente código, contracasos e validação dinâmica futura.
+
+Complementos estáticos de 08/11, sem nova execução do jogo: [habilidades individuais](task-habilidades-individuais-online.md) identifica modo cliente fixado em força geral e ausência dos sete atributos; [índices da Procura/Times](task-indices-mercado-online.md) rastreia a diferença entre elencos projetados e índices globais registrados pelos assets. Os testes de encaminhamento de propostas citados acima não certificam esses dois contratos. Reprodução dinâmica e integração permanecem pendentes.
 
 Na revisão de 6 de novembro de 2026 passaram:
 

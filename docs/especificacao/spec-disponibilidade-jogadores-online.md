@@ -27,6 +27,8 @@ Revisão técnica com o Agente 2: nomes `injuryUntilMillis`/`contractUntilMillis
 
 O contexto recebido pertence à data/partida publicada. A projeção usa a mesma referência temporal do snapshot; mudar data em outro cliente não pode recalcular por relógio de parede. Lesão com prazo exatamente igual à data deixa de satisfazer `fP`; contrato usa comparação própria do motor, sem impor a mesma desigualdade por conveniência.
 
+A renderização nativa de cartões `F.fS()` consulta a competição de `best.f.bl()` (`best/F.java:1130–1153`). `NativePreparation.create` chama `best.f.a(clube,partida)`; em folga o cliente pode passar o próximo confronto por `preparationMatch`. Logo, o contexto de consulta dessa tela pode ser próximo jogo, enquanto o contexto de edição/elegibilidade do host é a partida atual. A implementação futura deve explicitar essa distinção e associar registros à referência correta; não alimentar ambos com um booleano genérico ou manter referência global de competição anterior. Essa observação é estática e não constitui nova reprodução gráfica.
+
 Durante apresentação, snapshots congelados e projeções temporais da IA devem ocultar estados médicos finais até o evento/minuto correspondente. Reutilizar o mecanismo de ocultação atual, testando que novos campos não vazam o fim do jogo. Não persistir objetos cliente no save do host: o estado nativo verdadeiro já pertence ao checkpoint, enquanto as novas informações são projeções.
 
 ## Aceite observável

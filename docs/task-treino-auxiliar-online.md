@@ -4,6 +4,8 @@ Atualização de 08/11/2026: `impl/treino-auxiliar-online` implementa o comando 
 
 Status: aberta. P1 proposta. Diagnóstico estático em 08/11/2026; sem reprodução gráfica ou correção. Origem: primeira auditoria de [paridade nativa](task-paridade-nativa.md), PN-01.
 
+Complemento atual de acesso, somente por código: a [task de habilidades individuais](task-habilidades-individuais-online.md) rastreia `VisualModel` fixando modo false, construtor `a.eg` ocultando Id e `NativePreparation` não restaurando sua visibilidade. O teste gráfico chama openNativeTraining por reflexão; não certifica clique no botão do dashboard. Preservar a validação integrada de diálogo/comando/persistência/motor e acrescentar esse acesso aos critérios ainda pendentes, sem restaurar o diagnóstico histórico de auxiliar sem comando.
+
 Checkpoint posterior em 08/11/2026: [spec completa de treino](especificacao/spec-treino-auxiliar-online.md) disponível, com consumidor semanal e precedência verificados por execução isolada do motor e quatro combinações persistidas em Kryo. O diagnóstico inicial abaixo permanece histórico; a revisão do bloqueio provisório do Agente 2 não equivale ao aceite do auxiliar completo nem à integração na principal.
 
 ## Fato observado no código

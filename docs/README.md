@@ -14,6 +14,19 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Treino do auxiliar](task-treino-auxiliar-online.md) | Implementação e validação técnica registradas; limites e aceite explícitos |
 | [Juniores nativos](task-juniores-nativos-online.md) | Divergência de projeção reproduzida em carreira isolada; callbacks da academia ainda offline |
 | [Lesões na projeção](task-projecao-lesoes-online.md) | Bug confirmado: inelegibilidade/folga vira contusão até prazo fictício |
+| [Finanças e crédito bancário](task-financas-nativas-online.md) | Complemento PN-09: capacidade nativa inventariada; painel contábil e operações bancárias sem integração |
+| [Compra de listado e recusa do atleta](task-compra-listados-online.md) | Complemento PN-09: atalho de compra direta não verifica a aceitação nativa; diagnóstico estático |
+| [Táticas salvas e padrão](task-taticas-salvas-online.md) | Complemento PN-11: biblioteca local sem persistência online; escalação padrão bloqueada |
+| [Habilidades individuais](task-habilidades-individuais-online.md) | Complemento PN-09/PN-11: modo cliente fixado em força geral; atributos e filtros sem projeção completa |
+| [Índices da Procura e de Times](task-indices-mercado-online.md) | Complemento PN-09/PN-11: candidatos dependem de índices registrados pelos assets, sem reconciliação completa com o host |
+| [Seleção no menu de gestão](task-selecao-gestao-online.md) | Complemento PN-09/PN-11: conversão duplicada, ID contextual ignorado e retirada com intenção inicial invertida |
+| [Preços do estádio](task-precos-estadio-online.md) | Complemento PN-09: confirmação nativa desviada e rascunho compartilhado com snapshots |
+| [Resultado de disputa de pênaltis](task-resultado-penaltis-online.md) | Complemento PN-05/PN-11: nomes de campos do host e do painel divergem; resultado não aplicado ao objeto nativo |
+| [Ajustes durante a partida](task-ajustes-partida-online.md) | Complemento PN-09/PN-11/PN-12: expulsões, banco e validação integral de substituições múltiplas |
+| [Estatísticas dos jogadores](task-estatisticas-jogadores-online.md) | Complemento PN-11: colunas nativas dependem de campos e históricos que o snapshot parcial não transporta |
+| [Renovação de contratos](task-renovacao-contratos-online.md) | Complemento PN-09: salário e contraproposta ausentes do formulário; cálculo e limites requerem comparação nativa |
+| [Nacionalidade do técnico](task-nacionalidade-tecnico-online.md) | Complemento PN-11: escolha do seletor não chega ao host e nacionalidade não é projetada nos perfis |
+| [Empregos e troca de clube](task-empregos-tecnicos-online.md) | Complemento PN-09/PN-11: suporte ao desempregado não cobre convites ao técnico empregado; persistência dos convites indefinida |
 | [Validação da gestão](validacao-gestao-nativa.md) | Execuções independentes de modelo/comando direto e matriz do que ainda falta |
 | [Revisão independente do treino](revisao-independente-treino.md) | JAR da branch e janela real verificados; bloqueio provisório, sem integração à principal |
 | [Revisão independente da folga](revisao-independente-folga.md) | Execuções e capturas do JAR da branch; primeira falha de Robot preservada e repetição aprovada |

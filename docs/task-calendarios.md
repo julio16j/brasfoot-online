@@ -2,6 +2,8 @@
 
 Data: 6 de novembro de 2026. Escopo: código local, motor original incluído no projeto e carreiras descartáveis. Nenhum save existente foi carregado ou alterado. Esta etapa acrescenta diagnóstico e planejamento; não muda regras do jogo.
 
+Complemento estático de 08/11/2026: [marcação de amistosos na carreira](especificacao/spec-amistosos-carreira-online.md). O acesso nativo depende de datas futuras do host, ausentes da projeção de uma única data; o modo avulso `--demo` não equivale a agendamento na carreira. Contrato e critérios próprios registrados, sem executar o jogo nem alterar o planejamento de geração de ligas abaixo.
+
 ## Resultado principal
 
 A hipótese de que somente a liga brasileira funciona não se confirmou: os cenários abaixo geraram jogos de liga e avançaram até janeiro de 2023 sem exceção. Há, entretanto, um defeito confirmado na ordem de inicialização das ligas e limitações de navegação e apresentação que prejudicam a experiência fora do Brasil.
@@ -85,6 +87,8 @@ Implementação proposta: separar consultas de calendário e classificações, l
 ### 5. Ordenação de datas e atualização da janela — prioridade média
 
 O calendário envia apenas `day.f()`, uma data formatada, e `NativeCareerDialogs.table` cria um `DefaultTableModel` sem tipo de coluna com ordenação automática. Ao clicar na coluna Data, a ordenação usa os textos e pode colocar `01/12` antes de `02/01`. A ordem inicial vem do calendário nativo; o problema surge na reordenação da tabela.
+
+Complemento estático de 08/11: o mesmo helper constrói as classificações e não sobrescreve getColumnClass. Assim, o sorter não recebe o tipo numérico de posição/pontos/jogos/saldo e pode ordenar pelas representações textuais (por exemplo 1, 10, 2). A ordenação inicial por posição em `CareerViews` é explícita e não comprova a ordenação interativa por coluna. Preservar tipos/comparadores numéricos, sinal do saldo e valores ausentes; acrescentar números de um/dois/três dígitos ao aceite. Sem execução de janela nesta etapa.
 
 Além disso, a janela de carreira é montada com uma consulta pontual a `/overview`; não há atualização periódica dessa tabela enquanto o calendário avança. O usuário precisa reabri-la para obter novo estado.
 

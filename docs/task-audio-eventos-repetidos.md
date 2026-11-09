@@ -2,6 +2,8 @@
 
 Status: aberta, aguardando investigação e reprodução. Relato registrado em 6 de novembro de 2026. Esta etapa é documental; nenhuma correção foi implementada.
 
+Contrato consolidado após investigação: [spec de áudio](especificacao/spec-audio-eventos-online.md). Status atual: dois desvios de solicitação de emissão já reproduzidos nos probes abaixo; causa total do relato e reprodução audível ainda não certificadas. Na retomada após integração `fd4aa24f`, a inspeção do código confirmou que o consumo de `NativeMatchPanel` mantém os ramos investigados. A nova restrição do usuário a análise por código impediu novas execuções sonoras; não apresentar os probes anteriores como repetidos no JAR integrado.
+
 ## Checkpoint de investigação executada — 08/11/2026
 
 O agente de requisitos reproduziu dois comportamentos no painel nativo online real, por snapshots controlados, em execução headless e **muted** (sem reprodução física). Probe externo `AuditAudio.java`, log `result-audio.txt`, em `C:/Users/Julio/AppData/Local/Temp/brasfoot-audit-training-6e_ixo3p`, sobre o JAR nativo e `build/classes` da principal. Nenhum fonte/teste/pacote foi alterado.

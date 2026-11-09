@@ -1,6 +1,8 @@
 # Treino semanal e auxiliar online
 
-Revisão: 08/11/2026. Status: contrato para implementação; PN-01 continua aberto na [task](../task-treino-auxiliar-online.md). Diagnóstico e execução independente descritos abaixo. Não confundir bloqueio provisório do controle com suporte ao auxiliar.
+Limite de acesso identificado estaticamente após a integração: [modo individual e visibilidade do botão Id](../task-habilidades-individuais-online.md). O clique real no dashboard permanece pendente de validação; os testes anteriores abriram o diálogo por reflexão. A entrega funcional e as evidências abaixo continuam válidas no escopo exercitado.
+
+Revisão: 08/11/2026. Status atual: contrato implementado e tecnicamente validado na integração `fd4aa24f`, conforme [registro integrado](../integracao-main-2026-11-08.md) e [implementação completa](../implementacao-treino-auxiliar-completo.md). A [task](../task-treino-auxiliar-online.md) preserva limites e aceite. O diagnóstico e os probes iniciais abaixo são históricos; o bloqueio provisório foi substituído pelo auxiliar online completo.
 
 ## Consumidor nativo e precedência comprovada
 
@@ -20,12 +22,14 @@ O fluxo online já chama `SR.q(0)` em `CareerEngine.completeDate()`. `q(0)` varr
 
 1. Manter `training-focus` para foco 0/1 e definir ação distinta `training-assistant`, com campo booleano estrito `enabled`. O host resolve o clube do técnico autenticado; não aceitar clube arbitrário do formulário. Reutilizar revisão/fase de gestão e invalidação de Pronto de `/management`.
 2. A ação do auxiliar chama `club.M(enabled)` no host. Não chamar `aT()` nem alterar `bO()`, habilidades ou foco por conta do comando. O efeito usa o próximo processamento nativo; uma semana já processada não deve ser recalculada.
-3. Publicar `trainingAssistant` junto a `trainingFocus` no snapshot do clube e projetar ambos em `VisualModel`. Hoje só o foco é publicado (`GameAdapter.java:251`) e projetado (`VisualModel.java:82`); essa lacuna também impede confiar na caixa inicialmente mostrada por um cliente novo.
+3. Publicar `trainingAssistant` junto a `trainingFocus` no snapshot do clube e projetar ambos em `VisualModel`. A lacuna inicial de só publicar/projetar foco foi corrigida na integração; `updateTraining` também atualiza esses campos enquanto um editor de escalação impede a projeção completa, preservando o rascunho.
 4. A tela nativa deve enviar intenção, aguardar confirmação e refletir os dois valores autoritativos. Pode preservar rádios selecionáveis como no painel original, mas deve explicar que o foco manual só decide quando o auxiliar está desativado, respeitado o ciclo especial do motor. Não simular seleção aleatória do auxiliar na interface.
 5. Erro ou conflito restaura valores confirmados e reabilita interação. Projeção e reabertura não reenviam comandos; rejeição não deixa mutação local com aparência de confirmação.
 6. Persistir no checkpoint Kryo existente; não criar arquivo paralelo para estes dois campos. A retomada deve preservar a combinação escolhida, incluindo auxiliar ativo com foco 1 armazenado. Oferta de emprego/demissão pode mudar clube e padrões nativos: reconsultar o clube atual após transição.
 
 ## Evidência executada e aceite restante
+
+A implementação e a validação integrada posteriores estão nos registros vinculados no cabeçalho. As pendências descritas para os probes iniciais nesta seção delimitam o que eles próprios provaram, não significam que o comando completo esteja ausente na versão integrada. Não houve nova execução do treino nesta revisão somente documental.
 
 Probe temporário independente executado contra `analysis/brasfoot.jar` e adaptador local em 08/11/2026: quatro combinações de auxiliar/foco por invocação do consumidor privado `F.f(double)`, quatro roundtrips por `saveLocal/readLocalSave` em saves descartáveis e chamada de `aT()` com incremento do ciclo passaram. Diretório: `C:/Users/Julio/AppData/Local/Temp/brasfoot-audit-training-6e_ixo3p` (`AuditTraining.java`, `result.txt`). A primeira compilação falhou por importação wildcard que sombreava pacote `c`; a primeira asserção supunha goleiro no índice 0 e foi corrigida para a posição real. Falhas eram do probe, não do produto.
 
