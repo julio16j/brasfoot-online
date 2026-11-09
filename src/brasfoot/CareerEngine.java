@@ -44,7 +44,7 @@ public final class CareerEngine {
         c.a.SR.bs=false;
         // National teams require local selection dialogs; club competitions remain enabled.
         c.a.SR.setJogaSelecoesAll(false);c.a.SR.setJogaRegionais(false);
-        c.a.SR.setVerMudancaTecnicos(0);c.a.SR.setAutoRenovaContrato(true);
+        c.a.SR.setVerMudancaTecnicos(0);
         Class<?> loader=Class.forName("best.p");loader.getMethod("dd").invoke(null);
     }
     private static GameAdapter startAssets(List<String> assets,String[] coachNames){
@@ -75,7 +75,7 @@ public final class CareerEngine {
         game.resetPreparation();
         prepare();
     }
-    private static void prepare(){
+    static void prepare(){
         if(c.a.SR.isAutoRenovaContrato())for(Object raw:c.a.SR.M()) {
             ah club=((best.al)raw).fg();if(club==null)continue;
             for(Object value:club.kc()){best.F player=(best.F)value;if(player.fR()<=0)player.a(180L,true);}

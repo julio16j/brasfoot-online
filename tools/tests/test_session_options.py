@@ -52,12 +52,13 @@ try:
     edit(400, {'nonHumanCompetitionPlayback': {'21': True}})
     assert edit(409, {'autoSaveMode': 2})['code'] == 'OPTION_NOT_SUPPORTED'
     code, state = request(base, '/state', host); assert state['sessionOptions']['revision'] == 0
-    state = edit(200, {'soundsEnabled': False, 'humanSpeedIndex': 3}); assert state['sessionOptions']['revision'] == 1
+    state = edit(200, {'soundsEnabled': False, 'humanSpeedIndex': 3, 'autoRenewExpiredContracts': False}); assert state['sessionOptions']['revision'] == 1
+    assert state['sessionOptions']['pendingValues']['autoRenewExpiredContracts'] is False
     assert state['sessionOptions']['effectiveTickMillis'] == 450
     assert edit(409, {'soundsEnabled': True})['code'] == 'OPTIONS_REVISION_CONFLICT'
     state = edit(200, {'soundsEnabled': False}, revision=1); assert state['sessionOptions']['revision'] == 1
     state = edit(200, {'openLineupAtHalfTime': False}, revision=1)
-    assert state['sessionOptions']['pendingValues'] == {'openLineupAtHalfTime': False}
+    assert state['sessionOptions']['pendingValues'] == {'openLineupAtHalfTime': False, 'autoRenewExpiredContracts': False}
     code, observed = request(base, '/state', guest); assert code == 200 and not observed['sessionOptions']['canEdit']
     assert observed['sessionOptions']['values'] == state['sessionOptions']['values']
     manifest = json.loads((directory/'session.json').read_text(encoding='utf-8'))
@@ -69,7 +70,7 @@ process, base, info = start(['--resume', str(directory), '--tick-ms', '25'])
 try:
     host = info['Host token']; code, state = request(base, '/state', host); assert code == 200
     options = state['sessionOptions']; assert options['revision'] == 2 and options['values']['humanSpeedIndex'] == 3
-    assert options['pendingValues'] == {'openLineupAtHalfTime': False}
+    assert options['pendingValues'] == {'openLineupAtHalfTime': False, 'autoRenewExpiredContracts': False}
     assert options['speedSource'] == 'CLI_OVERRIDE' and options['effectiveTickMillis'] == 25
     code, error = request(base, '/session-options', host, {'optionsRevision': 2, 'changes': '{"humanSpeedIndex":2}'})
     assert code == 409 and error['code'] == 'CLI_OVERRIDE'
@@ -90,7 +91,7 @@ try:
         assert time.monotonic() < deadline and state['round']['phase'] != 'FAILED', state['playback']
         time.sleep(.05); code, state = request(base, '/state', host)
     assert state['sessionOptions']['revision'] == 4
-    assert not state['sessionOptions']['values']['openLineupAtHalfTime'] and not state['sessionOptions']['pendingValues']
+    assert not state['sessionOptions']['values']['openLineupAtHalfTime'] and state['sessionOptions']['pendingValues'] == {'autoRenewExpiredContracts': False}
     paused = state['playback']['sequence']; time.sleep(.15)
     code, state = request(base, '/state', host); assert state['playback']['sequence'] == paused
     # A failed atomic manifest replacement must not confirm the candidate.

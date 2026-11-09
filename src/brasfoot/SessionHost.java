@@ -309,6 +309,7 @@ public final class SessionHost {
                 if(!hostToken.equals(exchange.getRequestHeaders().getFirst("Authorization").substring(7)))throw new SecurityException("Only the host can advance the calendar");
                 Map<String,String> data=form(exchange);
                 round.nextRound(coach,Long.parseLong(required(data,"round")),Long.parseLong(required(data,"revision")),()->{
+                    try{activateOptions("NEXT_CONTRACT_EVALUATION");}catch(IOException error){throw new IllegalStateException(error.getMessage(),error);}
                     try{CareerEngine.nextDate(game);}catch(RuntimeException error){round.engineFailed();playback.fail(error);throw error;}
                 });
                 playbackClock.cancel();presentationStart=null;frozenClubs=Collections.emptyMap();playback=new MatchPlayback(game.currentMatches(),true);persist();

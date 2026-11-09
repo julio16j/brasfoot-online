@@ -34,7 +34,7 @@ public final class SessionOptions {
         add("openLineupAtHalfTime","VerJanelaSubs","Janela de substituição no intervalo","boolean",1,true,false,"NEXT_HALF_TIME",null);
         add("contractWarningMode","AvisoTerminoContrato","Aviso de término de contrato","integer",2,false,false,"NEXT_CONTRACT_EVALUATION","Avisos nativos ainda não transportados aos destinatários");
         add("showPlayerAuctions","VerLeiloes","Ver leilão de jogadores","boolean",1,false,false,"NEXT_AUCTION","Leilão nativo ainda não integrado ao protocolo online");
-        add("autoRenewExpiredContracts","AutoRenovaContrato","Atualizar automaticamente contratos encerrados","boolean",1,false,false,"NEXT_CONTRACT_EVALUATION","Callback nativo de renovação ainda não integrado");
+        add("autoRenewExpiredContracts","AutoRenovaContrato","Atualizar automaticamente contratos encerrados","boolean",1,false,false,"NEXT_CONTRACT_EVALUATION",null);
         add("humanScoreColorsEnabled","UsaCorPlacar","Cor nos placares humanos","boolean",1,false,false,"IMMEDIATE",null);
         add("humanScoreColorIndex","CorPlacar","Cor selecionada para placares","integer",2,false,false,"IMMEDIATE",null);
         add("soundsEnabled","UsaSons","Sons nos eventos dos jogos","boolean",1,false,false,"IMMEDIATE",null);

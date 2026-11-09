@@ -26,6 +26,10 @@ public final class SessionOptionsTest {
         try{original.change(change("humanSpeedIndex",1),true);throw new AssertionError();}catch(SessionOptions.Conflict expected){check(expected.code.equals("CLI_OVERRIDE"));}
         try{original.change(change("autoSaveMode",2),false);throw new AssertionError();}catch(SessionOptions.Conflict expected){check(expected.code.equals("OPTION_NOT_SUPPORTED"));}
         active.applyNative();check(!c.a.SR.isUsaSons() && c.a.SR.getVerJanelaSubs()==0);
+        SessionOptions renewOffPending=active.change(change("autoRenewExpiredContracts",false),false);check(Boolean.TRUE.equals(renewOffPending.get("autoRenewExpiredContracts")) && Boolean.FALSE.equals(Data.map(renewOffPending.persisted().get("pendingValues")).get("autoRenewExpiredContracts")));
+        SessionOptions renewOff=renewOffPending.activate("NEXT_CONTRACT_EVALUATION");check(Boolean.FALSE.equals(renewOff.get("autoRenewExpiredContracts")) && Data.map(renewOff.persisted().get("pendingValues")).isEmpty());renewOff.applyNative();
+        best.ah managed=((best.al)c.a.SR.M().get(0)).fg();best.F expired=(best.F)managed.kc().get(0);expired.a(0L,true);check(expired.fR()==0);CareerEngine.prepare();check(expired.fR()==0);
+        SessionOptions renewOnPending=renewOff.change(change("autoRenewExpiredContracts",true),false);SessionOptions renewOn=renewOnPending.activate("NEXT_CONTRACT_EVALUATION");renewOn.applyNative();CareerEngine.prepare();check(expired.fR()==180);
         Object monitor=new Object();List<Runnable> tasks=new ArrayList<Runnable>();List<Long> delays=new ArrayList<Long>();List<FakeFuture> futures=new ArrayList<FakeFuture>();int[] ticks={0};
         PlaybackClock clock=new PlaybackClock(monitor,(task,delay)->{tasks.add(task);delays.add(delay);FakeFuture future=new FakeFuture();futures.add(future);return future;},()->ticks[0]++);
         clock.schedule(220);clock.schedule(70);check(futures.get(0).cancelled);tasks.get(0).run();check(ticks[0]==0);tasks.get(1).run();check(ticks[0]==1);check(delays.equals(Arrays.asList(220L,70L)));

@@ -16,6 +16,7 @@ O manifesto persiste o candidato antes da confirmação. Uma falha de armazename
 | `humanScoreColorsEnabled`, `humanScoreColorIndex`, `highlightHomeEvents` | Setters nativos; renderização original de `b.aG` nos placares e eventos |
 | `playerListColorsEnabled`, `playerListPalette` | Setters nativos e renderer original `b.aH`; cinco cores aplicadas atomicamente |
 | `windowThemeIndex` | Armazenamento em `est.Options`; cores originais `best.aq.E` nas janelas abertas e futuras |
+| `autoRenewExpiredContracts` | Pending changes activate before `CareerEngine.prepare` at the next contract evaluation; expired contracts renew for the native 180-day term |
 
 A tela usa o layout original `a.fB.mJ`, com listeners online próprios. O construtor de `fB` não é executado: ele instala listeners que escrevem `options.bcf` durante a própria inicialização dos seletores. A construção do painel usa a infraestrutura de serialização do Java 8 para inicializar `JPanel`, seguida apenas do método nativo de layout. Não há chamada de `c.a.vJ`. Esse caminho depende da distribuição Java 8 já exigida pelo projeto e tem teste gráfico específico.
 
@@ -35,7 +36,6 @@ Estas chaves constam do catálogo e da persistência, mas não estão editáveis
 | --- | --- |
 | `autoSaveMode` | Integrar contador nativo de três jogos e início do ano; deduplicar salvamento adicional com checkpoints obrigatórios |
 | `showCoachChanges`, `contractWarningMode`, `showPlayerAuctions` | Integrar notificações nativas e seus destinatários, preservando processamento autoritativo e privacidade |
-| `autoRenewExpiredContracts` | Substituir a adaptação de renovação já existente em `CareerEngine.prepare` pelo callback original verificado; ativar alterações antes da avaliação |
 | `showNonHumanPenalties` | Apresentar a disputa autoritativa sem recalcular seu resultado |
 | `groupStateCompetitions`, `hideNonHumanNationalLeagues`, `hideStateRegionalOutsideBrazil`, `hideRegionalsWithoutHumanHistory`, `watchedLeagueCountryIds`, `nonHumanCompetitionPlayback` | Integrar a projeção de filtros com a precedência de `best.s` e `best.f`, o observador e o histórico regional. Não alterar a quantidade de jogos simulados |
 
@@ -50,3 +50,8 @@ Não considerar esta revisão como conclusão da especificação. Ainda falta va
 - `python tools/tests/test_session.py`: sessão HTTP, dois clientes de terminal, relógio, intervalo e save final.
 - `python tools/tests/test_native_session.py`: dois clientes Swing, resultados compartilhados, áudio e ausência de simulação local.
 - `python tools/tests/test_career_session.py`: passou com quatro clientes Swing, duas rodadas, barreira do quarto técnico, resultados compartilhados, retomada e recuperação de rodada interrompida. A restrição indevida de 36 jogadores foi removida e o custo dos snapshots foi corrigido; ver [investigação do teste](resolvidos/task-teste-carreira.md).
+
+
+## PN-05: renovacao automatica
+
+`autoRenewExpiredContracts` agora pode ser editada pelo host. A alteracao fica pendente ate `NEXT_CONTRACT_EVALUATION`, persiste no manifesto e ativa antes da preparacao da data seguinte. O hook autoritativo renova contratos expirados por 180 dias usando `CareerEngine.prepare`; a inicializacao deixa de forcar a opcao ligada. Os testes cobrem opcao desligada e ligada, ativacao no limite e persistencia. Avisos, leiloes, auto-save, penaltis e filtros continuam indisponiveis ate seus consumidores serem integrados.
