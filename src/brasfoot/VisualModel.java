@@ -99,6 +99,10 @@ public final class VisualModel {
                 stadium.i(String.valueOf(stadiumRow.get("name")));stadium.a(seats);stadium.b(costs);stadium.o(Boolean.TRUE.equals(stadiumRow.get("suggestedPrices")));club.a(stadium);
             }
         }
+        reconcileNativeIndexes(game);
+    }
+    private void reconcileNativeIndexes(Map<String,Object> game){List<ah> nativeClubs=c.a.SR.P();nativeClubs.clear();List<F> nativePlayers=c.a.SR.O();nativePlayers.clear();Set<F> seen=Collections.newSetFromMap(new IdentityHashMap<F,Boolean>());
+        for(Object raw:Data.list(game.get("visualClubs"))){int id=Data.number(Data.map(raw).get("clubId"));ah club=clubs.get(id);if(club==null)continue;nativeClubs.add(club);for(Object player:club.kc()){F value=(F)player;if(seen.add(value))nativePlayers.add(value);}}
     }
     private void projectSuspensions(F player,List<Object> source){List<Object> records=new ArrayList<Object>();for(Object rawRecord:source){Map<String,Object> record=Data.map(rawRecord);String key=String.valueOf(record.get("competitionKey"));f.a competition=competitions.get(key);if(competition==null){Map<String,Object> synthetic=new LinkedHashMap<String,Object>();synthetic.put("competitionKey",key);synthetic.put("competitionId",record.get("competitionId"));synthetic.put("competition",record.get("competition"));synthetic.put("competitionType",record.get("competitionType"));competition=competition(synthetic);}best.H suspension=new best.H();suspension.m(competition);for(int i=0;i<Data.number(record.get("yellowCards"));i++)suspension.cz();for(int i=0;i<Data.number(record.get("redCards"));i++)suspension.cA();suspension.gY();records.add(suspension);}Data.set(player,"eS",records);}
     private static F rolePlayer(ah club,Object id){if(id==null)return null;int playerId=Data.number(id);for(Object raw:club.kc()){F player=(F)raw;if(player.gD()==playerId)return player;}throw new IllegalStateException("Special role references an unknown player");}

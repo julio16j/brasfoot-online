@@ -28,6 +28,9 @@ public final class AvailabilityProjectionTest {
         check(Boolean.TRUE.equals(visualPlayer.get("forSale"))&&Data.number(visualPlayer.get("askingPrice"))==123000&&Boolean.TRUE.equals(visualPlayer.get("loanAvailable")),"Snapshot carries authoritative sale, price and loan-listing fields");
         check(Data.list(visualPlayer.get("suspensions")).size()==Data.list(Data.get(hostPlayer,"eS")).size(),"Snapshot carries professional suspension records");
         VisualModel model=new VisualModel(root,state);F projected=null;for(Object raw:model.club(hostClub.lk()).kc()){F candidate=(F)raw;if(hostPlayer.gD()>=0?candidate.gD()==hostPlayer.gD():hostPlayer.getNome().equals(candidate.getNome()))projected=candidate;}
+        check(c.a.SR.P().size()==Data.list(Data.map(state.get("game")).get("visualClubs")).size(),"Native club index contains exactly clubs from the current projection");
+        int expectedIndexedPlayers=0;for(Object raw:Data.list(Data.map(state.get("game")).get("visualClubs")))expectedIndexedPlayers+=model.club(Data.number(Data.map(raw).get("clubId"))).kc().size();
+        check(c.a.SR.O().size()==expectedIndexedPlayers&&c.a.SR.O().contains(projected),"Native search index contains reconstructed current players and no extra asset entries");
         check(projected!=null,"Professional player is projected");check(projected.fo()==injuryEnd,"Projection preserves actual injury deadline");
         check(Data.longNumber(Data.get(projected,"eJ"))==contractEnd,"Projection does not extend an expired contract");
         check(Boolean.TRUE.equals(projected.ft())&&projected.fl()==123000&&Boolean.TRUE.equals(projected.fz()),"Projection uses authoritative listing state instead of asset defaults");

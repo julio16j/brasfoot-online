@@ -1,16 +1,16 @@
 # Índices locais da Procura e de Times
 
-Status: parcial em `main`; seleção após ordenação, validação de preço, listagem/preço/condição de empréstimo e atributos individuais projetados. Fonte/completude dos candidatos e validação de interface/retomada permanecem abertas. Diagnóstico original em 08/11/2026.
+Status: parcial em `main`; seleção após ordenação, validação de preço, listagem/preço/condição de empréstimo, atributos individuais e reconciliação dos índices locais projetados. Catálogo completo de candidatos e validação de interface/retomada permanecem abertos. Diagnóstico original em 08/11/2026.
 
 ## Caminho rastreado
 
 `NativeTransferSearch` instancia `a.gx`, cujo `nD()` chama `af.D(false)`; a busca percorre o índice global `c.a.SR.O()`, não o elenco do comprador (`analysis/decompiled/a/gx_0.java:177–184`; `best/af.java:58–91`). A tela Times usa `c.a.SR.P()` para montar sua árvore (`a/iA.java:350–360`).
 
-`VisualModel` cria um estado nativo vazio. Para cada clube visível, tenta construir `new ah(e.t)` a partir de seu `.ban`; esse construtor registra o clube em P e os profissionais originais do arquivo em O (`best/ah.java:1315–1380`; `best/f_0.java:382–407`). Depois, `VisualModel.updateClubs` limpa `club.kc()` e reconstrói o elenco usando os dados do host. Reaproveita referências antigas quando o identificador coincide; jogadores ausentes são retirados do elenco e novos recebem `new F()`.
+`VisualModel` cria um estado nativo vazio. Para cada clube projetado, tenta construir `new ah(e.t)` a partir de seu `.ban`; esse construtor registra clube/jogadores originais do arquivo nos índices nativos. `VisualModel.updateClubs` então reconstrói os elencos com os dados do host e, ao final, substitui os índices globais P/O pelos clubes e jogadores dos `visualClubs` do snapshot atual. Novos atletas projetados entram em O e registros somente do asset são retirados.
 
-O construtor vazio de F e seu setter `n(ah)` não registram o jogador em O (`best/F.java:111,238–241`). O adaptador não reconcilia explicitamente O ao substituir esses elencos. Portanto, retirar/incluir referências em kc não mantém por si só o índice consumido pela Procura: um jogador removido pode continuar no índice; um novo objeto projetado pode não entrar nele. A manifestação exata depende das coincidências entre IDs do arquivo e do host, sem caso real executado nesta rodada.
+O construtor vazio de F e seu setter `n(ah)` não registram o jogador em O (`best/F.java:111,238–241`). A reconciliação explícita agora garante que O corresponda aos elencos atuais projetados e que P corresponda aos clubes do snapshot. `AvailabilityProjectionTest` verifica tamanhos e identidade de jogadores após reconstrução. Isso corrige inconsistência dos índices locais, mas não fornece o universo inteiro da carreira.
 
-No fallback sem `.ban`, `new ah()` também não registra o clube em P. Além disso, `GameAdapter.snapshot` só inclui em `visualClubs` clubes dos técnicos, adversários próximos e partidas correntes; não o universo completo da carreira. O mapa cliente acumula clubes já vistos, sem contrato explícito de catálogo completo ou expiração. Não afirmar que a Procura está sempre vazia: os construtores dos assets possuem os registros descritos acima.
+No fallback sem `.ban`, `new ah()` não registra o clube em P; a reconciliação agora inclui o clube de fallback quando ele está no snapshot. `GameAdapter.snapshot` ainda inclui somente clubes dos técnicos, adversários próximos e partidas correntes, não o universo completo da carreira. A Procura nativa, portanto, permanece limitada aos clubes do snapshot atual até existir um catálogo autoritativo de mercado.
 
 `CareerManagement.view` possui uma consulta separada de mercado sobre todos os clubes do host. As telas nativas `NativeTransferSearch.open` e `NativeTransferMarket.open` não a consultam ao montar candidatos. A disponibilidade dessa API não certifica cobertura das duas telas. Os testes auxiliares de propostas/preços/listeners não validam identidade ou completude dos candidatos exibidos.
 
