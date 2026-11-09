@@ -3,6 +3,9 @@ import best.F;
 import best.I;
 import best.ah;
 import java.util.*;
+import java.lang.reflect.Method;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.*;
 import javax.swing.*;
 /** Uses the original draggable pitch; submission is rerouted to the host. */
@@ -13,16 +16,21 @@ public final class NativeLineup {
         return open(owner,club,match,submit,true);
     }
     public static JDialog open(JFrame owner,ah club,I match,Submit submit,boolean editable){
+        return open(owner,club,match,submit,editable,editable);
+    }
+    public static JDialog open(JFrame owner,ah club,I match,Submit submit,boolean editable,boolean rolesEditable){
         java.util.List<F> roster=new ArrayList<F>((java.util.List<F>)(java.util.List<?>)club.kc());
         JDialog dialog=new JDialog(owner,"Escalação online — "+club.getNome(),false);
         a.bz original=new a.bz(dialog,club,match,false);
         seed(original,club,match);
-        Runnable save=()->{try{submit.send(extract(original,club,roster),dialog::dispose);}catch(Exception error){JOptionPane.showMessageDialog(dialog,error.getMessage(),"Escalação",JOptionPane.WARNING_MESSAGE);}};
+        int[] roles={roleId(club.ke()),roleId(club.kd()),roleId(club.lq()),roleId(club.lr())};
+        Object[] baseline={club.ke(),club.kd(),club.lq(),club.lr()};boolean[] confirmed={false};
+        Runnable save=()->{try{Map<String,String> form=extract(original,club,roster);if(rolesEditable)form.put("roles",Data.csv(Arrays.asList(roles[0],roles[1],roles[2],roles[3])));submit.send(form,()->{if(rolesEditable)applyRoles(club,roster,roles);confirmed[0]=true;dialog.dispose();});}catch(Exception error){JOptionPane.showMessageDialog(dialog,error.getMessage(),"Lineup",JOptionPane.WARNING_MESSAGE);}};
         JButton play=(JButton)Data.get(original,"Bn");for(java.awt.event.ActionListener listener:play.getActionListeners())play.removeActionListener(listener);play.setText(editable?"Aplicar alterações":"Somente leitura");if(editable)play.addActionListener(e->save.run());else play.setEnabled(false);
         JButton back=(JButton)Data.get(original,"Bo");for(java.awt.event.ActionListener listener:back.getActionListeners())back.removeActionListener(listener);back.setText("Fechar");back.addActionListener(e->dialog.dispose());
-        for(Object key:new Object[]{"AW"})for(Component item:((JPopupMenu)Data.get(original,(String)key)).getComponents())if(item instanceof JMenuItem){item.setEnabled(false);((JMenuItem)item).setToolTipText("Batedores e capitão ainda não configuráveis no online");}
+        int actionIndex=0;for(Object key:new Object[]{"AW"})for(Component item:((JPopupMenu)Data.get(original,(String)key)).getComponents())if(item instanceof JMenuItem){item.setEnabled(rolesEditable);if(rolesEditable){final int role=actionIndex++;JMenuItem menuItem=(JMenuItem)item;for(java.awt.event.ActionListener listener:menuItem.getActionListeners())menuItem.removeActionListener(listener);menuItem.addActionListener(event->{int selectedSlot=Data.number(Data.get(original,"AU"));F player=((components.ao)Data.list(Data.get(original,"AE")).get(selectedSlot)).x();if(player!=null){roles[role]=role==3 && roles[role]==player.gD()?-1:player.gD();setRole(club,role,roles[role]<0?null:player);refreshRolesPanel(original);}});}}
         if(editable)routeKeyboard(original,save);else{makeReadOnly(original);back.setEnabled(true);}
-        dialog.add(new JScrollPane(original));dialog.setSize(1080,800);dialog.setMinimumSize(new Dimension(850,600));dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);return dialog;
+        dialog.add(new JScrollPane(original));dialog.setSize(1080,800);dialog.setMinimumSize(new Dimension(850,600));dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){if(rolesEditable && !confirmed[0])restoreRoles(club,baseline);}});return dialog;
     }
     @SuppressWarnings("unchecked")
     public static void seed(a.bz original,ah club){seed(original,club,null);}
@@ -64,4 +72,10 @@ public final class NativeLineup {
         java.util.List<Integer> tactics=new ArrayList<Integer>();for(int value:club.kj())tactics.add(value);
         Map<String,String> result=new LinkedHashMap<String,String>();result.put("starters",Data.csv(starters));result.put("bench",Data.csv(bench));result.put("slots",Data.csv(slots));result.put("tactics",Data.csv(tactics));return result;
     }
+    private static int roleId(F player){return player==null?-1:player.gD();}
+    private static void setRole(ah club,int role,F player){if(role==0)club.k(player);else if(role==1)club.j(player);else if(role==2)club.n(player);else club.o(player);}
+    private static void refreshRolesPanel(a.bz panel){try{Method refresh=a.bz.class.getDeclaredMethod("cS",int.class);refresh.setAccessible(true);refresh.invoke(panel,-1);}catch(Exception error){throw new IllegalStateException("Could not refresh native role symbols",error);}}
+    private static void applyRoles(ah club,java.util.List<F> roster,int[] roles){club.k(rolePlayer(roster,roles[0]));club.j(rolePlayer(roster,roles[1]));club.n(rolePlayer(roster,roles[2]));club.o(rolePlayer(roster,roles[3]));}
+    private static F rolePlayer(java.util.List<F> roster,int id){if(id<0)return null;for(F player:roster)if(player.gD()==id)return player;return null;}
+    private static void restoreRoles(ah club,Object[] roles){club.k((F)roles[0]);club.j((F)roles[1]);club.n((F)roles[2]);club.o((F)roles[3]);}
 }

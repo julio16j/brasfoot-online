@@ -419,7 +419,7 @@ public final class NativeClient {
         editor=NativeLineup.open(frame,club,match,(form,success)->{
             if(!editable)throw new IllegalStateException("Esta escalação está em modo somente leitura");
             command("/live-lineup",form,()->{success.run();status.setText("Ajustes da escalação aplicados.");});
-        },editable);
+        },editable,false);
         editor.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){editor=null;if(latest!=null)accept(latest);}});editor.setVisible(!testing);
     }
     private void finishTest(Map<String,Object> state)throws Exception{

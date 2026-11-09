@@ -42,7 +42,18 @@ try:
     for coach,token in zip(state['game']['coaches'],[host_token,guest]):
         eligible=coach['suggestion']['starters']; bench=coach['suggestion']['bench']
         assert len(eligible)>=11
-        state=status(200,'/lineup',{'round':1,'revision':0,'starters':','.join(map(str,eligible[:11])),'bench':','.join(map(str,bench))},token)
+        form={'round':1,'revision':0,'starters':','.join(map(str,eligible[:11])),'bench':','.join(map(str,bench))}
+        if token==host_token:
+            chosen=[coach['players'][index]['playerId'] for index in eligible[:11]]
+            form.update({'slots':'1,2,9,4,7,11,13,14,16,20,23','tactics':','.join(map(str,coach['tactics'])),'roles':','.join(map(str,[chosen[0],chosen[1],chosen[2],chosen[10]]))})
+        state=status(200,'/lineup',form,token)
+        if token==host_token:
+            published=next(row for row in state['game']['visualClubs'] if row['clubId']==coach['clubId'])['roles']
+            assert published['freeKicks']==chosen[0] and published['captain']==chosen[1] and published['corners']==chosen[2] and published['falseNine']==chosen[10]
+            invalid=dict(form);invalid.update({'revision':1,'slots':'1,2,9,4,7,11,13,14,16,20,14'})
+            status(400,'/lineup',invalid,token)
+            unchanged=status(200,'/state',token=host_token)
+            assert unchanged['round']['coaches'][0]['revision']==1 and next(row for row in unchanged['game']['visualClubs'] if row['clubId']==coach['clubId'])['roles']==published
     # Multiple edits before Ready, independent of the other coach's revision.
     coach=state['game']['coaches'][0]
     eligible=coach['suggestion']['starters']; bench=coach['suggestion']['bench']
@@ -106,7 +117,9 @@ try:
     assert saved['matches'][0]['played']
     assert saved['matches'][0]['homeGoals']==live['matches'][0]['homeGoals']
     assert saved['matches'][0]['awayGoals']==live['matches'][0]['awayGoals']
-    result={'result':'PASS','checks':['join and exclusive coach slots','authenticated commands','lineup validation','unlimited edits before ready','independent coach revisions','concurrent ready locks once','commands rejected after lock','shared live clock and events','both terminal clients render full time','matching final results','final score reloaded from host save'],'session':str(directory),'simulationImplemented':True,'final':live}
+    saved_roles=next(row for row in saved['visualClubs'] if row['clubId']==coach['clubId'])['roles']
+    assert saved_roles==published,'Special role identities must survive the game save and resume source'
+    result={'result':'PASS','checks':['join and exclusive coach slots','authenticated commands','lineup validation','unlimited edits before ready','independent coach revisions','concurrent ready locks once','commands rejected after lock','shared live clock and events','both terminal clients render full time','matching final results','final score and special role IDs reloaded from host save'],'session':str(directory),'simulationImplemented':True,'final':live}
     (ROOT/'analysis/http-test-result.json').write_text(json.dumps(result,indent=2))
     print(json.dumps(result,indent=2))
 finally:

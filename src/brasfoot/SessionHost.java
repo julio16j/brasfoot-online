@@ -321,7 +321,8 @@ public final class SessionHost {
                 long revision = Long.parseLong(required(data, "revision"));
                 if(path.equals("/lineup")){
                     int[] starters=indices(required(data,"starters")),bench=indices(data.get("bench"));
-                    if(data.containsKey("slots") || data.containsKey("tactics")) round.lineupWithOptions(coach,expectedRound,revision,starters,bench,data.containsKey("slots")?indices(data.get("slots")):new int[]{1,2,9,4,7,11,13,14,16,20,23},data.containsKey("tactics")?indices(data.get("tactics")):null);
+                    if(data.containsKey("roles"))round.lineupWithRoles(coach,expectedRound,revision,starters,bench,data.containsKey("slots")?indices(data.get("slots")):new int[]{1,2,9,4,7,11,13,14,16,20,23},data.containsKey("tactics")?indices(data.get("tactics")):null,indices(data.get("roles")));
+                    else if(data.containsKey("slots") || data.containsKey("tactics")) round.lineupWithOptions(coach,expectedRound,revision,starters,bench,data.containsKey("slots")?indices(data.get("slots")):new int[]{1,2,9,4,7,11,13,14,16,20,23},data.containsKey("tactics")?indices(data.get("tactics")):null);
                     else round.lineup(coach,expectedRound,revision,starters,bench);
                 }
                 else {

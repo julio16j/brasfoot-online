@@ -64,6 +64,9 @@ public final class GameAdapter implements RoundCoordinator.Actions {
     }
     @SuppressWarnings("unchecked")
     public void lineupWithOptions(int coach,int[] starters,int[] bench,int[] slots,int[] tactics) {
+        lineupWithRoles(coach,starters,bench,slots,tactics,null);
+    }
+    public void lineupWithRoles(int coach,int[] starters,int[] bench,int[] slots,int[] tactics,int[] roles) {
         ah club = club(coach);
         I match = match(club);
         if (match == null) throw new IllegalStateException("No current match for coach");
@@ -81,6 +84,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         // Native slots 1..25 describe pitch positions and 26..36 the bench.
         // Roster indices may exceed 35; unselected players keep slot -1.
         Set<Integer> selected = new HashSet<Integer>();
+        Set<Integer> starting = new HashSet<Integer>();for(int index:starters)starting.add(index);
         List<F> chosen = new ArrayList<F>();
         for (int[] group : new int[][] {starters, bench}) {
             for (int index : group) {
@@ -92,6 +96,22 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         }
         if (chosen.get(0).getPosicao() != 0) throw new IllegalArgumentException("First starter must be the goalkeeper");
         for (int i=1;i<11;i++) if (chosen.get(i).getPosicao()==0) throw new IllegalArgumentException("Only one starting goalkeeper");
+        F[] special=new F[4];
+        if(roles!=null){
+            if(roles.length!=4)throw new IllegalArgumentException("Need four special player roles");
+            for(int role=0;role<4;role++){
+                int id=roles[role];if(id==-1)continue;if(id<0)throw new IllegalArgumentException("Invalid special role player ID");
+                F player=null;for(F candidate:roster)if(candidate.gD()==id){player=candidate;break;}
+                if(player==null || player.fg()!=club || !player.a(match,false))throw new IllegalArgumentException("Special role player is unavailable");
+                if(role<3){
+                    if(!starting.contains(roster.indexOf(player)))throw new IllegalArgumentException("Special role player must be a starter");
+                } else {
+                    int slot=-1;for(int i=0;i<starters.length;i++)if(roster.get(starters[i])==player){slot=slots[i];break;}
+                    if(slot<=14 || slot==17)throw new IllegalArgumentException("False nine is only available in eligible native pitch cells");
+                }
+                special[role]=player;
+            }
+        }
         club.kY().clear(); club.kZ().clear();
         List<F> all = match.hc() == club ? match.hl() : match.hm();
         List<F> active = match.hc() == club ? match.hp() : match.hq();
@@ -108,6 +128,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             F player=chosen.get(i); player.as(26+i-11); player.b(Boolean.TRUE);
             club.kZ().add(player); reserves.add(player);
         }
+        if(roles!=null){club.k(special[0]);club.j(special[1]);club.n(special[2]);club.o(special[3]);}
         submitted.add(coach);
     }
     public Map<String,Object> substitute(int coach,int outgoingId,int incomingId,MatchPlayback playback){
@@ -196,7 +217,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             row.put("coachId", entry.getKey()); row.put("name", entry.getValue().dS());
             row.put("clubId", club == null ? null : club.lk());
             row.put("club", club == null ? null : club.getNome());
-            if(club!=null){List<Integer> t=new ArrayList<Integer>();for(int value:club.kj())t.add(value);row.put("tactics",t);}
+            if(club!=null){List<Integer> t=new ArrayList<Integer>();for(int value:club.kj())t.add(value);row.put("tactics",t);row.put("roles",roleIds(club));}
             row.put("hasMatch", match != null); row.put("engineReady", club != null && club.kf());
             List<Object> players = new ArrayList<Object>();
             if (club != null) {
@@ -245,6 +266,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         for(ah club:visible)visual.add(frozenClubs.containsKey(club.lk())?frozenClubs.get(club.lk()):visualClub(club));
         result.put("visualClubs",visual);return result;
     }
+    private static Map<String,Object> roleIds(ah club){Map<String,Object> roles=new LinkedHashMap<String,Object>();roles.put("freeKicks",club.ke()==null?null:club.ke().gD());roles.put("captain",club.kd()==null?null:club.kd().gD());roles.put("corners",club.lq()==null?null:club.lq().gD());roles.put("falseNine",club.lr()==null?null:club.lr().gD());return roles;}
     private Map<String,Object> visualClub(ah club){
         Map<String,Object> row=new LinkedHashMap<String,Object>();
         row.put("clubId",club.lk());row.put("club",club.getNome());row.put("asset",club.jY());row.put("country",club.getPais());
@@ -252,6 +274,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         if(club.ev()!=null){Map<String,Object> stadium=new LinkedHashMap<String,Object>();stadium.put("name",club.ev().dS());stadium.put("seats",integers(club.ev().dT()));stadium.put("prices",integers(club.ev().dU()));stadium.put("suggestedPrices",club.ev().dV());row.put("stadium",stadium);}
         row.put("confidence",club.ka()==null?null:scalarFields(club.ka(),new String[]{"oe","of"}));
         List<Integer> tactics=new ArrayList<Integer>();for(int value:club.kj())tactics.add(value);row.put("tactics",tactics);
+        row.put("roles",roleIds(club));
         List<Object> players=new ArrayList<Object>();I fixture=match(club);int index=0;
         for(Object raw:club.kc()){
             F p=(F)raw;Map<String,Object> player=new LinkedHashMap<String,Object>();

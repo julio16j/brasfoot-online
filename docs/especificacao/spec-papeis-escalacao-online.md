@@ -1,6 +1,6 @@
 # Papéis especiais na escalação online
 
-Status: contrato inicial PN-06; consumidores parcialmente rastreados, aceite de efeito ainda pendente. Revisão de 08/11/2026. [Backlog](../task-paridade-nativa.md).
+Status: integracao da preparacao PN-06 concluida; certificacao de efeitos e retomada parcial. Revisao de 09/11/2026. [Backlog](../task-paridade-nativa.md).
 
 ## Origem e identidade nativa
 
@@ -34,3 +34,11 @@ Publicar escolhas confirmadas em snapshot e projetar referências dos jogadores 
 Save e retomada devem preservar identidades e referências coerentes. Cliente de outro clube só consulta; menus e atalhos não podem deixar callbacks offline modificarem papéis. Enquanto um papel/fase não estiver integrado, apresentar bloqueio explícito correspondente.
 
 Aceite exige teste com jogador escolhido no índice alto do elenco, movimento entre titulares/reservas, retirada/transferência, falha atômica, revisão obsoleta, dois técnicos, save/retomada, janela real com símbolos corretos e consumidor efetivo para faltas/escanteios. Para capitão/falso 9, registrar quais efeitos o JAR realmente contém e quais são apenas indicação; essa decisão continua em aberto até validação.
+
+## Implementacao PN-06
+
+O editor nativo mantem um rascunho dos quatro IDs e os envia com titulares, reservas, celulas e taticas. O host aceita o contrato somente durante PREPARING e valida identidade, disponibilidade e posicao final antes de alterar listas ou campos. Faltas, capitao e escanteios exigem titular; `-1` limpa explicitamente um papel, com alternancia nativa disponivel para falso 9, que segue as celulas acima de 14 exceto 17. Snapshots publicam IDs e `VisualModel` resolve as referencias apos reconstruir o elenco. O menu de papeis fica bloqueado durante edicao ao vivo e em modo somente leitura.
+
+Validacao: `LargeRosterLineupTest` escolheu jogador no indice 40, conferiu os quatro setters e IDs publicados, testou a limpeza do falso 9 e rejeitou atomicamente uma celula proibida. `tools/tests/test_session.py` confirmou envio HTTP, revisao inalterada e snapshot preservado apos rejeicao, alem dos IDs no save do jogo. `python tools/build_adapter.py --test` passou.
+
+Limites: o JAR local tem consumidores diretos para batedores de faltas e escanteios, mas nenhum evento foi forcado para medir os efeitos. Nao foi comprovado efeito esportivo adicional para capitao ou falso 9; falso 9 aparece como selecao e indicacao visual. Retomada explicita do host com papeis e reabertura da janela nativa ainda precisam de testes. Papeis especiais continuam indisponiveis durante a partida.

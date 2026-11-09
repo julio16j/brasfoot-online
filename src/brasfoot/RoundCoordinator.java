@@ -9,6 +9,7 @@ public final class RoundCoordinator {
         void lineup(int coach, int[] starters, int[] bench);
         void ready(int coach, boolean value);
         default void lineupWithOptions(int coach,int[] starters,int[] bench,int[] slots,int[] tactics){lineup(coach,starters,bench);}
+        default void lineupWithRoles(int coach,int[] starters,int[] bench,int[] slots,int[] tactics,int[] roles){lineupWithOptions(coach,starters,bench,slots,tactics);}
     }
     private final Actions actions;
     private final Map<Integer, Boolean> ready = new LinkedHashMap<Integer, Boolean>();
@@ -39,9 +40,12 @@ public final class RoundCoordinator {
         lineupWithOptions(coach,expectedRound,expectedRevision,starters,bench,new int[]{1,2,9,4,7,11,13,14,16,20,23},null);
     }
     public synchronized void lineupWithOptions(int coach,long expectedRound,long expectedRevision,int[] starters,int[] bench,int[] slots,int[] tactics){
+        lineupWithRoles(coach,expectedRound,expectedRevision,starters,bench,slots,tactics,null);
+    }
+    public synchronized void lineupWithRoles(int coach,long expectedRound,long expectedRevision,int[] starters,int[] bench,int[] slots,int[] tactics,int[] roles){
         validate(coach,expectedRound,expectedRevision);
         if(ready.get(coach))throw new IllegalStateException("Withdraw ready before editing");
-        actions.lineupWithOptions(coach,starters.clone(),bench.clone(),slots.clone(),tactics==null?null:tactics.clone());
+        actions.lineupWithRoles(coach,starters.clone(),bench.clone(),slots.clone(),tactics==null?null:tactics.clone(),roles==null?null:roles.clone());
         changed(coach);
     }
     public synchronized void management(int coach,long expectedRound,long expectedRevision,Collection<Integer> affected,Runnable command){
