@@ -10,6 +10,7 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Implementação da folga](implementacao-escalacao-folga.md) | Coerência dos acessos; automação e planejamento antecipado pendentes |
 | [Implementação do auxiliar](implementacao-treino-auxiliar-completo.md) | Comando autoritativo, confirmação, persistência e treino nativo |
 | [Implementação PN-07: empréstimos](implementacao-emprestimos-online.md) | Listagem, solicitação IA/humana, aceite/recusa, devolução, projeção e retomada HTTP; compra definitiva bloqueada |
+| [Implementação PN-02: países das ligas](implementacao-calendario-paises.md) | Geração das ligas dos países escolhidos e criação internacional, integrada na main |
 | [Auditoria do agente de requisitos](estado-agente-requisitos.md) | Rodada de 08/11/2026: inventário nativo, evidências, limitações e retomada |
 | [Paridade nativa](task-paridade-nativa.md) | Backlog aberto PN-01 a PN-12, prioridades e dependências |
 | [Treino do auxiliar](task-treino-auxiliar-online.md) | Implementação e validação técnica registradas; limites e aceite explícitos |
@@ -36,7 +37,7 @@ Revisado em 8 de novembro de 2026. Este índice separa o estado implementado, o 
 | [Implementação das configurações](implementacao-configuracoes-online.md) | Dez opções habilitadas e doze ainda sem integração; protocolo e validação |
 | [Especificações](especificacao/README.md) | Requisitos e critérios de aceite em arquivos `spec-...` |
 | [Especificação das configurações](especificacao/spec-configuracoes-online.md) | Requisitos completos; implementação parcial |
-| [Investigação dos calendários](task-calendarios.md) | Pendências de geração de ligas, folgas, navegação e cobertura internacional |
+| [Investigação dos calendários](task-calendarios.md) | Diagnóstico original e pendências de folgas, navegação e cobertura internacional |
 | [Investigação da escalação](task-escalacao.md) | Pendências da interface em datas sem partida do clube |
 | [Configurações online e velocidade](resolvidos/task-configuracoes-online.md) | Entrega atual resolvida por aceite do usuário; áudio e acesso nativo permanecem em tasks próprias |
 | [Áudio repetido ou fora de contexto](task-audio-eventos-repetidos.md) | Aberta: reproduzir, identificar a origem dos disparos e corrigir duplicações |
