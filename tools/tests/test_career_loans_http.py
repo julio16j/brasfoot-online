@@ -1,10 +1,12 @@
 """Loan listing over HTTP and recovery in a fresh host JVM."""
 from pathlib import Path
 import json, os, socket, subprocess, time, urllib.request, urllib.parse, urllib.error
+import argparse
 
 ROOT=Path(__file__).resolve().parents[2]
 JAVA=r'C:\Program Files\Java\jre1.8.0_511\bin\java.exe'
-CP=os.pathsep.join(map(str,[ROOT/'build/classes',ROOT/'analysis/brasfoot.jar',*sorted((ROOT/'analysis/lib').glob('*.jar'))]))
+parser=argparse.ArgumentParser();parser.add_argument('--packaged',action='store_true');args=parser.parse_args()
+CP=os.pathsep.join(map(str,[ROOT/'dist/brasfoot-online.jar',*sorted((ROOT/'dist/lib').glob('*.jar'))] if args.packaged else [ROOT/'build/classes',ROOT/'analysis/brasfoot.jar',*sorted((ROOT/'analysis/lib').glob('*.jar'))]))
 processes=[]
 
 def request(base,path,token=None,data=None,expected=200):
@@ -19,7 +21,8 @@ def start(extra):
     with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
     output=ROOT/f'analysis/loan-host-{port}.log'
     log=output.open('w',encoding='utf-8')
-    proc=subprocess.Popen([JAVA,'-Dfile.encoding=UTF-8','-Djava.awt.headless=true','-javaagent:'+str(ROOT/'build/host-ui-agent.jar'),'-cp',CP,'brasfoot.SessionHost','--root',str(ROOT),'--bind','127.0.0.1','--port',str(port),'--tick-ms','1000',*extra],stdout=log,stderr=subprocess.STDOUT)
+    agent=ROOT/('dist/host-ui-agent.jar' if args.packaged else 'build/host-ui-agent.jar')
+    proc=subprocess.Popen([JAVA,'-Dfile.encoding=UTF-8','-Djava.awt.headless=true','-javaagent:'+str(agent),'-cp',CP,'brasfoot.SessionHost','--root',str(ROOT),'--bind','127.0.0.1','--port',str(port),'--tick-ms','1000',*extra],stdout=log,stderr=subprocess.STDOUT)
     processes.append(proc);deadline=time.monotonic()+30
     while time.monotonic()<deadline:
         text=output.read_text(encoding='utf-8',errors='replace')
