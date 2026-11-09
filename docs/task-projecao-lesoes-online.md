@@ -1,6 +1,6 @@
 # Inelegibilidade projetada como lesão permanente
 
-Status: bug confirmado por execução, aberto; P1 proposta. Investigação de 08/11/2026 durante revisão independente de PN-03. Problema independente da mensagem de folga; não ampliar silenciosamente o recorte da task de escalação.
+Status: correção de projeção integrada em `main`; task permanece aberta para aceite visual e validação temporal/playback. Investigação original em 08/11/2026 durante revisão independente de PN-03. Problema independente da mensagem de folga; não ampliar silenciosamente o recorte da task de escalação.
 
 Contrato de campos, regras temporais e aceite: [spec de disponibilidade](especificacao/spec-disponibilidade-jogadores-online.md).
 
@@ -25,6 +25,14 @@ Dependência confirmada por outro probe: `AuditCompetitionIdentity.java`/`compet
 ## Evidência
 
 `GameAdapter.java:264` publica `eligible = fixture != null && jogador.a(fixture,false)`; a cópia por técnico faz o mesmo em `:211`. `VisualModel.java:77` transforma qualquer `eligible=false` em `player.d(Long.MAX_VALUE)`. O setter representa fim da contusão, não o motivo geral de inelegibilidade (`analysis/decompiled/best/F.java:319–325`).
+
+## Correção implementada
+
+`GameAdapter` agora publica `injuryUntilMillis`, `contractEndMillis` e registros de suspensão para profissionais, junto aos campos já existentes da academia. `VisualModel` aplica somente o prazo médico recebido, preserva a data exata do contrato e reidrata cartões na referência de competição do snapshot. Removida a criação de contusão a partir de `eligible=false` e a extensão artificial de contrato com `Math.max(1, contractDays)`. O caminho de fallback de `NativeClient` também deixou de transformar inelegibilidade em lesão.
+
+O teste `AvailabilityProjectionTest` cobre prazos reais de lesão, contrato expirado, registros de suspensão profissional reidratados e isolamento do estado autoritativo do host. `python tools/build_adapter.py --test` passou; a execução também passou nos demais testes listados pelo script.
+
+Ainda requer janela nativa real para confirmar ícones/detalhes, transição folga→jogo, competições homônimas e consulta da suspensão contra fixture reconstruído; matriz de playback/reconexão e proteção contra vazamento de lesão futura também continuam abertas. Não declarar aceite completo desta PN apenas com teste de campos.
 
 O nativo `F.a(partida,false)` também rejeita por suspensão e contrato, além de contusão (`best/F.java:1055–1072`). Numa folga não há sequer partida de referência. Portanto, esse booleano não pode alimentar o campo de lesão.
 

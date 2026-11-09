@@ -1,6 +1,6 @@
 # Estado médico e disponibilidade dos jogadores
 
-Status: requisitos para [PN-12](../task-projecao-lesoes-online.md), aberto. Revisão 08/11/2026. A fonte autoritativa permanece o host; não reconstituir estado médico a partir de `eligible`.
+Status: requisitos para [PN-12](../task-projecao-lesoes-online.md), implementação parcial em `main`, aceite final aberto. Revisão 08/11/2026. A fonte autoritativa permanece o host; não reconstituir estado médico a partir de `eligible`.
 
 ## Campos e regras nativas comprovadas no código local
 
@@ -22,6 +22,8 @@ Os nomes acima são proposta de contrato de implementação; manter consistênci
 Revisão técnica com o Agente 2: nomes `injuryUntilMillis`/`contractUntilMillis` são equivalentes aceitáveis aos acima. A proposta de reconstituir registros `best.H` na mesma referência canônica `best.at` é coerente: `F.h(at)` compara identidade `==` (`best/F.java:2087–2098`); `H.gS()/m(at)` acessam referência transitória e `gY()` guarda `at.gD()` em `ft` (`best/h_0.java:16,39–45,107–114`). Usar ID válido da competição como chave quando disponível; IDs ausentes/negativos precisam de identificador distinto por instância no snapshot, sem fundir por nome/tipo. Atuais e próximos confrontos da mesma competição devem compartilhar a referência na projeção. Testar competições homônimas e remontagem após retomada antes de habilitar a reconstrução de suspensão. Implementação desta proposta foi adiada pela instrução de parada do usuário, sem aceite do código ainda.
 
 `VisualModel` deve projetar prazo médico real por `d(long)`, prazo contratual exato e contexto de suspensão/disponibilidade por mecanismo específico. Se o editor nativo depende de `F.a`, sua integração precisa manter o filtro correto sem trocar indisponibilidade por lesão artificial. A escolha concreta entre projeção do registro nativo de suspensão e um adaptador contextual deve preservar o consumidor nativo e a distinção visual. Não basta remover a linha `Long.MAX_VALUE` deixando todos selecionáveis.
+
+Implementado: snapshot de profissionais publica `injuryUntilMillis`, `contractEndMillis` e registros de suspensão; projeção do cliente aplica esses dados e ignora `eligible` para estado médico/contratual. O teste de projeção cobre campos, suspensão reidratada e isolamento do host. Permanecem pendentes os cenários de UI nativa, lookup de suspensão por fixture em competições sem ID, troca de data, reconexão e playback temporal.
 
 ## Tempo, playback e persistência
 
