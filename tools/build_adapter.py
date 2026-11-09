@@ -29,6 +29,7 @@ with zipfile.ZipFile(ROOT/'build/host-ui-agent.jar','w') as agent:
 if a.test:
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.YouthProjectionTest', str(ROOT)], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.AvailabilityProjectionTest', str(ROOT)], check=True, cwd=ROOT)
+    subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.NativeCareerDialogsTest'], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.AdapterTest', str(ROOT)], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.LargeRosterLineupTest', str(ROOT)], check=True, cwd=ROOT)
     subprocess.run([a.java, '-Djava.awt.headless=true', '-cp', os.pathsep.join(map(str, [out, *libs])), 'brasfoot.CareerCountrySelectionTest', str(ROOT)], check=True, cwd=ROOT)

@@ -40,13 +40,13 @@ public final class NativeCareerDialogs {
     private static JPanel managementPanel(JDialog dialog,String requested,Map<String,Object> data,Command command){
         JPanel root=new JPanel(new BorderLayout(10,10));root.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
         JComboBox<Choice> action=new JComboBox<Choice>();for(int i=0;i<ACTIONS.length;i++)action.addItem(new Choice(ACTIONS[i],LABELS[i]));
-        selectRequested(action,requested);
         JComboBox<Choice> player=new JComboBox<Choice>(),youth=new JComboBox<Choice>(),market=new JComboBox<Choice>(),loans=new JComboBox<Choice>(),offers=new JComboBox<Choice>(),jobs=new JComboBox<Choice>();
         fill(player,list(data,"players"),"playerId","name",true);fill(youth,list(data,"youth"),"playerId","name",true);fill(market,list(data,"market"),"playerId","name",true);
         fill(offers,list(data,"offers"),"offerId","player",false);fill(jobs,list(data,"jobs"),"clubId","club",false);
         fill(loans,list(data,"loans"),"playerId","name",false);
         JTextField price=new JTextField("100000",10);JComboBox<String> days=new JComboBox<String>(new String[]{"180","365","730","1095"});
         JComboBox<String> sale=new JComboBox<String>(new String[]{"true","false"}),accept=new JComboBox<String>(new String[]{"true","false"}),available=new JComboBox<String>(new String[]{"true","false"});
+        selectRequested(action,player,sale,requested);
         JPanel fields=new JPanel(new GridLayout(0,2,8,8));fields.add(new JLabel("Operação"));fields.add(action);
         fields.add(new JLabel("Jogador do elenco"));fields.add(player);fields.add(new JLabel("Jogador da base"));fields.add(youth);
         fields.add(new JLabel("Jogador do mercado"));fields.add(market);fields.add(new JLabel("Empréstimo ativo"));fields.add(loans);fields.add(new JLabel("Proposta"));fields.add(offers);fields.add(new JLabel("Clube com vaga"));fields.add(jobs);
@@ -75,9 +75,12 @@ public final class NativeCareerDialogs {
         return root;
     }
 
-    private static void selectRequested(JComboBox<Choice> choices,String requested){
-        if(requested==null)return;String value=requested.toLowerCase(Locale.ROOT);String action=value.startsWith("renov")?"renew":value.startsWith("promover")?"promote":value.startsWith("colocar")||value.startsWith("retirar")?"list":value.contains("transfer")||value.contains("procura")?"offer":null;
-        if(action!=null)for(int i=0;i<choices.getItemCount();i++)if(choices.getItemAt(i).id.equals(action))choices.setSelectedIndex(i);
+    static void selectRequested(JComboBox<Choice> actions,JComboBox<Choice> players,JComboBox<String> sale,String requested){
+        if(requested==null)return;String[] parts=requested.split(":",2);String value=parts[0].toLowerCase(Locale.ROOT);String action=value.startsWith("renov")?"renew":value.startsWith("promover")?"promote":value.startsWith("colocar")||value.startsWith("retirar")?"list":value.contains("transfer")||value.contains("procura")?"offer":null;
+        if(action!=null)for(int i=0;i<actions.getItemCount();i++)if(actions.getItemAt(i).id.equals(action)){actions.setSelectedIndex(i);break;}
+        if(parts.length<2)return;String playerId=parts[1];boolean found=false;for(int i=0;i<players.getItemCount();i++)if(players.getItemAt(i).id.equals(playerId)){players.setSelectedIndex(i);found=true;break;}
+        if(!found)players.setSelectedIndex(-1);
+        if(action!=null&&action.equals("list"))sale.setSelectedItem(value.startsWith("retirar")?"false":"true");
     }
     private static JFrame ownerOf(JDialog dialog){return (JFrame)SwingUtilities.getWindowAncestor(dialog.getOwner());}
     private static String describe(String title,List<Object> rows){StringBuilder out=new StringBuilder(title).append(":\n");for(Object raw:rows){Map<String,Object> row=Data.map(raw);out.append("• ").append(value(row.get("name")!=null?row.get("name"):row.get("player"))).append("  ").append(value(row.get("club"))).append("\n");}return out.append("\n").toString();}
@@ -86,5 +89,5 @@ public final class NativeCareerDialogs {
     private static String id(JComboBox<Choice> combo){return choice(combo).id;}
     private static List<Object> list(Map<String,Object> data,String key){Object value=data.get(key);return value instanceof List?Data.list(value):Collections.<Object>emptyList();}
     private static String value(Object value){return value==null?"—":String.valueOf(value);}
-    private static final class Choice {final String id,label,extra;Choice(String id,String label){this(id,label,null);}Choice(String id,String label,String extra){this.id=id;this.label=label;this.extra=extra;}@Override public String toString(){return label;}}
+    static final class Choice {final String id,label,extra;Choice(String id,String label){this(id,label,null);}Choice(String id,String label,String extra){this.id=id;this.label=label;this.extra=extra;}@Override public String toString(){return label;}}
 }

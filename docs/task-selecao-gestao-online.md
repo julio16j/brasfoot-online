@@ -1,6 +1,6 @@
 # Seleção de jogador e intenção no menu de gestão
 
-Status: parcial em `main`; leitura da linha visual da tabela após ordenação corrigida. Intenção/ID no formulário e confirmação real permanecem pendentes. Diagnóstico original em 08/11/2026.
+Status: parcial em `main`; leitura da linha visual após ordenação e preservação da intenção/ID no formulário corrigidas. Confirmação real na janela nativa permanece pendente. Diagnóstico original em 08/11/2026.
 
 ## Menu contextual e detalhe do jogador
 
@@ -12,11 +12,13 @@ Correção integrada: ambos os listeners usam a linha visual selecionada pela pr
 
 ## Intenção perdida no diálogo de gestão
 
-O popup encaminha texto `ação:playerId` para `NativeClient.openCareerMenu`; esse método passa a string inteira a `NativeCareerDialogs.open`. No diálogo, `selectRequested` usa apenas prefixos para escolher a operação. O sufixo com ID não é interpretado nem usado para selecionar a combo de jogadores. `fill` mantém a seleção inicial da combo; o comando posterior extrai o ID dessa combo, não o ID recebido pelo menu.
+O popup encaminha texto `ação:playerId` para `NativeClient.openCareerMenu`; esse método passa a string inteira a `NativeCareerDialogs.open`. A implementação original usava apenas prefixos para escolher a operação e descartava o sufixo com ID.
 
-Portanto, mesmo com a tabela sem ordenação e com o ID contextual correto, escolher Renovar no segundo atleta não pré-seleciona esse atleta no formulário: permanece o primeiro item do elenco até intervenção do usuário. Não há mutação automática ao abrir; o risco ocorre ao confirmar o formulário com a seleção padrão, que está visível. Não alegar execução de uma renovação indevida.
+Correção integrada: `selectRequested` interpreta o sufixo `playerId`, seleciona o atleta correspondente e limpa a seleção se o ID não estiver no snapshot. Para os comandos contextuais de lista, Retirar define `forSale=false` e Colocar define `forSale=true`. `NativeCareerDialogsTest` verifica renovação no segundo atleta, seleção por ID, ambas as intenções de lista e ID obsoleto. Ainda falta validar janela nativa e rejeição remota com rascunho preservado.
 
-Colocar e Retirar são ambos mapeados para `list`. A combo `sale` é criada com `["true","false"]` e não recebe a intenção do menu; Retirar abre com `true`. A confirmação envia esse valor (`NativeCareerDialogs.java:43–62,73–76`), podendo listar novamente em vez de retirar se não houver ajuste manual. Essa é uma perda explícita de intenção, independente da conversão de linha.
+Agora o ID contextual seleciona o atleta no formulário; se ele não existir no snapshot, nenhuma opção fica selecionada, evitando operar silenciosamente outro jogador.
+
+Colocar e Retirar são ambos mapeados para `list`; agora Colocar seleciona `sale=true` e Retirar seleciona `sale=false`. A confirmação ainda deve ser verificada em janela nativa.
 
 ## Contrato e aceite pendentes
 
