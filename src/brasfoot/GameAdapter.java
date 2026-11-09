@@ -206,7 +206,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
         checkGlobal();
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("calendarIndex", state.J());
-        result.put("career",isCareer());result.put("season",state.H());
+        result.put("career",isCareer());result.put("individualSkills",state.isHabilidadeIndividual());result.put("season",state.H());
         result.put("year",state.bb().get(Calendar.YEAR));result.put("date",state.T());
         result.put("dateMillis", state.bb().getTimeInMillis());
         List<Object> list = new ArrayList<Object>();
@@ -282,6 +282,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             player.put("index",index++);player.put("name",p.getNome());player.put("position",p.getPosicao());player.put("slot",p.fT());
             player.put("age",p.getIdade());player.put("strength",p.fi());player.put("fitness",p.fp());player.put("side",p.getLado());
             player.put("skill1",p.getCr1());player.put("skill2",p.getCr2());player.put("status",p.getStatus());player.put("star",p.ff());player.put("worldClass",p.gm());
+            player.put("skillGoalkeeping",p.gK());player.put("skillDefence",p.gN());player.put("skillSpeed",p.gO());player.put("skillFinishing",p.gP());player.put("skillHeading",p.gJ());player.put("skillTechnique",p.gL());player.put("skillPassing",p.gM());
             player.put("salary",p.fj());player.put("value",p.fk());player.put("contractDays",p.fR());
             player.put("forSale",p.ft());player.put("askingPrice",p.fl());player.put("loanAvailable",p.fz());
             player.put("playerId",p.gD());player.put("country",p.getPais());player.put("injuryUntilMillis",p.fo());player.put("contractEndMillis",Data.longNumber(Data.get(p,"eJ")));

@@ -1,6 +1,6 @@
 # Índices locais da Procura e de Times
 
-Status: parcial em `main`; seleção após ordenação, validação de preço e projeção de listagem/preço/condição de empréstimo integradas. Fonte/completude dos candidatos e validação de interface/retomada permanecem abertas. Diagnóstico original em 08/11/2026.
+Status: parcial em `main`; seleção após ordenação, validação de preço, listagem/preço/condição de empréstimo e atributos individuais projetados. Fonte/completude dos candidatos e validação de interface/retomada permanecem abertas. Diagnóstico original em 08/11/2026.
 
 ## Caminho rastreado
 

@@ -1,6 +1,6 @@
 # Habilidades individuais na projeção online
 
-Status: aberta; complemento de PN-09/PN-11, prioridade P2 proposta. Diagnóstico estático de 08/11/2026, sem executar jogo, janela ou testes.
+Status: projeção do modo e atributos integrada em `main`; aceite visual e cobertura completa de consulta ainda abertos. Diagnóstico original em 08/11/2026.
 
 ## Evidência e escopo
 
@@ -8,7 +8,9 @@ Status: aberta; complemento de PN-09/PN-11, prioridade P2 proposta. Diagnóstico
 
 O nativo oferece os dois modos. `analysis/decompiled/b/aH.java:87–153` alterna força geral e sete colunas pelos getters gJ–gP; `a/gx_0.java:131–153` alterna faixa geral e filtros `gol`, `des`, `vel`, `fin`, `arm`, `tec`, `pas`. Os sete valores são campos próprios de F (`best/F.java:3086–3139`). Não são `getCr1/getCr2`, que representam características.
 
-`GameAdapter.visualClub` publica força geral e características, mas não esses sete valores nem o modo da carreira. `VisualModel.updateClubs` reconstrói o mesmo subconjunto. `CareerManagement.playerRow` também não transporta as habilidades individuais. Alterar somente o booleano cliente exibiria valores sem origem autoritativa comprovada.
+`GameAdapter.visualClub` publicava força geral e características, mas não os sete valores nem o modo da carreira. `VisualModel.updateClubs` reconstruía o mesmo subconjunto. `CareerManagement.playerRow` também não transportava as habilidades individuais.
+
+Correção integrada: snapshot publica o modo efetivo `individualSkills` e sete atributos por jogador; `VisualModel` configura o modo e reidrata os valores nativos, e `CareerManagement.playerRow` os inclui no DTO. `AvailabilityProjectionTest` atribui valores distintos aos sete campos e verifica modo/round-trip. Ainda falta comparar filtros e valores renderizados na janela nativa e testar treino/retomada.
 
 O padrão nativo de `est/Options.java:20` é verdadeiro; isso não demonstra qual modo está ativo no save do usuário. A divergência é condicional ao modo do host, sem reprodução gráfica ou comparação de atleta real nesta rodada. Não há evidência aqui de alteração da simulação autoritativa: a lacuna demonstrada é de consulta, representação e filtros.
 

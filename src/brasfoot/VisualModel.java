@@ -17,7 +17,7 @@ public final class VisualModel {
     private final File root;
     public VisualModel(File root,Map<String,Object> state)throws Exception{
         this.root=root;new best.M(true);best.n.cU();c.a.SR=new best.f();c.a.afQ=new best.ay();
-        c.a.SR.setHabilidadeIndividual(false);c.a.SR.bs=false;rebuild(state);
+        c.a.SR.bs=false;rebuild(state);
     }
     public List<I> matches(){return matches;}
     public ah club(int id){return clubs.get(id);}
@@ -39,6 +39,7 @@ public final class VisualModel {
     @SuppressWarnings("unchecked")
     public void rebuild(Map<String,Object> state)throws Exception{
         Map<String,Object> game=Data.map(state.get("game"));
+        if(game.containsKey("individualSkills"))c.a.SR.setHabilidadeIndividual(Boolean.TRUE.equals(game.get("individualSkills")));
         c.a.SR.R().clear();best.a day=new best.a();day.a().setTimeInMillis(Data.longNumber(game.get("dateMillis")));c.a.SR.R().add(day);c.a.SR.l(0);
         c.a.SR.k(Data.number(game.get("season")));c.a.SR.I(Data.number(game.get("year")));
         matches.clear();competitions.clear();for(Object raw:Data.list(Data.map(state.get("playback")).get("matches")))competition(Data.map(raw));for(Object raw:Data.list(game.get("upcoming")))competition(Data.map(raw));
@@ -84,6 +85,7 @@ public final class VisualModel {
                 player.as(Data.number(p.get("slot")));if(p.containsKey("injuryUntilMillis"))player.d(Data.longNumber(p.get("injuryUntilMillis")));
                 Data.set(player,"et",Data.number(p.get("salary")));Data.set(player,"eu",Data.number(p.get("value")));if(p.containsKey("contractEndMillis"))Data.set(player,"eJ",Data.longNumber(p.get("contractEndMillis")));
                 if(p.containsKey("forSale"))player.c((Boolean)p.get("forSale"));if(p.containsKey("askingPrice"))player.ag(Data.number(p.get("askingPrice")));if(p.containsKey("loanAvailable"))player.g((Boolean)p.get("loanAvailable"));
+                if(p.containsKey("skillGoalkeeping")){player.aJ(Data.number(p.get("skillGoalkeeping")));player.aM(Data.number(p.get("skillDefence")));player.aN(Data.number(p.get("skillSpeed")));player.aO(Data.number(p.get("skillFinishing")));player.aI(Data.number(p.get("skillHeading")));player.aK(Data.number(p.get("skillTechnique")));player.aL(Data.number(p.get("skillPassing")));}
                 if(p.containsKey("suspensions"))projectSuspensions(player,Data.list(p.get("suspensions")));
                 club.kc().add(player);
             }
