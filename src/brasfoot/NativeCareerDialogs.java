@@ -27,7 +27,7 @@ public final class NativeCareerDialogs {
         JPanel root=new JPanel(new BorderLayout(8,8));JPanel summary=new JPanel(new FlowLayout(FlowLayout.LEFT));
         summary.add(new JLabel("Data: "+value(overview.get("date"))+"   Temporada: "+value(overview.get("year"))));
         summary.add(new JLabel("Saldo: "+value(overview.get("balance"))+"   Folha: "+value(overview.get("wages"))));root.add(summary,BorderLayout.NORTH);
-        JTabbedPane views=new JTabbedPane();views.addTab("Calendário",table(new String[]{"Data","Competição","Fase","Mandante","Visitante","Resultado"},list(overview,"calendar"),new String[]{"date","competition","phase","home","away","result"}));
+        JTabbedPane views=new JTabbedPane();views.addTab("Calendário",agendaPanel(list(overview,"calendar")));
         views.addTab("Artilheiros",table(new String[]{"Jogador","Clube","Gols","Jogos"},list(overview,"scorers"),new String[]{"name","club","goals","appearances"}));
         views.addTab("Assistências",table(new String[]{"Jogador","Clube","Assist.","Jogos"},list(overview,"assists"),new String[]{"name","club","assists","appearances"}));
         for(Object raw:list(overview,"tables")){Map<String,Object> league=Data.map(raw);views.addTab(String.valueOf(league.get("name")),table(new String[]{"Pos.","Clube","Pts","J","V","E","D","GP","GC","SG"},list(league,"rows"),new String[]{"position","club","points","played","wins","draws","losses","goalsFor","goalsAgainst","goalDifference"}));}
@@ -36,10 +36,12 @@ public final class NativeCareerDialogs {
         root.add(new JLabel("Técnicos: "+String.join("   •   ",coaches)),BorderLayout.SOUTH);return root;
     }
 
+    static JPanel agendaPanel(List<Object> rows){return table(new String[]{"Data","Competi\u00e7\u00e3o","Fase","Mandante","Visitante","Resultado","P\u00fablico","Renda"},rows,new String[]{"date","competition","phase","home","away","result","attendance","revenue"});}
     static JPanel table(String[] columns,List<Object> rows,String[] keys){
-        Object[][] values=new Object[rows.size()][columns.length];Map<String,Long> dateKeys=new HashMap<String,Long>();for(int i=0;i<rows.size();i++){Map<String,Object> row=Data.map(rows.get(i));for(int j=0;j<keys.length;j++)values[i][j]=row.get(keys[j]);if(row.get("date")!=null&&row.get("dateMillis")!=null)dateKeys.put(String.valueOf(row.get("date")),Data.longNumber(row.get("dateMillis")));}
+        Object[][] values=new Object[rows.size()][columns.length];Map<String,Long> dateKeys=new HashMap<String,Long>();for(int i=0;i<rows.size();i++){Map<String,Object> row=Data.map(rows.get(i));for(int j=0;j<keys.length;j++){Object cell=row.get(keys[j]);values[i][j]=("attendance".equals(keys[j])||"revenue".equals(keys[j]))&&cell instanceof Number&&((Number)cell).longValue()<=0?null:cell;}if(row.get("date")!=null&&row.get("dateMillis")!=null)dateKeys.put(String.valueOf(row.get("date")),Data.longNumber(row.get("dateMillis")));}
         JTable table=new JTable(new DefaultTableModel(values,columns){@Override public boolean isCellEditable(int row,int col){return false;}@Override public Class<?> getColumnClass(int column){for(int row=0;row<getRowCount();row++){Object value=getValueAt(row,column);if(value!=null)return value.getClass();}return Object.class;}});table.setAutoCreateRowSorter(true);
         if(keys.length>0&&"date".equals(keys[0])){TableRowSorter<?> sorter=(TableRowSorter<?>)table.getRowSorter();sorter.setComparator(0,Comparator.comparingLong(raw->dateKeys.getOrDefault(String.valueOf(raw),Long.MAX_VALUE)));sorter.setSortKeys(java.util.Collections.singletonList(new javax.swing.RowSorter.SortKey(0,javax.swing.SortOrder.ASCENDING)));}
+        for(int column=0;column<keys.length;column++)if("revenue".equals(keys[column]))table.getColumnModel().getColumn(column).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer(){@Override protected void setValue(Object value){setHorizontalAlignment(SwingConstants.RIGHT);setText(value instanceof Number?best.C.a(((Number)value).doubleValue(),0):"");}});
         JPanel panel=new JPanel(new BorderLayout());panel.add(new JScrollPane(table),BorderLayout.CENTER);return panel;
     }
 
