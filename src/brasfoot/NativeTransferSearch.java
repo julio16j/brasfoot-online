@@ -63,7 +63,7 @@ public final class NativeTransferSearch {
     private static void offerSelected(JFrame owner,JDialog searchDialog,a.gx search,JTable table,ah buyer,Submit submit,NativeYouth.Promotion youthPromotion,NativeTransferMarket.AcademyQuery academyQuery){
         int selected=table.getSelectedRow();if(selected<0)return;
         Object row=valueAtSelectedRow(table,0);if(!(row instanceof F))return;
-        F player=(F)row;ah seller=player.fg();if(seller==null || seller==buyer){JOptionPane.showMessageDialog(searchDialog,"Selecione um jogador de outro clube.","Transferências",JOptionPane.INFORMATION_MESSAGE);return;}
+        F player=(F)row;if(player.fg()==null)return;
         NativeTransferMarket.openSelected(owner,searchDialog,buyer,player,submit,youthPromotion,academyQuery);
     }
 

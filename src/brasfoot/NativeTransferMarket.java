@@ -34,11 +34,12 @@ public final class NativeTransferMarket {
         openSelected(owner,searchDialog,buyer,player,submit,youthPromotion,null);
     }
     public static void openSelected(JFrame owner,JDialog searchDialog,ah buyer,F player,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery){
-        if(buyer==null || player==null || player.fg()==null || player.fg()==buyer)return;
-        ah seller=player.fg();
+        ah seller=player==null?null:player.fg();if(!canOpenSelected(buyer,player,seller))return;
         JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,seller,buyer,false);panel.s(player);
         show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery);
     }
+
+    static boolean canOpenSelected(ah buyer,F player,ah seller){return buyer!=null&&player!=null&&seller!=null;}
 
     private static void show(JFrame owner,JDialog dialog,a.iA panel,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery){
         JButton buy=(JButton)Data.get(panel,"FN"),offer=(JButton)Data.get(panel,"MK"),loan=(JButton)Data.get(panel,"MJ");
