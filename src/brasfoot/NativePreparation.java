@@ -32,9 +32,11 @@ public final class NativePreparation {
         for(String field:fields)nativeActions.put(field,((JButton)Data.get(original,field)).getActionListeners());
         disconnect(original);
         routePreferences(original,menu);
+        lockParticipantMutation(original);
         JButton scale=(JButton)Data.get(original,"HU");scale.setEnabled(true);scale.addActionListener(e->lineup.run());
         for(String field:fields){JButton button=(JButton)Data.get(original,field);button.setEnabled(true);button.setToolTipText(null);
-            if(field.equals("HV"))button.addActionListener(e->menu.accept("Estádio"));
+            if(field.equals("HT")){button.setEnabled(false);button.setToolTipText("Edi\u00e7\u00e3o de cores do clube ainda n\u00e3o integrada ao host");}
+            else if(field.equals("HV"))button.addActionListener(e->menu.accept("Estádio"));
             else if(field.equals("yY"))button.addActionListener(e->menu.accept("Procura"));
             else if(field.equals("Ib"))button.addActionListener(e->menu.accept("Times"));
             else if(field.equals("HW"))button.addActionListener(e->menu.accept("Juniores"));
@@ -46,6 +48,11 @@ public final class NativePreparation {
         table.setComponentPopupMenu(actions);
         table.getSelectionModel().addListSelectionListener(e->{if(!e.getValueIsAdjusting()){Object player=NativeTransferSearch.valueAtSelectedRow(table,0);if(player instanceof F)original.s((F)player);}});
         return original;
+    }
+    private static void lockParticipantMutation(a.eg original){
+        JPopupMenu popup=(JPopupMenu)Data.get(original,"Hz");int matches=0;
+        for(Component child:popup.getComponents())if(child instanceof JMenuItem){JMenuItem item=(JMenuItem)child;if("Adicionar/remover t\u00e9cnicos".equals(item.getText())){matches++;for(ActionListener listener:item.getActionListeners())item.removeActionListener(listener);item.setAccelerator(null);item.setEnabled(false);item.setToolTipText("Os participantes s\u00e3o definidos na cria\u00e7\u00e3o da sess\u00e3o online");}}
+        if(matches!=1)throw new IllegalStateException("Item nativo de participantes indispon\u00edvel nesta vers\u00e3o");
     }
     private static void routePreferences(a.eg original,Consumer<String> menu){
         JPopupMenu popup=(JPopupMenu)Data.get(original,"Hy");int preferences=0;
