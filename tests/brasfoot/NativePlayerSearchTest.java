@@ -60,6 +60,7 @@ public final class NativePlayerSearchTest {
             try{api.call("/players/search",query("limit","25","offset","25"));throw new AssertionError("Continuation pages must require the first page revision");}catch(java.io.IOException expected){}
             try{api.call("/players/search",query("limit","1","queryRevision","-1"));throw new AssertionError("Stale search revision must be rejected");}catch(java.io.IOException expected){}
             try{new SessionApi("http://127.0.0.1:"+host.httpPort()).call("/players/search",query("limit","1"));throw new AssertionError("Search endpoint must reject unauthenticated callers");}catch(java.io.IOException expected){}
+            Field storageFailed=SessionHost.class.getDeclaredField("storageFailed");storageFailed.setAccessible(true);storageFailed.setBoolean(host,true);try{api.call("/players/search",query("limit","1"));throw new AssertionError("Search must be unavailable when the host cannot checkpoint IDs");}catch(java.io.IOException expected){}finally{storageFailed.setBoolean(host,false);}
         }finally{host.stopHttp();host.close();}
         rejects(query("ageFrom","18"),"Half ranges must be rejected");rejects(query("unexpected","1"),"Unknown filters must be rejected");rejects(query("star","yes"),"Invalid flags must be rejected");rejects(query("position","999"),"Out of range positions must be rejected");
         System.out.println("PASS host player search matches native af.D(false) across default, identity, range, nationality, skill and flag filters; world="+state.O().size());
