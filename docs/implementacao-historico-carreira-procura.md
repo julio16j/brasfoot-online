@@ -1,0 +1,5 @@
+# Preservar histórico na ficha Times aberta pela Procura
+
+A Procura agora inclui, por jogador, as entradas nativas de histórico dos últimos anos/clubes: ano, identidade e nome do clube, jogos, gols, cartões, aparições, assistências e avaliações. A projeção restaura os objetos `best.k` na ficha `F`, com o nome do clube disponível ao renderer da tabela histórica, e preserva o marcador de promoção. Os campos de resumo da temporada continuam separados do histórico.
+
+`NativePlayerSearchTest` compara DTO e projeção com os getters do histórico original por jogador, e exige que a fixture inclua registros. `NativePlayerSearchWindowTest` confere a identidade e estatísticas históricas no painel Times real aberto pela Procura. `python tools/build_adapter.py --test-transfer`, o teste de busca HTTP e a UI Swing passaram tanto com as classes compiladas quanto com o JAR distribuído. O ZIP contém 22.735 entradas, `testzip()` retorna `None`, SHA-256 `5d5b8c7250c17d5ee88a20d7d9714cc4f15e2dba91ddc01057817a41eb80dd0c`.
