@@ -40,14 +40,17 @@ public final class NativeTransferSearch {
     }
 
     public static void open(JFrame owner,ah buyer,int mode,Submit submit,Query query,NativeYouth.Promotion youthPromotion){
+        open(owner,buyer,mode,submit,query,youthPromotion,null);
+    }
+    public static void open(JFrame owner,ah buyer,int mode,Submit submit,Query query,NativeYouth.Promotion youthPromotion,NativeTransferMarket.AcademyQuery academyQuery){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
         JDialog dialog=new JDialog(owner,"Procura de jogadores",true);
         a.gx panel=new a.gx(dialog,buyer,false,mode);
         JTable table=(JTable)Data.get(panel,"zj");
         for(java.awt.event.MouseListener listener:table.getMouseListeners())
             if(isNativeOpenListener(listener.getClass().getName()))table.removeMouseListener(listener);
-        table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(event.getClickCount()==2)offerSelected(owner,dialog,panel,table,buyer,submit,youthPromotion);}});
-        AbstractAction offer=new AbstractAction(){@Override public void actionPerformed(ActionEvent event){offerSelected(owner,dialog,panel,table,buyer,submit,youthPromotion);}};
+        table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(event.getClickCount()==2)offerSelected(owner,dialog,panel,table,buyer,submit,youthPromotion,academyQuery);}});
+        AbstractAction offer=new AbstractAction(){@Override public void actionPerformed(ActionEvent event){offerSelected(owner,dialog,panel,table,buyer,submit,youthPromotion,academyQuery);}};
         JButton searchButton=(JButton)Data.get(panel,"yY");replaceEnterAction(panel,offer);replaceEnterAction(table,offer);replaceEnterAction(searchButton,offer);
         if(query!=null){for(ActionListener listener:searchButton.getActionListeners())searchButton.removeActionListener(listener);searchButton.addActionListener(event->runSearch(dialog,panel,table,searchButton,query,buyer,mode));}
         dialog.add(panel);int width=mode==2?840:820,height=mode==2?670:620;
@@ -55,11 +58,11 @@ public final class NativeTransferSearch {
         dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
     }
 
-    private static void offerSelected(JFrame owner,JDialog searchDialog,a.gx search,JTable table,ah buyer,Submit submit,NativeYouth.Promotion youthPromotion){
+    private static void offerSelected(JFrame owner,JDialog searchDialog,a.gx search,JTable table,ah buyer,Submit submit,NativeYouth.Promotion youthPromotion,NativeTransferMarket.AcademyQuery academyQuery){
         int selected=table.getSelectedRow();if(selected<0)return;
         Object row=valueAtSelectedRow(table,0);if(!(row instanceof F))return;
         F player=(F)row;ah seller=player.fg();if(seller==null || seller==buyer){JOptionPane.showMessageDialog(searchDialog,"Selecione um jogador de outro clube.","Transferências",JOptionPane.INFORMATION_MESSAGE);return;}
-        NativeTransferMarket.openSelected(owner,searchDialog,buyer,player,submit,youthPromotion);
+        NativeTransferMarket.openSelected(owner,searchDialog,buyer,player,submit,youthPromotion,academyQuery);
     }
 
     public static void showOffer(JFrame owner,JDialog parent,F player,ah buyer,Submit submit){

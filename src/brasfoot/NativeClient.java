@@ -285,7 +285,7 @@ public final class NativeClient {
     private void openNativeTransferSearch(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
         int mode=c.a.SR.isHabilidadeIndividual()?2:1;
-        NativeTransferSearch.open(frame,owner.fg(),mode,this::submitNativeTransfer,this::searchNativePlayers,this::submitNativeYouthPromotion);
+        NativeTransferSearch.open(frame,owner.fg(),mode,this::submitNativeTransfer,this::searchNativePlayers,this::submitNativeYouthPromotion,this::queryNativeAcademy);
     }
     private void searchNativePlayers(Map<String,String> filters,java.util.function.Consumer<Map<String,Object>> success,java.util.function.Consumer<Throwable> failure){final SessionApi connection=api;if(connection==null){failure.accept(new IllegalStateException("Host is disconnected"));return;}network.execute(()->{try{java.util.List<Object> players=new ArrayList<Object>();int offset=0,total=-1;String revision=null,mode=null;long date=0;
             do{Map<String,String> request=new LinkedHashMap<String,String>(filters);request.put("offset",String.valueOf(offset));request.put("limit","1000");if(revision!=null)request.put("queryRevision",revision);Map<String,Object> page=connection.call("/players/search",request);int pageTotal=Data.number(page.get("total"));if(total>=0&&total!=pageTotal)throw new IllegalStateException("Search result changed while loading");total=pageTotal;String pageRevision=String.valueOf(page.get("queryRevision")),pageMode=String.valueOf(page.get("mode"));if(revision!=null&&!revision.equals(pageRevision))throw new IllegalStateException("Search snapshot changed while loading");if(mode!=null&&!mode.equals(pageMode))throw new IllegalStateException("Search mode changed while loading");revision=pageRevision;mode=pageMode;date=Data.longNumber(page.get("dateMillis"));java.util.List<Object> batch=Data.list(page.get("players"));players.addAll(batch);Object next=page.get("nextOffset");if(next==null)break;int nextOffset=Data.number(next);if(nextOffset<=offset||batch.isEmpty())throw new IllegalStateException("Host returned an invalid player page");offset=nextOffset;}while(players.size()<total);
@@ -293,8 +293,9 @@ public final class NativeClient {
         }catch(Throwable error){SwingUtilities.invokeLater(()->{if(!closed&&api==connection)failure.accept(error);});}});}
     private void openNativeTransferMarket(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
-        NativeTransferMarket.open(frame,owner.fg(),this::submitNativeTransfer,this::submitNativeYouthPromotion);
+        NativeTransferMarket.open(frame,owner.fg(),this::submitNativeTransfer,this::submitNativeYouthPromotion,this::queryNativeAcademy);
     }
+    private void queryNativeAcademy(int clubId,java.util.function.Consumer<Map<String,Object>> success,java.util.function.Consumer<Throwable> failure){final SessionApi connection=api;if(connection==null){failure.accept(new IllegalStateException("Host disconnected"));return;}network.execute(()->{try{Map<String,String> request=new LinkedHashMap<String,String>();request.put("clubId",String.valueOf(clubId));Map<String,Object> result=connection.call("/club-academy",request);SwingUtilities.invokeLater(()->{if(!closed&&api==connection)success.accept(result);});}catch(Throwable error){SwingUtilities.invokeLater(()->{if(!closed&&api==connection)failure.accept(error);});}});}
     private void submitNativeYouthPromotion(int playerId,JDialog dialog,JButton button){Map<String,String> fields=new LinkedHashMap<String,String>();fields.put("action","promote");fields.put("playerId",String.valueOf(playerId));command("/management",fields,()->{dialog.dispose();status.setText("Junior promovido pelo host; elenco e base atualizados.");},()->button.setEnabled(true));}
     private void submitNativeTransfer(Map<String,String> fields,Runnable success,Runnable onFailure){
         command("/management",fields,()->{
