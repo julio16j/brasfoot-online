@@ -1,0 +1,24 @@
+package brasfoot;
+
+import best.F;
+import best.ah;
+import best.al;
+import java.awt.*;
+import java.io.*;
+import javax.swing.*;
+
+/** Exercises Times → Academy with a remote seller using the native dialogs. */
+public final class NativeTransferMarketAcademyWindowTest {
+    private static void check(boolean value,String message){if(!value)throw new AssertionError(message);}
+    private static JDialog findDialog(String title){for(Window window:Window.getWindows())if(window instanceof JDialog&&window.isShowing()&&title.equals(((JDialog)window).getTitle()))return (JDialog)window;return null;}
+    private static Object findField(Container root,String name){try{return Data.get(root,name);}catch(RuntimeException ignored){}for(Component child:root.getComponents())if(child instanceof Container){Object value=findField((Container)child,name);if(value!=null)return value;}return null;}
+    private static void click(Robot robot,Component component){Point point=component.getLocationOnScreen();robot.mouseMove(point.x+component.getWidth()/2,point.y+component.getHeight()/2);robot.mousePress(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);robot.mouseRelease(java.awt.event.InputEvent.BUTTON1_DOWN_MASK);robot.waitForIdle();}
+    public static void main(String[] args)throws Exception{
+        File root=new File(args[0]);PrintStream original=System.out;GameAdapter game;System.setOut(new PrintStream(new ByteArrayOutputStream()));try{game=CareerEngine.create(root,new String[]{"Corinthians","Palmeiras"});}finally{System.setOut(original);}
+        al coach=(al)c.a.SR.M().get(0);ah buyer=coach.fg(),seller=null;for(Object raw:c.a.SR.P()){ah candidate=(ah)raw;if(candidate!=buyer&&!candidate.kc().isEmpty()&&!candidate.ky().isEmpty()){seller=candidate;break;}}check(buyer!=null&&seller!=null,"Fixture must contain a buyer and a remote seller with a junior academy");F searched=(F)seller.kc().get(0);final ah remoteSeller=seller;final JFrame owner=new JFrame("Online academy access check");final JDialog search=new JDialog(owner,"Procura");SwingUtilities.invokeAndWait(()->{owner.setSize(700,500);owner.setLocationRelativeTo(null);owner.setVisible(true);});
+        SwingUtilities.invokeLater(()->NativeTransferMarket.openSelected(owner,search,buyer,searched,(request,success,failure)->{throw new AssertionError("Viewing a remote academy must not issue a mutation");},null));
+        Robot robot=new Robot();robot.setAutoDelay(80);JDialog times=null;for(int i=0;i<100&&times==null;i++){robot.delay(100);times=findDialog("Times");}check(times!=null,"Selected player opens the Times window");a.iA market=null;for(Component component:times.getContentPane().getComponents())if(component instanceof a.iA)market=(a.iA)component;check(market!=null,"Times window contains the native market panel");check(Data.get(market,"uk")==remoteSeller&&Data.get(market,"ul")==buyer,"Times displays the searched seller and keeps the authenticated buyer");check(NativeTransferMarket.academyClub(market)==remoteSeller,"Academy callback resolves the seller panel");JButton academy=(JButton)Data.get(market,"HW");check(academy.isEnabled(),"Remote academy remains viewable");final JButton academyButton=academy;Thread academyClick=new Thread(()->{try{SwingUtilities.invokeAndWait(academyButton::doClick);}catch(Exception error){throw new RuntimeException(error);}});academyClick.start();
+        JDialog youth=null;for(int i=0;i<100&&youth==null;i++){robot.delay(100);for(Window window:Window.getWindows())if(window instanceof JDialog&&window.isShowing()&&findField(((JDialog)window).getContentPane(),"FR") instanceof JTable){youth=(JDialog)window;break;}}if(youth==null)for(Window window:Window.getWindows())System.out.println("WINDOW "+window.getClass().getName()+" showing="+window.isShowing()+" title="+(window instanceof Frame?((Frame)window).getTitle():((window instanceof JDialog)?((JDialog)window).getTitle():""))+" content="+(window instanceof RootPaneContainer?((RootPaneContainer)window).getContentPane().getComponentCount():-1));check(youth!=null,"Times HW opens the native academy dialog");JPanel panel=(JPanel)youth.getContentPane().getComponent(0);JTable table=(JTable)Data.get(panel,"FR");JButton promote=(JButton)Data.get(panel,"FQ");check(table.getRowCount()==remoteSeller.ky().size(),"Academy rows belong to the remote seller");check(!promote.isEnabled(),"A remote club's academy cannot be promoted by this buyer");check(!((JButton)Data.get(panel,"FP")).isEnabled()&&!((JButton)Data.get(panel,"FN")).isEnabled()&&!((JButton)Data.get(panel,"FO")).isEnabled(),"Unsupported remote academy mutations remain disabled");
+        JDialog finalYouth=youth,finalTimes=times;SwingUtilities.invokeAndWait(()->{finalYouth.dispose();finalTimes.dispose();search.dispose();owner.dispose();});System.out.println("PASS Times displays the searched seller and opens its read-only remote academy");
+    }
+}
