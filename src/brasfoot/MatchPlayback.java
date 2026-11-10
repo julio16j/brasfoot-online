@@ -147,7 +147,7 @@ public final class MatchPlayback {
             row.put("competitionKey",CompetitionIdentity.key(match.hy()));
             row.put("phaseLabel",match.hG());row.put("stadium",match.ev()!=null?match.ev().dS():match.ik());
             row.put("attendance",concealed?null:match.hU());row.put("attendanceBySection",concealed?null:integers(match.hT()));row.put("revenue",concealed?null:match.hN());row.put("financialDataAvailable",!concealed);
-            row.put("homePenalties",concealed?null:match.hQ()[0]);row.put("awayPenalties",concealed?null:match.hQ()[1]);
+            boolean penaltiesAvailable=!concealed&&match.e()&&match.hQ()[0]>=0&&match.hQ()[1]>=0;row.put("penaltiesAvailable",penaltiesAvailable);row.put("homePenalties",penaltiesAvailable?match.hQ()[0]:null);row.put("awayPenalties",penaltiesAvailable?match.hQ()[1]:null);row.put("winnerClubId",!concealed&&match.e()&&match.hR()!=null?match.hR().lk():null);
             row.put("homeGoals",match.hu());row.put("awayGoals",match.hw());row.put("played",!concealed && match.e());
             row.put("shots",Arrays.asList(match.hA()[0],match.hA()[1]));
             row.put("possession",Arrays.asList(match.hz()[0],match.hz()[1]));

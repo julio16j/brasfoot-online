@@ -80,7 +80,7 @@ public final class NativeMatchPanel extends a.dV {
             Data.set(match,"fB",Data.number(row.get("homeGoals")));Data.set(match,"fC",Data.number(row.get("awayGoals")));
             match.a(Boolean.TRUE.equals(row.get("played")));
             if(row.containsKey("attendance")){if(row.get("attendance")==null)hiddenAttendance.add(match);else hiddenAttendance.remove(match);Data.set(match,"fD",new int[]{row.get("attendance")==null?0:Data.number(row.get("attendance")),0,0,0});}
-            if(row.containsKey("penalties")){java.util.List<Object> pen=Data.list(row.get("penalties"));match.i(new int[]{Data.number(pen.get(0)),Data.number(pen.get(1))});}
+            if(row.containsKey("homePenalties")&&row.containsKey("awayPenalties")){boolean known=Boolean.TRUE.equals(row.get("penaltiesAvailable"))&&row.get("homePenalties") instanceof Number&&row.get("awayPenalties") instanceof Number;match.i(known?new int[]{Data.number(row.get("homePenalties")),Data.number(row.get("awayPenalties"))}:new int[]{-1,-1});}if(row.containsKey("winnerClubId")){Object winner=row.get("winnerClubId");match.u(winner==null?null:Data.number(winner)==match.hc().lk()?match.hc():Data.number(winner)==match.hd().lk()?match.hd():null);}
             components.v wrapper=null;
             for(Object object:qi())if(((components.v)object).tR()==match){wrapper=(components.v)object;break;}
             if(wrapper==null)continue;
@@ -120,7 +120,7 @@ public final class NativeMatchPanel extends a.dV {
             ((JLabel)Data.get(this,"Hh")).setIcon(featured.hc().kP());((JLabel)Data.get(this,"Hi")).setIcon(featured.hd().kP());
             if(row.containsKey("attendance"))((JLabel)Data.get(this,"Hm")).setText(row.get("attendance")==null?"--":String.valueOf(row.get("attendance")));
             if(row.containsKey("phaseLabel"))((JLabel)Data.get(this,"Ht")).setText((String)row.get("phaseLabel"));
-            ((JLabel)Data.get(this,"Hn")).setText(row.get("homeGoals")+" x "+row.get("awayGoals"));
+            String score=row.get("homeGoals")+" x "+row.get("awayGoals");if(Boolean.TRUE.equals(row.get("penaltiesAvailable"))&&row.get("homePenalties")!=null&&row.get("awayPenalties")!=null)score="<html><div style=\"text-align:center\">"+row.get("homeGoals")+" x "+row.get("awayGoals")+"<br><span style=\"font-size:10px\">P\u00ean.: "+row.get("homePenalties")+" x "+row.get("awayPenalties")+"</span></div></html>";((JLabel)Data.get(this,"Hn")).setText(score);
             String text=status.equals("FINISHED")?"Fim de jogo":status.equals("HALF_TIME")?"Intervalo":status.equals("FAILED")?"Partida interrompida":status.equals("NOT_STARTED")?"Aguardando os técnicos":live.get("minute")+"' - "+live.get("half")+"º tempo";
             ((JLabel)Data.get(this,"uh")).setText(text);
             JProgressBar progress=(JProgressBar)Data.get(this,"Hf");progress.setMaximum(45);progress.setValue(Math.min(45,Data.number(live.get("halfMinute"))));

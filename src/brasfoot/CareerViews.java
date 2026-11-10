@@ -18,12 +18,13 @@ public final class CareerViews {
                 Map<String,Object> row=new LinkedHashMap<String,Object>();
                 row.put("date",day.f());row.put("dateMillis",day.a().getTime().getTime());row.put("status",match.e()?"played":"scheduled");
                 row.put("competition",match.hy()==null?"":match.hy().getNome());row.put("phase",match.hG());row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
-                row.put("result",match.e()?match.hu()+" x "+match.hw():"—");confirmedFinancials(row,match);fixtures.add(row);
+                row.put("result",confirmedResult(match));confirmedMatchFields(row,match);fixtures.add(row);
             }
         }
         Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("clubId",clubId);result.put("club",club.getNome());result.put("fixtures",fixtures);return result;
     }
-    private static void confirmedFinancials(Map<String,Object> row,I match){row.put("attendance",match.e()?match.hU():null);row.put("revenue",match.e()?match.hN():null);}
+    private static String confirmedResult(I match){if(!match.e())return "x";int[] penalties=match.hQ();return penalties[0]>=0&&penalties[1]>=0?match.hu()+" ("+penalties[0]+") x "+match.hw()+" ("+penalties[1]+")":match.hu()+" x "+match.hw();}
+    private static void confirmedMatchFields(Map<String,Object> row,I match){row.put("attendance",match.e()?match.hU():null);row.put("revenue",match.e()?match.hN():null);boolean penalties=match.e()&&match.hQ()[0]>=0&&match.hQ()[1]>=0;row.put("penaltiesAvailable",penalties);row.put("homePenalties",penalties?match.hQ()[0]:null);row.put("awayPenalties",penalties?match.hQ()[1]:null);row.put("winnerClubId",match.e()&&match.hR()!=null?match.hR().lk():null);}
     public static Map<String,Object> snapshot(int coachId){
         al coach=c.a.SR.y(coachId);if(coach==null || !coach.jZ())throw new IllegalArgumentException("Unknown coach");
         ah club=coach.fg();Map<String,Object> out=new LinkedHashMap<String,Object>();
@@ -36,7 +37,7 @@ public final class CareerViews {
                 if(club!=null && (match.hc()==club || match.hd()==club)){
                     Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("date",day.f());row.put("dateMillis",day.a().getTime().getTime());row.put("matchId",row.get("dateMillis")+":"+(match.hy()==null?"none":CompetitionIdentity.key(match.hy()))+":"+match.hc().lk()+":"+match.hd().lk());row.put("status",match.e()?"played":"scheduled");
                     row.put("competition",match.hy().getNome());row.put("phase",match.hG());row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
-                    row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());row.put("competitionId",match.hy()==null?-1:match.hy().gD());row.put("competitionKey",CompetitionIdentity.key(match.hy()));row.put("competitionType",match.hy()==null?0:match.hy().b());row.put("result",match.e()?match.hu()+" x "+match.hw():"—");row.put("homeGoals",match.e()?match.hu():null);row.put("awayGoals",match.e()?match.hw():null);confirmedFinancials(row,match);calendar.add(row);
+                    row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());row.put("competitionId",match.hy()==null?-1:match.hy().gD());row.put("competitionKey",CompetitionIdentity.key(match.hy()));row.put("competitionType",match.hy()==null?0:match.hy().b());row.put("result",confirmedResult(match));row.put("homeGoals",match.e()?match.hu():null);row.put("awayGoals",match.e()?match.hw():null);confirmedMatchFields(row,match);calendar.add(row);
                     if(match.ht() instanceof f.s)leagues.add((f.s)match.ht());
                 }
             }
