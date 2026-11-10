@@ -13,6 +13,7 @@ import best.ah;
 /** Original Brasfoot match panel, with all local simulation/navigation disabled. */
 public final class NativeMatchPanel extends a.dV {
     private static final long serialVersionUID=1L;
+    private final Set<I> hiddenAttendance=Collections.newSetFromMap(new IdentityHashMap<I,Boolean>());
     private final Set<String> received=new HashSet<String>();
     private final java.util.List<I> matches;
     private boolean mute;
@@ -33,7 +34,7 @@ public final class NativeMatchPanel extends a.dV {
         if(GO!=null)GO.stop();
         disableLocalActions(this);
         for(String key:new String[]{"Hp","Ho"}){JLabel team=(JLabel)Data.get(this,key);team.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));team.setToolTipText("Abrir escalação");team.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(!matches.isEmpty() && lineupOpener!=null)lineupOpener.accept(matches.get(0));}});}
-        JTable table=(JTable)Data.get(this,"Hs");table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){int row=table.rowAtPoint(event.getPoint());if(row<0 || row>=qi().size() || lineupOpener==null)return;I selected=((components.v)qi().get(row)).tR();if(selected!=null)lineupOpener.accept(selected);}});
+        JTable table=(JTable)Data.get(this,"Hs");table.setDefaultRenderer(components.v.class,new b.aG(){@Override public Component getTableCellRendererComponent(JTable grid,Object value,boolean selected,boolean focused,int row,int column){Component rendered=super.getTableCellRendererComponent(grid,value,selected,focused,row,column);if(column==0&&value instanceof components.v){I fixture=((components.v)value).tR();if(hiddenAttendance.contains(fixture))setText((fixture.ev()==null?fixture.ik():fixture.ev().dS())+" | --");}return rendered;}});table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){int row=table.rowAtPoint(event.getPoint());if(row<0 || row>=qi().size() || lineupOpener==null)return;I selected=((components.v)qi().get(row)).tR();if(selected!=null)lineupOpener.accept(selected);}});
     }
     public void lineupOpener(Consumer<I> opener){lineupOpener=opener;}
     @Override public void oR(){if(GO!=null)GO.stop();}
@@ -78,7 +79,7 @@ public final class NativeMatchPanel extends a.dV {
             Map<String,Object> row=Data.map(rows.get(index));I match=matches.get(index);
             Data.set(match,"fB",Data.number(row.get("homeGoals")));Data.set(match,"fC",Data.number(row.get("awayGoals")));
             match.a(Boolean.TRUE.equals(row.get("played")));
-            if(row.containsKey("attendance")){Data.set(match,"fD",new int[]{Data.number(row.get("attendance")),0,0,0});}
+            if(row.containsKey("attendance")){if(row.get("attendance")==null)hiddenAttendance.add(match);else hiddenAttendance.remove(match);Data.set(match,"fD",new int[]{row.get("attendance")==null?0:Data.number(row.get("attendance")),0,0,0});}
             if(row.containsKey("penalties")){java.util.List<Object> pen=Data.list(row.get("penalties"));match.i(new int[]{Data.number(pen.get(0)),Data.number(pen.get(1))});}
             components.v wrapper=null;
             for(Object object:qi())if(((components.v)object).tR()==match){wrapper=(components.v)object;break;}
@@ -117,7 +118,7 @@ public final class NativeMatchPanel extends a.dV {
             ((JLabel)Data.get(this,"Hp")).setBackground(featured.hc().kB());((JLabel)Data.get(this,"Hp")).setForeground(featured.hc().kC());
             ((JLabel)Data.get(this,"Ho")).setBackground(featured.hd().kB());((JLabel)Data.get(this,"Ho")).setForeground(featured.hd().kC());
             ((JLabel)Data.get(this,"Hh")).setIcon(featured.hc().kP());((JLabel)Data.get(this,"Hi")).setIcon(featured.hd().kP());
-            if(row.containsKey("attendance"))((JLabel)Data.get(this,"Hm")).setText(String.valueOf(row.get("attendance")));
+            if(row.containsKey("attendance"))((JLabel)Data.get(this,"Hm")).setText(row.get("attendance")==null?"--":String.valueOf(row.get("attendance")));
             if(row.containsKey("phaseLabel"))((JLabel)Data.get(this,"Ht")).setText((String)row.get("phaseLabel"));
             ((JLabel)Data.get(this,"Hn")).setText(row.get("homeGoals")+" x "+row.get("awayGoals"));
             String text=status.equals("FINISHED")?"Fim de jogo":status.equals("HALF_TIME")?"Intervalo":status.equals("FAILED")?"Partida interrompida":status.equals("NOT_STARTED")?"Aguardando os técnicos":live.get("minute")+"' - "+live.get("half")+"º tempo";
