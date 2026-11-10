@@ -20,7 +20,7 @@ final class NativePlayerSearch {
 
     static List<F> find(best.f state,Map<String,String> fields){
         if(fields.size()>FIELDS.size() || !FIELDS.containsAll(fields.keySet()))throw new IllegalArgumentException("Unknown player search filter");
-        best.af filter=new best.af();String name=fields.get("name");if(name!=null){if(name.length()>120)throw new IllegalArgumentException("Player name filter is too long");filter.setNome(name);}
+        best.af filter=new best.af();String name=fields.get("name");if(name!=null)filter.setNome(name);
         optionalIndex(fields,"position",0,best.aq.rH.length-1,filter::bv);optionalIndex(fields,"side",0,best.aq.rK.length-1,filter::bw);
         range(fields,"strengthFrom","strengthTo",0,100,filter::bx,(from,to)->{filter.bM(from);filter.bN(to);});
         range(fields,"ageFrom","ageTo",0,100,filter::by,(from,to)->{filter.bO(from);filter.bP(to);});
