@@ -8,6 +8,21 @@ import java.util.*;
 /** Read-only views of the authoritative calendar and original league statistics. */
 public final class CareerViews {
     private CareerViews(){ }
+    public static Map<String,Object> clubAgenda(int clubId){
+        ah club=c.a.SR.x(clubId);if(club==null)throw new IllegalArgumentException("Unknown club");
+        List<Object> fixtures=new ArrayList<Object>();
+        for(Object raw:c.a.SR.R()){
+            best.a day=(best.a)raw;
+            for(Object value:day.h()){
+                I match=(I)value;if(match.hc()!=club&&match.hd()!=club)continue;
+                Map<String,Object> row=new LinkedHashMap<String,Object>();
+                row.put("date",day.f());row.put("dateMillis",day.a().getTime().getTime());row.put("status",match.e()?"played":"scheduled");
+                row.put("competition",match.hy()==null?"":match.hy().getNome());row.put("phase",match.hG());row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
+                row.put("result",match.e()?match.hu()+" x "+match.hw():"—");fixtures.add(row);
+            }
+        }
+        Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("clubId",clubId);result.put("club",club.getNome());result.put("fixtures",fixtures);return result;
+    }
     public static Map<String,Object> snapshot(int coachId){
         al coach=c.a.SR.y(coachId);if(coach==null || !coach.jZ())throw new IllegalArgumentException("Unknown coach");
         ah club=coach.fg();Map<String,Object> out=new LinkedHashMap<String,Object>();

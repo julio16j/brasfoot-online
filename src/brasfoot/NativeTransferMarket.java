@@ -19,14 +19,18 @@ import javax.swing.WindowConstants;
 public final class NativeTransferMarket {
     private NativeTransferMarket() { }
     public interface AcademyQuery {void load(int clubId,Consumer<Map<String,Object>> success,Consumer<Throwable> failure);}
+    public interface AgendaQuery {void load(int clubId,Consumer<Map<String,Object>> success,Consumer<Throwable> failure);}
 
     public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion){
         open(owner,buyer,submit,youthPromotion,null);
     }
     public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery){
+        open(owner,buyer,submit,youthPromotion,academyQuery,null);
+    }
+    public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery,AgendaQuery agendaQuery){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
         JDialog dialog=new JDialog(owner,"Times",true);a.iA panel=new a.iA(dialog,buyer,buyer,false);
-        show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery);
+        show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery,agendaQuery);
     }
 
     /** Opens the visited seller's native Times window with the searched player selected. */
@@ -34,9 +38,12 @@ public final class NativeTransferMarket {
         openSelected(owner,searchDialog,buyer,player,submit,youthPromotion,null);
     }
     public static void openSelected(JFrame owner,JDialog searchDialog,ah buyer,F player,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery){
+        openSelected(owner,searchDialog,buyer,player,submit,youthPromotion,academyQuery,null);
+    }
+    public static void openSelected(JFrame owner,JDialog searchDialog,ah buyer,F player,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery,AgendaQuery agendaQuery){
         ah seller=player==null?null:player.fg();if(!canOpenSelected(buyer,player,seller))return;
         JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,seller,buyer,false);selectPlayerRow(panel,player);panel.s(player);
-        show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery);
+        show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery,agendaQuery);
     }
 
     static boolean canOpenSelected(ah buyer,F player,ah seller){return buyer!=null&&player!=null&&seller!=null;}
@@ -53,14 +60,26 @@ public final class NativeTransferMarket {
         return false;
     }
 
-    private static void show(JFrame owner,JDialog dialog,a.iA panel,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery){
+    private static void show(JFrame owner,JDialog dialog,a.iA panel,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery,AgendaQuery agendaQuery){
         JButton buy=(JButton)Data.get(panel,"FN"),offer=(JButton)Data.get(panel,"MK"),loan=(JButton)Data.get(panel,"MJ");
         replaceLocalHandler(buy,(event)->purchase(owner,dialog,panel,buyer,buy,submit));
         replaceLocalHandler(offer,(event)->makeOffer(owner,dialog,panel,buyer,submit));
+        JButton agenda=(JButton)Data.get(panel,"HR");if(agendaQuery!=null)replaceLocalHandler(agenda,event->loadAgenda(owner,dialog,panel,agendaQuery,agenda));
         replaceLocalHandler(loan,(event)->requestLoan(owner,dialog,panel,buyer,loan,submit));loan.setToolTipText("Solicitar empréstimo do jogador selecionado");
         replaceLocalHandler((JButton)Data.get(panel,"HW"),(event)->{ah visited=academyClub(panel);if(visited==null)return;if(visited==buyer||academyQuery==null){NativeYouth.open(dialog,buyer,visited,visited==buyer,youthPromotion);return;}JButton academy=(JButton)Data.get(panel,"HW");academy.setEnabled(false);academyQuery.load(visited.lk(),result->{if(!dialog.isDisplayable())return;try{if(Data.number(result.get("clubId"))!=visited.lk())throw new IllegalStateException("A resposta da academia pertence a outro clube");ah academySnapshot=academySnapshotClub(visited,Data.list(result.get("players")));NativeYouth.open(dialog,buyer,academySnapshot,false,youthPromotion);}catch(RuntimeException error){javax.swing.JOptionPane.showMessageDialog(dialog,error.getMessage(),"Academia",javax.swing.JOptionPane.WARNING_MESSAGE);}finally{if(academy.isDisplayable())academy.setEnabled(true);}},error->{if(!dialog.isDisplayable())return;academy.setEnabled(true);javax.swing.JOptionPane.showMessageDialog(dialog,"Não foi possível consultar a base juvenil deste clube: "+error.getMessage(),"Academia",javax.swing.JOptionPane.WARNING_MESSAGE);});});
         Dimension size=marketSize();dialog.add(panel);dialog.setSize(size);dialog.setPreferredSize(size);dialog.setResizable(false);
         dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
+    }
+
+    private static void loadAgenda(JFrame owner,JDialog times,a.iA panel,AgendaQuery query,JButton button){
+        ah club=academyClub(panel);if(club==null)return;button.setEnabled(false);
+        query.load(club.lk(),result->{if(!times.isDisplayable())return;try{
+            if(Data.number(result.get("clubId"))!=club.lk())throw new IllegalStateException("A agenda retornada pertence a outro clube");
+            List<Object> fixtures=Data.list(result.get("fixtures"));String[] columns={"Data","Competição","Fase","Mandante","Visitante","Resultado"};Object[][] rows=new Object[fixtures.size()][columns.length];
+            for(int i=0;i<fixtures.size();i++){Map<String,Object> fixture=Data.map(fixtures.get(i));rows[i][0]=fixture.get("date");rows[i][1]=fixture.get("competition");rows[i][2]=fixture.get("phase");rows[i][3]=fixture.get("home");rows[i][4]=fixture.get("away");rows[i][5]=fixture.get("result");}
+            javax.swing.JTable table=new javax.swing.JTable(new javax.swing.table.DefaultTableModel(rows,columns){@Override public boolean isCellEditable(int row,int column){return false;}});table.setAutoCreateRowSorter(true);table.setFillsViewportHeight(true);
+            JDialog agenda=new JDialog(times,"Agenda - "+club.getNome(),true);agenda.add(new javax.swing.JScrollPane(table));agenda.setSize(820,480);agenda.setPreferredSize(new Dimension(820,480));agenda.setResizable(false);agenda.setLocationRelativeTo(owner);agenda.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);agenda.setVisible(true);
+        }catch(RuntimeException error){JOptionPane.showMessageDialog(times,error.getMessage(),"Agenda",JOptionPane.WARNING_MESSAGE);}finally{if(button.isDisplayable())button.setEnabled(true);}},error->{if(!times.isDisplayable())return;button.setEnabled(true);JOptionPane.showMessageDialog(times,"Não foi possível consultar a agenda deste clube: "+error.getMessage(),"Agenda",JOptionPane.WARNING_MESSAGE);});
     }
 
     private static Dimension marketSize(){
@@ -103,6 +122,7 @@ public final class NativeTransferMarket {
 
     static ah academyClub(a.iA panel){return (ah)Data.get(panel,"uk");}
     static boolean academySnapshotCurrent(long revision,Map<String,Object> snapshot){return snapshot!=null&&snapshot.get("queryRevision")!=null&&Data.longNumber(snapshot.get("queryRevision"))==revision;}
+    static boolean agendaSnapshotCurrent(int clubId,long revision,Map<String,Object> snapshot){return academySnapshotCurrent(revision,snapshot)&&snapshot.get("clubId")!=null&&Data.number(snapshot.get("clubId"))==clubId;}
     private static ah academySnapshotClub(ah visited,List<Object> rows){ah academy=new ah();academy.bX(visited.lk());Data.set(academy,"dm",visited.getNome());academy.setPais(visited.getPais());academy.setDivisao(visited.getDivisao());academy.k(Boolean.FALSE);for(Object raw:rows)academy.ky().add(academyPlayer(Data.map(raw),academy));return academy;}
     private static F academyPlayer(Map<String,Object> row,ah club){F player=new F();player.az(Data.number(row.get("playerId")));player.setNome(String.valueOf(row.get("name")));player.setPosicao(Data.number(row.get("position")));player.setIdade(Data.number(row.get("age")));player.setPais(Data.number(row.get("country")));player.setLado(Data.number(row.get("side")));player.setCr1(Data.number(row.get("skill1")));player.setCr2(Data.number(row.get("skill2")));player.ad(Data.number(row.get("strength")));player.ao(Data.number(row.get("cpe")));player.ap(Data.number(row.get("development")));player.ae(Data.number(row.get("salary")));Data.set(player,"eu",Data.number(row.get("value")));player.h(Boolean.TRUE.equals(row.get("junior")));player.d(Data.longNumber(row.get("injuryUntilMillis")));Data.set(player,"eJ",Data.longNumber(row.get("contractEndMillis")));player.n(club);return player;}
 }
