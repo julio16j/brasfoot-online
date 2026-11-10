@@ -109,6 +109,7 @@ public final class SessionHost {
         result.put("viewerCoachId", viewerCoach); result.put("demo", demo); result.put("simulationImplemented", true);
         result.put("host",tokens.get(hostToken)==viewerCoach);
         result.put("storageFailed", storageFailed); result.put("checkpoint", checkpoint);
+        String searchReason=playerSearchUnavailable(viewerCoach);Map<String,Object> searchAvailability=new LinkedHashMap<String,Object>();searchAvailability.put("available",searchReason==null);searchAvailability.put("reason",searchReason);result.put("playerSearch",searchAvailability);
         if(game.isCareer())management.ensureIds();
         if(cachedGame==null || cachedSequence!=playback.sequence() || cachedCheckpoint!=checkpoint){
             cachedPlayback=playback.snapshot();cachedGame=presentedGame(cachedPlayback);
@@ -117,6 +118,12 @@ public final class SessionHost {
         result.put("round", round.snapshot()); result.put("game", cachedGame); result.put("playback",cachedPlayback);
         result.put("sessionOptions",sessionOptions.snapshot(tokens.get(hostToken)==viewerCoach,game.hasHumanMatch(),tickOverrideMillis));
         return result;
+    }
+    private String playerSearchUnavailable(int coachId){
+        if(storageFailed)return "Procura indispon\u00edvel enquanto o salvamento estiver pausado";
+        if(presentationStart!=null&&!playback.status().equals("FINISHED"))return "Procura dispon\u00edvel ap\u00f3s a apresenta\u00e7\u00e3o da data";
+        best.al owner=(best.al)c.a.SR.y(coachId);if(owner==null||owner.fg()==null)return "Escolha um clube antes de procurar jogadores";
+        return null;
     }
     Map<String,Object> presentedGame(Map<String,Object> shown){
         if(presentationStart==null || playback.status().equals("FINISHED"))return game.snapshot();

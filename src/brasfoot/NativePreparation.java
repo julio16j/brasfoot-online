@@ -15,6 +15,7 @@ public final class NativePreparation {
     public static void lineupAvailability(JPanel panel,boolean enabled,String reason){
         JButton scale=(JButton)Data.get(panel,"HU");scale.setEnabled(enabled);scale.setToolTipText(reason);
     }
+    public static void playerSearchAvailability(JPanel panel,boolean enabled,String reason){JButton search=(JButton)Data.get(panel,"yY");search.setEnabled(enabled);search.setToolTipText(reason);}
     @SuppressWarnings("unchecked")
     public static JPanel create(JFrame frame,ah club,I match,Runnable lineup){
         return create(frame,club,match,lineup,action->{ });
