@@ -61,7 +61,7 @@ public final class NativeTransferSearch {
         offerDialog.setLocationRelativeTo(owner);offerDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);offerDialog.setVisible(true);
     }
 
-    static boolean isNativeOpenListener(String className){return className!=null && (className.equals("a.gb") || className.startsWith("a.gb$"));}
+    static boolean isNativeOpenListener(String className){if(className==null)return false;String normalized=className.toLowerCase(java.util.Locale.ROOT);return normalized.equals("a.gb")||normalized.startsWith("a.gb$");}
 
     static int parseNativePrice(String entered){
         if(entered==null || !entered.trim().matches("[0-9]+"))throw new IllegalArgumentException("Informe um valor válido.");

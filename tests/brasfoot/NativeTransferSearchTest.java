@@ -13,6 +13,8 @@ public final class NativeTransferSearchTest {
     public static void main(String[] args){
         check(NativeTransferSearch.isNativeOpenListener("a.gb"),"Native double-click listener must be recognized");
         check(NativeTransferSearch.isNativeOpenListener("a.gb$1"),"Nested native listener must be recognized");
+        check(NativeTransferSearch.isNativeOpenListener("a.gB"),"Native listener's actual mixed-case class name must be recognized");
+        check(NativeTransferSearch.isNativeOpenListener("a.gB$1"),"Nested listener's actual mixed-case class name must be recognized");
         check(!NativeTransferSearch.isNativeOpenListener("a.gy"),"Search button listener must remain untouched");
         check(!NativeTransferSearch.isNativeOpenListener("brasfoot.TransferListener"),"Online listeners must remain untouched");
 
