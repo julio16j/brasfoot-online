@@ -26,7 +26,7 @@ public final class NativeTransferMarket {
     public static void openSelected(JFrame owner,JDialog searchDialog,ah buyer,F player,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion){
         if(buyer==null || player==null || player.fg()==null || player.fg()==buyer)return;
         ah seller=player.fg();
-        JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,buyer,seller,false);panel.s(player);
+        JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,seller,buyer,false);panel.s(player);
         show(owner,dialog,panel,buyer,submit,youthPromotion);
     }
 
@@ -35,7 +35,7 @@ public final class NativeTransferMarket {
         replaceLocalHandler(buy,(event)->purchase(owner,dialog,panel,buyer,buy,submit));
         replaceLocalHandler(offer,(event)->makeOffer(owner,dialog,panel,buyer,submit));
         replaceLocalHandler(loan,(event)->requestLoan(owner,dialog,panel,buyer,loan,submit));loan.setEnabled(true);loan.setToolTipText("Solicitar empréstimo do jogador selecionado");
-        replaceLocalHandler((JButton)Data.get(panel,"HW"),(event)->{ah visited=(ah)Data.get(panel,"ul");if(visited!=null)NativeYouth.open(dialog,buyer,visited,visited==buyer,youthPromotion);});
+        replaceLocalHandler((JButton)Data.get(panel,"HW"),(event)->{ah visited=academyClub(panel);if(visited!=null)NativeYouth.open(dialog,buyer,visited,visited==buyer,youthPromotion);});
         Dimension size=marketSize();dialog.add(panel);dialog.setSize(size);dialog.setPreferredSize(size);dialog.setResizable(false);
         dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
     }
@@ -77,4 +77,6 @@ public final class NativeTransferMarket {
     static Map<String,String> purchaseRequest(int playerId,int sellerClubId,int askingPrice){
         return NativeTransferSearch.offerRequest(playerId,sellerClubId,askingPrice);
     }
+
+    static ah academyClub(a.iA panel){return (ah)Data.get(panel,"uk");}
 }
