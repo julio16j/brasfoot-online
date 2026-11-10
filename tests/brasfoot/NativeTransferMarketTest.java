@@ -20,6 +20,7 @@ public final class NativeTransferMarketTest {
         check("19".equals(request.get("playerId")),"Purchase request must identify the selected player");
         check("4".equals(request.get("sellerClubId")),"Purchase request must identify the selling club");
         check("825000".equals(request.get("price")),"Purchase request must debit the native asking price");
+        Map<String,Object> academySnapshot=new java.util.LinkedHashMap<String,Object>();academySnapshot.put("queryRevision",12L);check(NativeTransferMarket.academySnapshotCurrent(12,academySnapshot),"Academy response may be projected when its revision is current");check(!NativeTransferMarket.academySnapshotCurrent(13,academySnapshot),"Academy response from an older session revision must be discarded");check(!NativeTransferMarket.academySnapshotCurrent(12,new java.util.LinkedHashMap<String,Object>()),"Academy response without a revision must be discarded");
         sun.misc.Unsafe unsafe;Field singleton=sun.misc.Unsafe.class.getDeclaredField("theUnsafe");singleton.setAccessible(true);unsafe=(sun.misc.Unsafe)singleton.get(null);a.iA panel=(a.iA)unsafe.allocateInstance(a.iA.class);best.ah buyer=new best.ah(),seller=new best.ah();Data.set(panel,"uk",seller);Data.set(panel,"ul",buyer);check(NativeTransferMarket.academyClub(panel)==seller,"Academy access must use the displayed/visited club, not the buyer finance field");
         System.out.println("PASS native Times purchase uses only the host transaction");
     }

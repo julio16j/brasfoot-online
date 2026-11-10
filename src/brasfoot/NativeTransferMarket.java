@@ -89,5 +89,6 @@ public final class NativeTransferMarket {
     }
 
     static ah academyClub(a.iA panel){return (ah)Data.get(panel,"uk");}
+    static boolean academySnapshotCurrent(long revision,Map<String,Object> snapshot){return snapshot!=null&&snapshot.get("queryRevision")!=null&&Data.longNumber(snapshot.get("queryRevision"))==revision;}
     private static F academyPlayer(Map<String,Object> row,ah club){F player=new F();player.az(Data.number(row.get("playerId")));player.setNome(String.valueOf(row.get("name")));player.setPosicao(Data.number(row.get("position")));player.setIdade(Data.number(row.get("age")));player.setPais(Data.number(row.get("country")));player.setLado(Data.number(row.get("side")));player.setCr1(Data.number(row.get("skill1")));player.setCr2(Data.number(row.get("skill2")));player.ad(Data.number(row.get("strength")));player.ao(Data.number(row.get("cpe")));player.ap(Data.number(row.get("development")));player.ae(Data.number(row.get("salary")));Data.set(player,"eu",Data.number(row.get("value")));player.h(Boolean.TRUE.equals(row.get("junior")));player.d(Data.longNumber(row.get("injuryUntilMillis")));Data.set(player,"eJ",Data.longNumber(row.get("contractEndMillis")));player.n(club);return player;}
 }
