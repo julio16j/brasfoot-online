@@ -327,6 +327,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
     }
     public void saveLocal(File destination) throws IOException {
         checkGlobal();
+        NativeReferencePersistence.prepare(state);
         Kryo kryo = new Kryo(); kryo.setRegistrationRequired(false);
         try (Output output = new Output(new FileOutputStream(destination))) {
             kryo.writeClassAndObject(output, state); kryo.writeClassAndObject(output, c.a.afQ);
@@ -339,6 +340,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             best.f loaded = (best.f) kryo.readClassAndObject(input);
             best.ay secondary = (best.ay) kryo.readClassAndObject(input);
             loaded.G(); c.a.SR = loaded; c.a.afQ = secondary;
+            try{NativeReferencePersistence.reconnect(loaded);}catch(IllegalStateException invalid){throw new IOException("Could not reconnect native career references: "+invalid.getMessage(),invalid);}
             for (Object object : loaded.M()) { al coach = (al)object; if (coach.fg() != null) coach.fg().I(false); }
             return new GameAdapter(loaded);
         }
