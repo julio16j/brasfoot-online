@@ -46,7 +46,7 @@ public final class NativePlayerSearchTest {
         check(Data.number(first.get("nextOffset"))==1000&&Data.number(second.get("nextOffset"))==2000,"Paged response must expose the next offset");
         int clubsBefore=state.P().size(),playersBefore=state.O().size();List<F> detached=NativeTransferSearch.projectRows(Data.list(first.get("players")),((best.al)state.M().get(0)).fg());
         check(state.P().size()==clubsBefore&&state.O().size()==playersBefore,"Detached search results must not mutate native club or player indexes");
-        for(F player:detached)if(player.fg()!=null&&player.fg()!=((best.al)state.M().get(0)).fg())check(player.fg().kc().contains(player),"Detached seller club must retain the selected player for native Times details");
+        for(F player:detached)if(player.fg()!=null&&player.fg()!=((best.al)state.M().get(0)).fg()){check(player.fg().kc().contains(player),"Detached seller club must retain the selected player for native Times details");check(player.fg().ka()!=null,"Detached seller projection must include a manager for the native Times header");}
         SessionHost host=new SessionHost(game,new File(args[0],"sessions-native-player-search").toPath(),coach,false,10000);try{
             host.startHttp("127.0.0.1",0);Field tokenField=SessionHost.class.getDeclaredField("hostToken");tokenField.setAccessible(true);SessionApi api=new SessionApi("http://127.0.0.1:"+host.httpPort());api.token((String)tokenField.get(host));
             Map<String,Object> remote=api.call("/players/search",query("name",sample.getNome().substring(0,Math.min(4,sample.getNome().length())),"limit","25"));
