@@ -6,7 +6,7 @@ Após cada atualização dos resultados de Procura, o cliente instala comparador
 
 ## Validação
 
-`NativeTransferSearchTest` confirma ordenação crescente dos códigos no índice geral, preservação da identidade do jogador e resolução da seleção visual após ordenar. `python tools/build_adapter.py` compilou as fontes e `NativeTransferSearchTest` passou. `NativePlayerSearchWindowTest` abriu Procura→Times no JAR empacotado; `NativeTransferMarketAcademyWindowTest` também passou no mesmo pacote. O ZIP contém 22.735 entradas, `zip.testzip()` retornou `None`, SHA-256 `e72eaf128565bcef6d3fb15f239a39cc676ee0cee11c7f95176ea1226bbac527`.
+`NativeTransferSearchTest` confirma ordenação crescente dos códigos no índice geral, preservação da identidade do jogador e resolução da seleção visual após ordenar. `NativePlayerSearchWindowTest` agora aciona o cabeçalho `Car.` na Procura real, verifica a ordem dos códigos em todas as linhas, seleciona o resultado remoto depois do sort e confirma que Times recebe esse ID. O teste passou contra o JAR empacotado. `NativeTransferMarketAcademyWindowTest` também passou no mesmo pacote. O ZIP contém 22.735 entradas, `zip.testzip()` retornou `None`, SHA-256 `e72eaf128565bcef6d3fb15f239a39cc676ee0cee11c7f95176ea1226bbac527`.
 
 ## Limites
 
