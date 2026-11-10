@@ -17,7 +17,7 @@ public final class CareerViews {
             best.a day=(best.a)raw;
             for(Object value:day.h()){
                 I match=(I)value;
-                if(club==null || match.hc()==club || match.hd()==club){
+                if(club!=null && (match.hc()==club || match.hd()==club)){
                     Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("date",day.f());row.put("dateMillis",day.a().getTime().getTime());row.put("matchId",row.get("dateMillis")+":"+(match.hy()==null?"none":CompetitionIdentity.key(match.hy()))+":"+match.hc().lk()+":"+match.hd().lk());row.put("status",match.e()?"played":"scheduled");
                     row.put("competition",match.hy().getNome());row.put("phase",match.hG());row.put("home",match.hc().getNome());row.put("away",match.hd().getNome());
                     row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());row.put("competitionId",match.hy()==null?-1:match.hy().gD());row.put("competitionKey",CompetitionIdentity.key(match.hy()));row.put("competitionType",match.hy()==null?0:match.hy().b());row.put("result",match.e()?match.hu()+" x "+match.hw():"—");row.put("homeGoals",match.e()?match.hu():null);row.put("awayGoals",match.e()?match.hw():null);calendar.add(row);
