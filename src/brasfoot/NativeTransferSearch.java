@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 public final class NativeTransferSearch {
     public interface Submit { void send(Map<String,String> fields,Runnable success,Runnable failure); }
     public interface Query { void search(Map<String,String> filters,Consumer<Map<String,Object>> success,Consumer<Throwable> failure); }
+    static final class PlayingCountryOption {final int id;final String label;PlayingCountryOption(int id,String label){this.id=id;this.label=label;}@Override public String toString(){return label;}}
     private NativeTransferSearch() { }
 
     public static void open(JFrame owner,ah buyer,int mode,Submit submit){open(owner,buyer,mode,submit,null,null);}
@@ -48,9 +49,13 @@ public final class NativeTransferSearch {
         open(owner,buyer,mode,submit,query,youthPromotion,academyQuery,null);
     }
     public static void open(JFrame owner,ah buyer,int mode,Submit submit,Query query,NativeYouth.Promotion youthPromotion,NativeTransferMarket.AcademyQuery academyQuery,NativeTransferMarket.AgendaQuery agendaQuery){
+        open(owner,buyer,mode,submit,query,youthPromotion,academyQuery,agendaQuery,null);
+    }
+    public static void open(JFrame owner,ah buyer,int mode,Submit submit,Query query,NativeYouth.Promotion youthPromotion,NativeTransferMarket.AcademyQuery academyQuery,NativeTransferMarket.AgendaQuery agendaQuery,List<Object> playingCountries){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
         JDialog dialog=new JDialog(owner,"Procura de jogadores",true);
         a.gx panel=new a.gx(dialog,buyer,false,mode);
+        if(playingCountries!=null)installPlayingCountryOptions((components.O)Data.get(panel,"zi"),playingCountries);
         JTable table=(JTable)Data.get(panel,"zj");
         for(java.awt.event.MouseListener listener:table.getMouseListeners())
             if(isNativeOpenListener(listener.getClass().getName()))table.removeMouseListener(listener);
@@ -62,6 +67,15 @@ public final class NativeTransferSearch {
         dialog.setSize(width,height);dialog.setPreferredSize(new Dimension(width,height));dialog.setResizable(false);
         dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
     }
+
+    static void installPlayingCountryOptions(components.O controls,List<Object> countries){
+        javax.swing.JComboBox<Object> combo=(javax.swing.JComboBox<Object>)Data.get(controls,"Qu");combo.removeAllItems();combo.addItem("Qualquer");
+        for(Object raw:countries){Map<String,Object> country=Data.map(raw);combo.addItem(new PlayingCountryOption(Data.number(country.get("id")),String.valueOf(country.get("label"))));}
+        combo.setRenderer(new javax.swing.DefaultListCellRenderer(){@Override public java.awt.Component getListCellRendererComponent(javax.swing.JList<?> list,Object value,int index,boolean selected,boolean focus){return super.getListCellRendererComponent(list,value==null?"":value.toString(),index,selected,focus);}});
+        combo.setSelectedIndex(0);
+    }
+
+    static String playingCountryId(Object selected,int index){if(index<=0)return null;if(selected instanceof PlayingCountryOption)return String.valueOf(((PlayingCountryOption)selected).id);throw new IllegalArgumentException("País de atuação inválido");}
 
     private static void offerSelected(JFrame owner,JDialog searchDialog,a.gx search,JTable table,ah buyer,Submit submit,NativeYouth.Promotion youthPromotion,NativeTransferMarket.AcademyQuery academyQuery,NativeTransferMarket.AgendaQuery agendaQuery){
         int selected=table.getSelectedRow();if(selected<0)return;
@@ -94,7 +108,7 @@ public final class NativeTransferSearch {
         if(mode==2){String[] names={"goalkeeping","defence","speed","finishing","arm","technique","passing"},components={"QN","QL","QQ","QM","QK","QP","QO"};for(int i=0;i<names.length;i++)slider(controls,components[i],names[i],filters,false);}
         checkbox(controls,"Qs","star",filters);checkbox(controls,"Qt","worldClass",filters);checkbox(controls,"Qr","loanAvailable",filters);checkbox(controls,"Qq","forSale",filters);return filters;}
     private static void combo(Object controls,String component,String key,Map<String,String> fields){combo(controls,component,key,fields,false);}
-    private static void combo(Object controls,String controlsField,String key,Map<String,String> fields,boolean countryCatalog){javax.swing.JComboBox<?> combo=(javax.swing.JComboBox<?>)Data.get(controls,controlsField);int selected=combo.getSelectedIndex()-1;if(selected<0)return;if(countryCatalog)fields.put(key,String.valueOf(((best.ad)best.n.cY().get(selected)).getPais()));else if(key.equals("playingCountry")){if(selected>=c.a.SR.N().size())throw new IllegalArgumentException("País de atuação inválido");fields.put(key,String.valueOf(((best.Z)c.a.SR.N().get(selected)).jc()));}else fields.put(key,String.valueOf(selected));}
+    private static void combo(Object controls,String controlsField,String key,Map<String,String> fields,boolean countryCatalog){javax.swing.JComboBox<?> combo=(javax.swing.JComboBox<?>)Data.get(controls,controlsField);int selected=combo.getSelectedIndex()-1;if(selected<0)return;if(countryCatalog)fields.put(key,String.valueOf(((best.ad)best.n.cY().get(selected)).getPais()));else if(key.equals("playingCountry")){String countryId=playingCountryId(combo.getSelectedItem(),combo.getSelectedIndex());if(countryId!=null)fields.put(key,countryId);}else fields.put(key,String.valueOf(selected));}
     private static void slider(Object controls,String component,String key,Map<String,String> fields,boolean age){components.aa slider=(components.aa)Data.get(controls,component);int from=slider.getValue(),to=slider.uv();if(from>slider.getMinimum()||to<slider.getMaximum()){fields.put(key+"From",String.valueOf(from));fields.put(key+"To",String.valueOf(age&&to==slider.getMaximum()?100:to));}}
     private static void checkbox(Object controls,String component,String key,Map<String,String> fields){if(((javax.swing.JCheckBox)Data.get(controls,component)).isSelected())fields.put(key,"true");}
 

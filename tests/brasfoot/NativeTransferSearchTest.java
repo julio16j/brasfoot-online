@@ -21,6 +21,7 @@ public final class NativeTransferSearchTest {
         check(NativeTransferSearch.isNativeOpenListener("a.gB$1"),"Nested listener's actual mixed-case class name must be recognized");
         check(!NativeTransferSearch.isNativeOpenListener("a.gy"),"Search button listener must remain untouched");
         check(!NativeTransferSearch.isNativeOpenListener("brasfoot.TransferListener"),"Online listeners must remain untouched");
+        NativeTransferSearch.PlayingCountryOption england=new NativeTransferSearch.PlayingCountryOption(1,"Inglaterra");check("1".equals(NativeTransferSearch.playingCountryId(england,1)),"Playing-country filters send the selected host country ID");check(NativeTransferSearch.playingCountryId("Qualquer",0)==null,"The unrestricted playing-country option adds no filter");rejects(()->NativeTransferSearch.playingCountryId("Inglaterra",1),"A displayed label without stable country identity must not be submitted");
 
         AtomicInteger nativeEnter=new AtomicInteger(),onlineEnter=new AtomicInteger();JButton searchButton=new JButton();
         searchButton.getActionMap().put("st",new AbstractAction(){@Override public void actionPerformed(java.awt.event.ActionEvent event){nativeEnter.incrementAndGet();}});
