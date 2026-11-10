@@ -122,6 +122,7 @@ public final class NativeTransferSearch {
     static void installCareerColumnSorter(JTable table,int mode){if(!(table.getRowSorter() instanceof TableRowSorter))return;int column=mode==2?14:8;if(column>=table.getModel().getColumnCount())return;((TableRowSorter<?>)table.getRowSorter()).setComparator(column,new Comparator<Object>(){@Override public int compare(Object left,Object right){if(!(left instanceof F)||!(right instanceof F))return String.valueOf(left).compareToIgnoreCase(String.valueOf(right));return compareCareerRatings((F)left,(F)right);}});}
     static int compareCareerRatings(F left,F right){int first=Integer.compare(left.getCr1(),right.getCr1());return first!=0?first:Integer.compare(left.getCr2(),right.getCr2());}
     static boolean isSearchSnapshotCurrent(long currentRevision,Object queryRevision){return queryRevision!=null&&String.valueOf(currentRevision).equals(String.valueOf(queryRevision));}
+    static boolean sameSearchPageSnapshot(int expectedTotal,String expectedMode,String expectedRevision,long expectedDate,int pageTotal,String pageMode,String pageRevision,long pageDate){return (expectedTotal<0||expectedTotal==pageTotal)&&(expectedMode==null||expectedMode.equals(pageMode))&&(expectedRevision==null||expectedRevision.equals(pageRevision))&&(expectedRevision==null||expectedDate==pageDate);}
     private static String countText(int total){if(total==0)return "Nenhum jogador encontrado";if(total==1)return "1 jogador encontrado";return total+" jogadores encontrados";}
 
     static int parseNativePrice(String entered){
