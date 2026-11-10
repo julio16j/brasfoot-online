@@ -339,7 +339,7 @@ public final class NativeClient {
     private Map<String,Object> ownRound(){for(Object raw:Data.list(Data.map(latest.get("round")).get("coaches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("coachId"))==coachId)return row;}throw new IllegalStateException("Técnico não encontrado");}
     private boolean isReady(){return Boolean.TRUE.equals(ownRound().get("ready"));}
     private void accept(Map<String,Object> snapshot){
-        if(closed || nativePanel==null)return;latest=snapshot;
+        if(closed || nativePanel==null)return;latest=snapshot;NativeYouth.observeRevision(Data.longNumber(Data.map(snapshot.get("round")).get("revision")));
         try{
             Map<String,Object> settings=Data.map(snapshot.get("sessionOptions"));SessionOptions.project(settings);
             audioEnabled=Boolean.TRUE.equals(Data.map(settings.get("values")).get("soundsEnabled"));audio.setSelected(audioEnabled);audio.setEnabled(Boolean.TRUE.equals(settings.get("canEdit")) && !optionsRequest);nativePanel.muted(!audioEnabled || testing);
