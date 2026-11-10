@@ -2,6 +2,10 @@
 
 Status: aberta, P2 proposta, complemento PN-09/PN-11. Investigação estática em 08/11/2026, sem jogo, janela ou testes executados.
 
+Atualização de implementação: a consulta de vagas do técnico desempregado mantém seus candidatos no estado de gestão do host, com data do ciclo; `exportState`/`restoreState` preservam o cache no mesmo dia e descartam uma consulta de data anterior. Isso evita novo sorteio ao retomar o mesmo checkpoint. Não representa convite dirigido persistente para técnico empregado, que segue pendente na spec.
+
+Continuidade estática de 09/11: jobs/job continuam restritos ao técnico sem clube; jobOffers é cache em memória por data e não aparece em exportState. Fluxo anual ay.zw para empregado continua separado. Após esta task, foi criada a [spec de convites e troca de clube](especificacao/spec-empregos-tecnicos-online.md), sem executar criação/aceitação de convite nesta revisão.
+
 ## Suporte presente e limite
 
 `CareerManagement.jobs` consulta `c.a.afQ.b(coach,false)` somente quando coach.fg()==null e mantém os IDs em cache até mudar a data. A ação job também exige técnico sem clube, clube oferecido e não humano; chama a função nativa de contratação `state.a(club,club.ka(),coach)`. A janela genérica de carreira oferece essa operação e o botão superior Carreira permanece disponível mesmo sem painel de clube. Não declarar que o desempregado não consegue abrir gestão apenas porque a preparação está vazia.

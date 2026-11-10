@@ -20,7 +20,7 @@ Especificações usam o prefixo `spec-` e descrevem requisitos e critérios de a
 | [Procura nativa de jogadores](spec-pesquisa-jogadores-online.md) | Busca global, filtros, paginação e janela real de Procura integrados; critérios de histórico/detalhe e aceite completo permanecem conforme a spec |
 | [Referências na persistência](spec-persistencia-referencias-nativas.md) | Contrato de H→competição/ap→atleta sem renumerar identidades online; diagnóstico estático e aceite aberto |
 | [Nacionalidade do técnico](spec-nacionalidade-tecnico-online.md) | Captura por técnico, validação do catálogo nativo, criação/projeção e overview integrados; retomada e percurso do seletor/JAR ainda precisam de validação |
-| [Convites e troca de clube](spec-empregos-tecnicos-online.md) | Desempregado e empregado separados; autoridade, vínculos, recuperação e decisões do ciclo de ofertas abertas |
+| [Convites e troca de clube](spec-empregos-tecnicos-online.md) | Cache da consulta de vagas do técnico desempregado agora é salvo/restaurado no mesmo dia; convites a empregados, troca transacional de clube e validação integral continuam abertos |
 | [Opções nativas online](spec-opcoes-nativas-online.md) | Implementada; [fontes e JAR validados](../implementacao-opcoes-nativas-online.md), aguardando aceite do usuário |
 
 As investigações usam `task-...`: as abertas ficam na raiz de `docs/`, e as corrigidas e validadas em [resolvidos](../resolvidos/README.md). O [índice principal](../README.md) reúne toda a documentação.
