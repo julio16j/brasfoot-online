@@ -81,6 +81,7 @@ public final class VisualModel {
                 if(player==null)player=new F();player.n(club);player.setNome((String)p.get("name"));player.setPosicao(Data.number(p.get("position")));
                 if(p.containsKey("playerId"))player.az(Data.number(p.get("playerId")));if(p.containsKey("country"))player.setPais(Data.number(p.get("country")));
                 if(p.containsKey("seasonStats"))for(Map.Entry<String,Object> entry:Data.map(p.get("seasonStats")).entrySet())if(entry.getKey().equals("fh") || entry.getKey().equals("fi"))Data.set(player,entry.getKey(),Data.number(entry.getValue()));
+                if(p.containsKey("careerAverageRating"))player.c(((Number)p.get("careerAverageRating")).doubleValue());
                 player.setIdade(Data.number(p.get("age")));player.ad(Data.number(p.get("strength")));player.ai(Data.number(p.get("fitness")));player.setLado(Data.number(p.get("side")));
                 player.setCr1(Data.number(p.get("skill1")));player.setCr2(Data.number(p.get("skill2")));player.setStatus(Data.number(p.get("status")));player.a(Boolean.TRUE.equals(p.get("star")));player.j(Boolean.TRUE.equals(p.get("worldClass")));
                 player.as(Data.number(p.get("slot")));if(p.containsKey("injuryUntilMillis"))player.d(Data.longNumber(p.get("injuryUntilMillis")));
