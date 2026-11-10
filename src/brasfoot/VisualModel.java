@@ -74,6 +74,7 @@ public final class VisualModel {
                 club.bX(id);clubs.put(id,club);
             }
             Data.set(club,"nb",Data.longNumber(row.get("balance")));club.setPais(Data.number(row.get("country")));club.setDivisao(Data.number(row.get("division")));
+            al manager=club.ka();if(manager!=null){if(row.containsKey("boardConfidence"))manager.cl(Data.number(row.get("boardConfidence")));if(row.containsKey("fanConfidence"))manager.cm(Data.number(row.get("fanConfidence")));}
             List<F> previous=new ArrayList<F>(club.kc());club.kc().clear();
             for(Object value:Data.list(row.get("players"))){Map<String,Object> p=Data.map(value);F player=null;
                 for(Iterator<F> it=previous.iterator();it.hasNext();){F candidate=it.next();if(p.containsKey("playerId") && Data.number(p.get("playerId"))>=0?candidate.gD()==Data.number(p.get("playerId")):candidate.getNome().equals(p.get("name"))){player=candidate;it.remove();break;}}
