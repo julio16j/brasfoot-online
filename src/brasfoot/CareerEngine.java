@@ -25,15 +25,19 @@ public final class CareerEngine {
         return createByAssets(root,assets.toArray(new String[assets.size()]),coachNames);
     }
     public static GameAdapter createByAssets(File root,String[] assets,String[] coachNames)throws Exception {
-        validateCount(assets.length);validateNames(assets.length,coachNames);Set<String> unique=new HashSet<String>();
+        return createByAssets(root,assets,coachNames,null);
+    }
+    public static GameAdapter createByAssets(File root,String[] assets,String[] coachNames,int[] nationalities)throws Exception {
+        validateCount(assets.length);validateNames(assets.length,coachNames);Set<String> unique=new HashSet<String>();validateNationalities(assets.length,nationalities);
         for(String asset:assets)if(asset==null || asset.trim().isEmpty() || !unique.add(asset.trim().toLowerCase(Locale.ROOT)))throw new IllegalArgumentException("Human club assets must be distinct and nonempty");
-        initializeWorld(root);List<String> selected=new ArrayList<String>();Collections.addAll(selected,assets);return startAssets(selected,coachNames);
+        initializeWorld(root);List<String> selected=new ArrayList<String>();Collections.addAll(selected,assets);return startAssets(selected,coachNames,nationalities);
     }
     private static void validateCount(int count){if(count<1 || count>16)throw new IllegalArgumentException("Choose between 1 and 16 human clubs");}
     private static void validateNames(int count,String[] coachNames){
         if(coachNames==null)return;if(coachNames.length!=count)throw new IllegalArgumentException("Provide one name for each human coach");
         for(String name:coachNames)if(name==null || name.trim().length()<2 || name.trim().length()>35)throw new IllegalArgumentException("Coach names need between 2 and 35 characters");
     }
+    private static void validateNationalities(int count,int[] nationalities){if(nationalities==null)return;if(nationalities.length!=count)throw new IllegalArgumentException("Provide one nationality code for each human coach");Set<Integer> valid=new HashSet<Integer>();for(Object raw:best.n.cY())valid.add(((best.ad)raw).getPais());for(int country:nationalities)if(!valid.contains(country))throw new IllegalArgumentException("Unknown coach nationality code: "+country);}
     public static void initializeClubSelection(File root)throws Exception{initializeWorld(root);setCountries(Collections.<Integer>emptySet(),true);generateCompetitions();}
     private static void initializeWorld(File root)throws Exception {
         System.setProperty("user.dir",new File(root,"game/Brasfoot22-23").getAbsolutePath());
@@ -47,13 +51,14 @@ public final class CareerEngine {
         c.a.SR.setVerMudancaTecnicos(0);
         Class<?> loader=Class.forName("best.p");loader.getMethod("dd").invoke(null);
     }
-    private static GameAdapter startAssets(List<String> assets,String[] coachNames){
+    private static GameAdapter startAssets(List<String> assets,String[] coachNames){return startAssets(assets,coachNames,null);}
+    private static GameAdapter startAssets(List<String> assets,String[] coachNames,int[] nationalities){
         Map<String,e.t> records=new LinkedHashMap<String,e.t>();Set<Integer> countries=new HashSet<Integer>();
         for(String asset:assets){e.t found=null;for(Object raw:c.a.SR.bC){e.t record=(e.t)raw;if(record.getFileRef().equalsIgnoreCase(asset.trim())){if(found!=null)throw new IllegalArgumentException("Ambiguous club asset: "+asset);found=record;}}
             if(found==null)throw new IllegalArgumentException("Unknown club asset: "+asset);records.put(asset.trim().toLowerCase(Locale.ROOT),found);countries.add(found.getPais());}
         setCountries(countries,false);generateCompetitions();List<ah> selected=new ArrayList<ah>();
         for(String asset:assets){String key=asset.trim().toLowerCase(Locale.ROOT);e.t record=records.get(key);ah found=null;for(Object raw:c.a.SR.P()){ah club=(ah)raw;if(club.jY().equalsIgnoreCase(record.getFileRef())){found=club;break;}}if(found==null)throw new IllegalStateException("Selected club was not generated: "+asset);selected.add(found);}
-        for(int index=0;index<selected.size();index++)selected.get(index).b(coachNames==null?"Técnico "+(index+1):coachNames[index].trim(),selected.get(index).getPais());
+        for(int index=0;index<selected.size();index++)selected.get(index).b(coachNames==null?"Técnico "+(index+1):coachNames[index].trim(),nationalities==null?selected.get(index).getPais():nationalities[index]);
         c.a.SR.az();prepare();return new GameAdapter(c.a.SR);
     }
     private static void setCountries(Set<Integer> countries,boolean all){for(Object raw:c.a.SR.bF){best.O country=(best.O)raw;country.v(all||countries.contains(country.getPais()));}}

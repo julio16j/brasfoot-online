@@ -384,7 +384,7 @@ public final class SessionHost {
         GameAdapter game;
         if(career){
             String[] names=options.containsKey("--coach-names")?new String(Base64.getUrlDecoder().decode(options.get("--coach-names")),StandardCharsets.UTF_8).split("\n",-1):null;
-            if(options.containsKey("--club-assets"))game=CareerEngine.createByAssets(root.toFile(),options.get("--club-assets").split(",",-1),names);
+            if(options.containsKey("--club-assets")){int[] nationalities=options.containsKey("--coach-nationalities")?indices(options.get("--coach-nationalities")):null;game=CareerEngine.createByAssets(root.toFile(),options.get("--club-assets").split(",",-1),names,nationalities);}
             else if(options.containsKey("--club-ids"))game=CareerEngine.create(root.toFile(),indices(options.get("--club-ids")),names);
             else game=CareerEngine.create(root.toFile(),options.getOrDefault("--clubs","Corinthians,Palmeiras,Santos,SÃ£o Paulo").split(","),names);
         } else if(demo)game=Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(),root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile());

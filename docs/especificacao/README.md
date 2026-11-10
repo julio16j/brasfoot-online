@@ -19,7 +19,7 @@ Especificações usam o prefixo `spec-` e descrevem requisitos e critérios de a
 | [Calendários e seis ligas](spec-calendarios-ligas-online.md) | PN-02 integrado; contrato de identidade/estado e ordenação da consulta geral em andamento; janela nativa, Tabelas/Rodadas e restantes critérios ainda abertos |
 | [Procura nativa de jogadores](spec-pesquisa-jogadores-online.md) | Busca global, filtros, paginação e janela real de Procura integrados; critérios de histórico/detalhe e aceite completo permanecem conforme a spec |
 | [Referências na persistência](spec-persistencia-referencias-nativas.md) | Contrato de H→competição/ap→atleta sem renumerar identidades online; diagnóstico estático e aceite aberto |
-| [Nacionalidade do técnico](spec-nacionalidade-tecnico-online.md) | Seleção→host→projeção/retomada por código nativo; catálogo independente das seis ligas, implementação pendente |
+| [Nacionalidade do técnico](spec-nacionalidade-tecnico-online.md) | Captura por técnico, validação do catálogo nativo, criação/projeção e overview integrados; retomada e percurso do seletor/JAR ainda precisam de validação |
 | [Convites e troca de clube](spec-empregos-tecnicos-online.md) | Desempregado e empregado separados; autoridade, vínculos, recuperação e decisões do ciclo de ofertas abertas |
 | [Opções nativas online](spec-opcoes-nativas-online.md) | Implementada; [fontes e JAR validados](../implementacao-opcoes-nativas-online.md), aguardando aceite do usuário |
 

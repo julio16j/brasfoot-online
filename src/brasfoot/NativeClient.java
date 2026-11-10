@@ -119,8 +119,9 @@ public final class NativeClient {
             Collections.addAll(args,"-cp",System.getProperty("java.class.path"),"brasfoot.SessionHost","--root",root.toString());
             if(resumeDirectory!=null){args.add("--resume");args.add(resumeDirectory.toString());}else args.add(career?"--career":"--demo");
             if(career && resumeDirectory==null){
-                java.util.List<String> assets=new ArrayList<String>(),names=new ArrayList<String>();for(NativeClubSelection.CoachChoice choice:careerSelection){assets.add(choice.clubAsset);names.add(choice.coachName);}
+                java.util.List<String> assets=new ArrayList<String>(),names=new ArrayList<String>(),nationalities=new ArrayList<String>();for(NativeClubSelection.CoachChoice choice:careerSelection){assets.add(choice.clubAsset);names.add(choice.coachName);nationalities.add(String.valueOf(choice.nationality));}
                 args.add("--club-assets");args.add(String.join(",",assets));args.add("--coach-names");args.add(Base64.getUrlEncoder().withoutPadding().encodeToString(String.join("\n",names).getBytes(StandardCharsets.UTF_8)));
+                args.add("--coach-nationalities");args.add(String.join(",",nationalities));
             }
             Collections.addAll(args,"--port",String.valueOf(selectedPort));
             if(testing)Collections.addAll(args,"--tick-ms","75");

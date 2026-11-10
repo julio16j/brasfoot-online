@@ -37,7 +37,7 @@ public final class CareerViews {
             table.put("rows",rows);tables.add(table);
         }
         out.put("calendar",calendar);out.put("tables",tables);out.put("date",c.a.SR.T());out.put("year",c.a.SR.bb().get(Calendar.YEAR));
-        List<Object> coaches=new ArrayList<Object>();for(Object raw:c.a.SR.M()){al human=(al)raw;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("name",human.dS());row.put("club",human.fg()==null?"Sem clube":human.fg().getNome());coaches.add(row);}out.put("coaches",coaches);
+        List<Object> coaches=new ArrayList<Object>();for(Object raw:c.a.SR.M()){al human=(al)raw;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("name",human.dS());row.put("nationality",human.lE());row.put("club",human.fg()==null?"Sem clube":human.fg().getNome());coaches.add(row);}out.put("coaches",coaches);
         out.put("balance",club==null?0L:club.kb());out.put("wages",club==null?0L:club.kK());return out;
     }
 }
