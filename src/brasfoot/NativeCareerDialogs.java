@@ -29,6 +29,7 @@ public final class NativeCareerDialogs {
         summary.add(new JLabel("Saldo: "+value(overview.get("balance"))+"   Folha: "+value(overview.get("wages"))));root.add(summary,BorderLayout.NORTH);
         JTabbedPane views=new JTabbedPane();views.addTab("Calendário",table(new String[]{"Data","Competição","Fase","Mandante","Visitante","Resultado"},list(overview,"calendar"),new String[]{"date","competition","phase","home","away","result"}));
         views.addTab("Artilheiros",table(new String[]{"Jogador","Clube","Gols","Jogos"},list(overview,"scorers"),new String[]{"name","club","goals","appearances"}));
+        views.addTab("Assistências",table(new String[]{"Jogador","Clube","Assist.","Jogos"},list(overview,"assists"),new String[]{"name","club","assists","appearances"}));
         for(Object raw:list(overview,"tables")){Map<String,Object> league=Data.map(raw);views.addTab(String.valueOf(league.get("name")),table(new String[]{"Pos.","Clube","Pts","J","V","E","D","GP","GC","SG"},list(league,"rows"),new String[]{"position","club","points","played","wins","draws","losses","goalsFor","goalsAgainst","goalDifference"}));}
         root.add(views,BorderLayout.CENTER);
         List<String> coaches=new ArrayList<String>();for(Object raw:list(overview,"coaches")){Map<String,Object> c=Data.map(raw);coaches.add(c.get("name")+" — "+c.get("club"));}
