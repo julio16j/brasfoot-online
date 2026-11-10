@@ -71,7 +71,7 @@ public final class NativeCareerDialogs {
                 case "loan-request":{Choice target=choice(market);request.put("action","loan-request");request.put("playerId",id(market));request.put("sellerClubId",String.valueOf(target.extra));break;}
                 case "respond":request.put("offerId",id(offers));request.put("accept",(String)accept.getSelectedItem());break;
                 case "sell":request.put("playerId",id(player));request.put("price",price.getText().trim());break;
-                case "job":request.put("clubId",id(jobs));break;
+                case "job":request.put("clubId",id(jobs));if(data.get("jobsRevision")!=null)request.put("jobsRevision",String.valueOf(data.get("jobsRevision")));break;
                 default:throw new IllegalArgumentException("Operação desconhecida");
             }
             submitCommand(command,request,submit,()->{dialog.dispose();JOptionPane.showMessageDialog(ownerOf(dialog),"Comando aplicado à carreira.","Brasfoot Online",JOptionPane.INFORMATION_MESSAGE);});

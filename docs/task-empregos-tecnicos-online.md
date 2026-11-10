@@ -6,6 +6,8 @@ Atualização de implementação: a consulta de vagas do técnico desempregado m
 
 Indicadores: o snapshot agora publica `boardConfidence`/`fanConfidence` do próprio técnico (`al.lL/lM`, campos `of/og`) e a projeção aplica esses valores. A projeção anterior expunha `oe/of`, que não correspondem às barras nativas. Teste de carreira confere os indicadores em snapshot do técnico e clube. Ainda não há teste visual das barras em janela real nem validação de troca efetiva de clube.
 
+Consulta de vaga: snapshot de gestão inclui `jobsDateMillis` e `jobsRevision`, e o formulário envia a revisão ao confirmar. Se o cache apresentado deixou de ser o atual, o host rejeita a escolha pedindo nova consulta; o caminho legado sem revisão ainda valida a vaga contra a lista corrente. O teste de carreira confirma que técnico sem clube abre o overview e rejeita uma revisão de vagas obsoleta. Convites dirigidos a técnicos empregados e troca A→B continuam fora desta entrega.
+
 Continuidade estática de 09/11: jobs/job continuam restritos ao técnico sem clube; o commit `246a94a1` agora inclui `jobDate`/`jobOffers` em `exportState`/`restoreState`, mantendo o cache no mesmo dia e descartando-o em data diferente. O teste alterado no mesmo commit verifica cache no mesmo processo, não uma retomada real de processo/sessão. Fluxo anual ay.zw para empregado continua separado. Após esta task, foi criada a [spec de convites e troca de clube](especificacao/spec-empregos-tecnicos-online.md), sem executar criação/aceitação de convite nesta revisão.
 
 ## Suporte presente e limite
