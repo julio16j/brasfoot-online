@@ -22,3 +22,9 @@ A suíte completa `python tools/build_adapter.py --test` passou. `python tools/t
 ## Limites
 
 O teste injeta relações válidas com IDs conhecidos; não cobre identificação de registros antigos sem ID, atletas removidos/aposentados, rankings/galeria, múltiplas temporadas nem distribuição com jogadores de IDs duplicados legados. Esses cenários continuam abertos na task. Não houve teste de janela nem abertura do Brasfoot nesta etapa.
+
+## Validação explícita de disciplina órfã — 10/11/2026
+
+`prepare` agora repara `H` sem ponteiro transitório quando o ID persistente encontra a competição canônica ainda presente na agenda. Antes de gravar, rejeita com erro identificável uma suspensão sem identidade recuperável ou cuja competição não está na agenda. `reconnect` faz a mesma validação antes de religar suspensões do save carregado; não conclui a retomada deixando o getter criar silenciosamente um registro vazio.
+
+`NativeReferencePersistenceTest` cobre as duas rejeições e repete o round-trip válido em JVMs separadas. Registros `ap` cujo atleta não existe permanecem sem ponteiro, conforme `best.ap.me()` nativo; nenhuma identidade ativa é fabricada para atletas removidos/aposentados. `python tools/build_adapter.py --test` passou; `python tools/package_client.py` atualizou JAR e ZIP; `zip.testzip()` retornou `None` para as 22.735 entradas. SHA-256 do ZIP: `c1a659c698817e38abe02d55d7d34bd6e2795cf3ec584e6be8a54d4a2cc6c0af`.
