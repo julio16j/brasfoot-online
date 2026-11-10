@@ -8,6 +8,7 @@ import java.util.*;
 /** Original career calendar and competition lifecycle, owned exclusively by the host. */
 public final class CareerEngine {
     private CareerEngine() { }
+    static final Set<Integer> LEAGUE_COUNTRIES=Collections.unmodifiableSet(new HashSet<Integer>(Arrays.asList(29,97,65,104,3,72)));
     public static GameAdapter create(File root, String[] clubs) throws Exception {
         return create(root,clubs,null);
     }
@@ -38,7 +39,7 @@ public final class CareerEngine {
         for(String name:coachNames)if(name==null || name.trim().length()<2 || name.trim().length()>35)throw new IllegalArgumentException("Coach names need between 2 and 35 characters");
     }
     private static void validateNationalities(int count,int[] nationalities){if(nationalities==null)return;if(nationalities.length!=count)throw new IllegalArgumentException("Provide one nationality code for each human coach");Set<Integer> valid=new HashSet<Integer>();for(Object raw:best.n.cY())valid.add(((best.ad)raw).getPais());for(int country:nationalities)if(!valid.contains(country))throw new IllegalArgumentException("Unknown coach nationality code: "+country);}
-    public static void initializeClubSelection(File root)throws Exception{initializeWorld(root);setCountries(Collections.<Integer>emptySet(),true);generateCompetitions();}
+    public static void initializeClubSelection(File root)throws Exception{initializeWorld(root);setCountries(LEAGUE_COUNTRIES,false);generateCompetitions();}
     private static void initializeWorld(File root)throws Exception {
         System.setProperty("user.dir",new File(root,"game/Brasfoot22-23").getAbsolutePath());
         new best.M(true);best.n.cU();new c.a();
@@ -53,10 +54,10 @@ public final class CareerEngine {
     }
     private static GameAdapter startAssets(List<String> assets,String[] coachNames){return startAssets(assets,coachNames,null);}
     private static GameAdapter startAssets(List<String> assets,String[] coachNames,int[] nationalities){
-        Map<String,e.t> records=new LinkedHashMap<String,e.t>();Set<Integer> countries=new HashSet<Integer>();
+        Map<String,e.t> records=new LinkedHashMap<String,e.t>();
         for(String asset:assets){e.t found=null;for(Object raw:c.a.SR.bC){e.t record=(e.t)raw;if(record.getFileRef().equalsIgnoreCase(asset.trim())){if(found!=null)throw new IllegalArgumentException("Ambiguous club asset: "+asset);found=record;}}
-            if(found==null)throw new IllegalArgumentException("Unknown club asset: "+asset);records.put(asset.trim().toLowerCase(Locale.ROOT),found);countries.add(found.getPais());}
-        setCountries(countries,false);generateCompetitions();List<ah> selected=new ArrayList<ah>();
+            if(found==null)throw new IllegalArgumentException("Unknown club asset: "+asset);if(!LEAGUE_COUNTRIES.contains(found.getPais()))throw new IllegalArgumentException("Human club country is not enabled for online careers: "+found.getPais());records.put(asset.trim().toLowerCase(Locale.ROOT),found);}
+        setCountries(LEAGUE_COUNTRIES,false);generateCompetitions();List<ah> selected=new ArrayList<ah>();
         for(String asset:assets){String key=asset.trim().toLowerCase(Locale.ROOT);e.t record=records.get(key);ah found=null;for(Object raw:c.a.SR.P()){ah club=(ah)raw;if(club.jY().equalsIgnoreCase(record.getFileRef())){found=club;break;}}if(found==null)throw new IllegalStateException("Selected club was not generated: "+asset);selected.add(found);}
         for(int index=0;index<selected.size();index++)selected.get(index).b(coachNames==null?"Técnico "+(index+1):coachNames[index].trim(),nationalities==null?selected.get(index).getPais():nationalities[index]);
         c.a.SR.az();prepare();return new GameAdapter(c.a.SR);
