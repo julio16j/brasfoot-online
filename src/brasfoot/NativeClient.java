@@ -288,8 +288,9 @@ public final class NativeClient {
     }
     private void openNativeTransferMarket(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
-        NativeTransferMarket.open(frame,owner.fg(),this::submitNativeTransfer);
+        NativeTransferMarket.open(frame,owner.fg(),this::submitNativeTransfer,this::submitNativeYouthPromotion);
     }
+    private void submitNativeYouthPromotion(int playerId,JDialog dialog,JButton button){Map<String,String> fields=new LinkedHashMap<String,String>();fields.put("action","promote");fields.put("playerId",String.valueOf(playerId));command("/management",fields,()->{dialog.dispose();status.setText("Junior promovido pelo host; elenco e base atualizados.");},()->button.setEnabled(true));}
     private void submitNativeTransfer(Map<String,String> fields,Runnable success,Runnable onFailure){
         command("/management",fields,()->{
             Map<String,Object> result=Data.map(latest.get("command"));String outcome=String.valueOf(result.get("status"));

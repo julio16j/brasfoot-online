@@ -16,13 +16,14 @@ import javax.swing.WindowConstants;
 public final class NativeTransferMarket {
     private NativeTransferMarket() { }
 
-    public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit){
+    public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
         JDialog dialog=new JDialog(owner,"Times",true);a.iA panel=new a.iA(dialog,buyer,buyer,false);
         JButton buy=(JButton)Data.get(panel,"FN"),offer=(JButton)Data.get(panel,"MK"),loan=(JButton)Data.get(panel,"MJ");
         replaceLocalHandler(buy,(event)->purchase(owner,dialog,panel,buyer,buy,submit));
         replaceLocalHandler(offer,(event)->makeOffer(owner,dialog,panel,buyer,submit));
         replaceLocalHandler(loan,(event)->requestLoan(owner,dialog,panel,buyer,loan,submit));loan.setEnabled(true);loan.setToolTipText("Solicitar empréstimo do jogador selecionado");
+        replaceLocalHandler((JButton)Data.get(panel,"HW"),(event)->{ah visited=(ah)Data.get(panel,"ul");if(visited!=null)NativeYouth.open(dialog,buyer,visited,visited==buyer,youthPromotion);});
         Dimension size=marketSize();dialog.add(panel);dialog.setSize(size);dialog.setPreferredSize(size);dialog.setResizable(false);
         dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
     }
