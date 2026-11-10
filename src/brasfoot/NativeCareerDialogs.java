@@ -5,6 +5,9 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.table.TableColumnModel;
+import java.util.Comparator;
 
 /** Career overview and explicit management commands for the multiplayer host. */
 public final class NativeCareerDialogs {
@@ -31,9 +34,10 @@ public final class NativeCareerDialogs {
         root.add(new JLabel("Técnicos: "+String.join("   •   ",coaches)),BorderLayout.SOUTH);return root;
     }
 
-    private static JPanel table(String[] columns,List<Object> rows,String[] keys){
-        Object[][] values=new Object[rows.size()][columns.length];for(int i=0;i<rows.size();i++){Map<String,Object> row=Data.map(rows.get(i));for(int j=0;j<keys.length;j++)values[i][j]=row.get(keys[j]);}
-        JTable table=new JTable(new DefaultTableModel(values,columns){@Override public boolean isCellEditable(int row,int col){return false;}});table.setAutoCreateRowSorter(true);
+    static JPanel table(String[] columns,List<Object> rows,String[] keys){
+        Object[][] values=new Object[rows.size()][columns.length];Map<String,Long> dateKeys=new HashMap<String,Long>();for(int i=0;i<rows.size();i++){Map<String,Object> row=Data.map(rows.get(i));for(int j=0;j<keys.length;j++)values[i][j]=row.get(keys[j]);if(row.get("date")!=null&&row.get("dateMillis")!=null)dateKeys.put(String.valueOf(row.get("date")),Data.longNumber(row.get("dateMillis")));}
+        JTable table=new JTable(new DefaultTableModel(values,columns){@Override public boolean isCellEditable(int row,int col){return false;}@Override public Class<?> getColumnClass(int column){for(int row=0;row<getRowCount();row++){Object value=getValueAt(row,column);if(value!=null)return value.getClass();}return Object.class;}});table.setAutoCreateRowSorter(true);
+        if(keys.length>0&&"date".equals(keys[0])){TableRowSorter<?> sorter=(TableRowSorter<?>)table.getRowSorter();sorter.setComparator(0,Comparator.comparingLong(raw->dateKeys.getOrDefault(String.valueOf(raw),Long.MAX_VALUE)));sorter.setSortKeys(java.util.Collections.singletonList(new javax.swing.RowSorter.SortKey(0,javax.swing.SortOrder.ASCENDING)));}
         JPanel panel=new JPanel(new BorderLayout());panel.add(new JScrollPane(table),BorderLayout.CENTER);return panel;
     }
 
