@@ -234,7 +234,7 @@ public final class GameAdapter implements RoundCoordinator.Actions {
             ah club = club(entry.getKey());
             I match = match(club);
             Map<String, Object> row = new LinkedHashMap<String, Object>();
-            row.put("coachId", entry.getKey()); row.put("name", entry.getValue().dS());row.put("nationality",entry.getValue().lE());
+            row.put("coachId", entry.getKey()); row.put("name", entry.getValue().dS());row.put("nationality",entry.getValue().lE());row.put("boardConfidence",entry.getValue().lL());row.put("fanConfidence",entry.getValue().lM());
             row.put("clubId", club == null ? null : club.lk());
             row.put("club", club == null ? null : club.getNome());
             if(club!=null){List<Integer> t=new ArrayList<Integer>();for(int value:club.kj())t.add(value);row.put("tactics",t);row.put("roles",roleIds(club));}

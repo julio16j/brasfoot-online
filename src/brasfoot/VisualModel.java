@@ -46,7 +46,7 @@ public final class VisualModel {
         updateClubs(game);
         c.a.SR.M().clear();
         for(Object raw:Data.list(game.get("coaches"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("coachId"));
-            al coach=coaches.get(id);if(coach==null){coach=new al((String)row.get("name"));Data.set(coach,"nU",id);coaches.put(id,coach);c.a.SR.L().add(coach);}if(row.containsKey("nationality"))coach.cg(Data.number(row.get("nationality")));
+            al coach=coaches.get(id);if(coach==null){coach=new al((String)row.get("name"));Data.set(coach,"nU",id);coaches.put(id,coach);c.a.SR.L().add(coach);}if(row.containsKey("nationality"))coach.cg(Data.number(row.get("nationality")));if(row.containsKey("boardConfidence"))coach.cl(Data.number(row.get("boardConfidence")));if(row.containsKey("fanConfidence"))coach.cm(Data.number(row.get("fanConfidence")));
             ah club=row.get("clubId")==null?null:clubs.get(Data.number(row.get("clubId")));coach.n(club);coach.k(true);
             if(club!=null){Data.set(club,"mZ",coach);Data.set(club,"na",id);club.k(true);}c.a.SR.M().add(coach);
         }
