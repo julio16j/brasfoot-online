@@ -57,6 +57,7 @@ public final class NativePlayerSearchTest {
             try{new SessionApi("http://127.0.0.1:"+host.httpPort()).call("/club-academy",query("clubId",String.valueOf(sample.fg().lk())));throw new AssertionError("Academy endpoint must reject unauthenticated callers");}catch(java.io.IOException expected){}
             Map<String,Object> stable=api.call("/players/search",query("limit","25","offset","25","queryRevision",String.valueOf(remote.get("queryRevision"))));
             check(Data.number(stable.get("offset"))==25,"Paged HTTP query must accept the revision returned by the first page");
+            try{api.call("/players/search",query("limit","25","offset","25"));throw new AssertionError("Continuation pages must require the first page revision");}catch(java.io.IOException expected){}
             try{api.call("/players/search",query("limit","1","queryRevision","-1"));throw new AssertionError("Stale search revision must be rejected");}catch(java.io.IOException expected){}
             try{new SessionApi("http://127.0.0.1:"+host.httpPort()).call("/players/search",query("limit","1"));throw new AssertionError("Search endpoint must reject unauthenticated callers");}catch(java.io.IOException expected){}
         }finally{host.stopHttp();host.close();}
