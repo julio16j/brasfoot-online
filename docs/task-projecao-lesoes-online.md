@@ -47,3 +47,17 @@ A interface inventa lesões para atletas saudáveis e mascara suspensão/contrat
 Separar no snapshot o fim real de lesão, o motivo de indisponibilidade e a elegibilidade para uma partida específica. A projeção deve preservar estado médico nativo e manter bloqueio esportivo/contratual por mecanismo próprio, sem usar uma lesão fictícia como atalho. Ausência de jogo deve ser representada como ausência de contexto, sem tornar atleta lesionado nem presumir que ele está elegível para a próxima partida.
 
 Critérios: saudável em folga continua saudável; lesionado tem prazo real; suspensão depende da competição; contrato vencido não vira contusão; tabela/detalhe/editor distinguem os casos; mudança de data remove o bloqueio apenas quando o host confirmar; snapshots e detalhes durante playback não revelam lesões futuras. Testar cliente real e motor do host separadamente; confirmar que um atleta bloqueado não se torna escalável por remover a lesão artificial. Persistência de host não deve receber dados médicos da projeção cliente. Testar pacote combinado após integração.
+
+## Evidência complementar em 09/11/2026
+
+Na revisão posterior à integração, `AvailabilityProjectionTest` passou nos limites temporais definidos pela comparação nativa: lesão com prazo igual à data global já não está ativa; contrato com fim igual à data segue elegível; contrato vencido um milissegundo antes é inelegível. O mesmo teste alterou artificialmente os prazos finais após o snapshot de referência e confirmou que `SessionHost.preserveAvailability` conserva lesão, contrato e contexto pré-jogo nos dados do técnico e no elenco visual durante playback.
+
+Essa ocultação dura até o playback terminar; ainda não foi observado um evento real de lesão durante uma partida nem a apresentação do prazo médico no minuto correspondente. Permanecem pendentes a janela nativa atualizada, transição folga→partida no JAR, retomada real do host e a suíte de sessão após o rebuild atual.
+
+## Continuação em 09/11/2026 — playback e fronteiras temporais
+
+Adicionada proteção em `SessionHost.presentedGame`: enquanto o playback está ativo, os campos `injuryUntilMillis`, `contractEndMillis`, `suspensions`, `eligible` e `eligibilityContext` publicados em técnicos/elencos visuais vêm do snapshot pré-jogo. A projeção não altera objetos autoritativos e o snapshot final, após o playback, retorna ao estado do host.
+
+`AvailabilityProjectionTest` passou as fronteiras nativas: lesão que expira exatamente na data global está recuperada; contrato que termina nessa data permanece elegível; contrato vencido um milissegundo antes não é elegível. O teste também altera os prazos finais depois do snapshot e verifica que o playback continua exibindo os valores/contexto iniciais.
+
+`python tools/build_adapter.py --test`, `python tools/tests/test_session.py`, testes HTTP do JAR para papéis e substituição, e verificação ZIP passaram. A janela `NativeRestDayWindowTest` executou os asserts de saúde/contexto, mas falhou depois em clique Robot; repetição falhou em outro botão. Essa parte gráfica não está certificada por esta rodada. O teste de sessão posterior usou host headless e cliente de texto. O cliente Swing não foi aberto novamente após a instrução do usuário. Ainda falta validar um evento real de lesão durante playback e retomada real com o novo recorte.

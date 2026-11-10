@@ -118,13 +118,26 @@ public final class SessionHost {
         result.put("sessionOptions",sessionOptions.snapshot(tokens.get(hostToken)==viewerCoach,game.hasHumanMatch(),tickOverrideMillis));
         return result;
     }
-    private Map<String,Object> presentedGame(Map<String,Object> shown){
+    Map<String,Object> presentedGame(Map<String,Object> shown){
         if(presentationStart==null || playback.status().equals("FINISHED"))return game.snapshot();
         Map<String,Object> current=game.snapshot(frozenClubs,Data.list(presentationStart.get("matches")));
+        preserveAvailability(current,presentationStart);
         List<Object> rows=Data.list(current.get("matches")),liveRows=Data.list(shown.get("matches"));
         for(int i=0;i<rows.size();i++){Map<String,Object> row=Data.map(rows.get(i)),live=Data.map(liveRows.get(i));row.put("homeGoals",live.get("homeGoals"));row.put("awayGoals",live.get("awayGoals"));row.put("played",live.get("played"));}
         return current;
     }
+    static void preserveAvailability(Map<String,Object> current,Map<String,Object> beforePlayback){
+        Map<Integer,Map<String,Object>> coaches=new HashMap<Integer,Map<String,Object>>();for(Object raw:Data.list(beforePlayback.get("coaches"))){Map<String,Object> row=Data.map(raw);coaches.put(Data.number(row.get("coachId")),row);}
+        for(Object raw:Data.list(current.get("coaches"))){Map<String,Object> row=Data.map(raw),before=coaches.get(Data.number(row.get("coachId")));if(before!=null)preservePlayers(Data.list(row.get("players")),Data.list(before.get("players")),true);}
+        Map<Integer,Map<String,Object>> clubs=new HashMap<Integer,Map<String,Object>>();for(Object raw:Data.list(beforePlayback.get("visualClubs"))){Map<String,Object> row=Data.map(raw);clubs.put(Data.number(row.get("clubId")),row);}
+        for(Object raw:Data.list(current.get("visualClubs"))){Map<String,Object> row=Data.map(raw),before=clubs.get(Data.number(row.get("clubId")));if(before!=null)preservePlayers(Data.list(row.get("players")),Data.list(before.get("players")),false);}
+    }
+    private static void preservePlayers(List<Object> current,List<Object> before,boolean coachRows){
+        Map<String,Map<String,Object>> indexed=new HashMap<String,Map<String,Object>>();for(Object raw:before){Map<String,Object> row=Data.map(raw);indexed.put(playerProjectionKey(row),row);}
+        String[] fields=coachRows?new String[]{"injuryUntilMillis","contractEndMillis","eligible","eligibilityContext"}:new String[]{"injuryUntilMillis","contractEndMillis","suspensions","eligible"};
+        for(Object raw:current){Map<String,Object> row=Data.map(raw),old=indexed.get(playerProjectionKey(row));if(old==null)continue;for(String field:fields)if(old.containsKey(field))row.put(field,old.get(field));}
+    }
+    private static String playerProjectionKey(Map<String,Object> row){int id=Data.number(row.get("playerId"));return id>=0?"id:"+id:"index:"+Data.number(row.get("index"));}
     private void reconfigureClock(){playbackClock.cancel();if(ticking && !storageFailed && playback.isLive())playbackClock.schedule(sessionOptions.interval(game.hasHumanMatch(),tickOverrideMillis));}
     private void activateOptions(String boundary)throws IOException{SessionOptions candidate=sessionOptions.activate(boundary);if(candidate!=sessionOptions){persist(candidate);sessionOptions=candidate;sessionOptions.applyNative();}}
     private void kickoffIfReady() throws IOException {
@@ -247,14 +260,14 @@ public final class SessionHost {
             int coach = authenticate(exchange);
             if (path.equals("/state") && method.equals("GET")) { reply(exchange, 200, state(coach)); return; }
             if(path.equals("/session-options") && method.equals("POST")){
-                if(coach!=tokens.get(hostToken)){Map<String,Object> body=error("Configurações controladas pelo host");body.put("code","HOST_REQUIRED");reply(exchange,403,body);return;}
+                if(coach!=tokens.get(hostToken)){Map<String,Object> body=error("ConfiguraÃ§Ãµes controladas pelo host");body.put("code","HOST_REQUIRED");reply(exchange,403,body);return;}
                 if(storageFailed){Map<String,Object> body=error("Host storage unavailable");body.put("code","STORAGE_FAILED");reply(exchange,503,body);return;}
                 try{
                     Map<String,String> data=form(exchange);if(!data.keySet().equals(new HashSet<String>(Arrays.asList("optionsRevision","changes"))))throw new IllegalArgumentException("Expected optionsRevision and changes only");
                     String revision=required(data,"optionsRevision");if(!revision.matches("0|[1-9][0-9]*"))throw new IllegalArgumentException("Invalid options revision");
                     Map<String,Object> changes=OptionsJson.parse(required(data,"changes"));
                     SessionOptions candidate=sessionOptions.change(changes,tickOverrideMillis!=null);
-                    if(Long.parseLong(revision)!=sessionOptions.revision())throw new SessionOptions.Conflict("OPTIONS_REVISION_CONFLICT","As configurações foram atualizadas");
+                    if(Long.parseLong(revision)!=sessionOptions.revision())throw new SessionOptions.Conflict("OPTIONS_REVISION_CONFLICT","As configuraÃ§Ãµes foram atualizadas");
                     if(candidate!=sessionOptions){playbackClock.cancel();persist(candidate);sessionOptions=candidate;try{sessionOptions.applyNative();}catch(RuntimeException failure){storageFailed=true;throw failure;}reconfigureClock();}
                     reply(exchange,200,state(coach));
                 }catch(SessionOptions.Conflict conflict){Map<String,Object> body=error(conflict.getMessage());body.put("code",conflict.code);body.put("sessionOptions",sessionOptions.snapshot(true,game.hasHumanMatch(),tickOverrideMillis));reply(exchange,409,body);}
@@ -262,7 +275,7 @@ public final class SessionHost {
                 catch(Exception failure){storageFailed=true;playbackClock.cancel();Map<String,Object> body=error(failure.getMessage());body.put("code","STORAGE_FAILED");reply(exchange,503,body);}return;
             }
             // Precomputed AI results must not leak through standings or player statistics.
-            if((path.equals("/overview") || path.equals("/management")) && method.equals("GET") && presentationStart!=null && !playback.status().equals("FINISHED"))throw new IllegalStateException("Consultas de gestão disponíveis após a apresentação da data");
+            if((path.equals("/overview") || path.equals("/management")) && method.equals("GET") && presentationStart!=null && !playback.status().equals("FINISHED"))throw new IllegalStateException("Consultas de gestÃ£o disponÃ­veis apÃ³s a apresentaÃ§Ã£o da data");
             if(path.equals("/management") && method.equals("GET")){reply(exchange,200,management.snapshot(coach));return;}
             if(path.equals("/overview") && method.equals("GET")){reply(exchange,200,CareerViews.snapshot(coach));return;}
             if(path.equals("/management") && method.equals("POST")){
@@ -372,7 +385,7 @@ public final class SessionHost {
             String[] names=options.containsKey("--coach-names")?new String(Base64.getUrlDecoder().decode(options.get("--coach-names")),StandardCharsets.UTF_8).split("\n",-1):null;
             if(options.containsKey("--club-assets"))game=CareerEngine.createByAssets(root.toFile(),options.get("--club-assets").split(",",-1),names);
             else if(options.containsKey("--club-ids"))game=CareerEngine.create(root.toFile(),indices(options.get("--club-ids")),names);
-            else game=CareerEngine.create(root.toFile(),options.getOrDefault("--clubs","Corinthians,Palmeiras,Santos,São Paulo").split(","),names);
+            else game=CareerEngine.create(root.toFile(),options.getOrDefault("--clubs","Corinthians,Palmeiras,Santos,SÃ£o Paulo").split(","),names);
         } else if(demo)game=Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(),root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile());
         else game=GameAdapter.readLocalSave(new File(options.get("--save")));
         if(game.isCareer()){
