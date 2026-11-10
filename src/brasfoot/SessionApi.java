@@ -4,6 +4,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 public final class SessionApi {
+    private static final int MAX_RESPONSE_BYTES=32*1024*1024;
     private final String address;
     private String token;
     public SessionApi(String address){String value=address.trim();if(!value.startsWith("http://") && !value.startsWith("https://"))value="http://"+value;this.address=value.replaceAll("/+$","");}
@@ -17,9 +18,9 @@ public final class SessionApi {
             byte[] bytes=String.join("&",fields).getBytes(StandardCharsets.UTF_8);connection.setFixedLengthStreamingMode(bytes.length);try(OutputStream out=connection.getOutputStream()){out.write(bytes);}
         }
         try{
-            int code=connection.getResponseCode();InputStream input=code>=400?connection.getErrorStream():connection.getInputStream();
+            int code=connection.getResponseCode();if(connection.getContentLengthLong()>MAX_RESPONSE_BYTES)throw new IOException("Resposta excede o limite de 32 MiB");InputStream input=code>=400?connection.getErrorStream():connection.getInputStream();
             if(input==null)throw new IOException("Host respondeu HTTP "+code);
-            ByteArrayOutputStream bytes=new ByteArrayOutputStream();try(InputStream in=input){byte[] buffer=new byte[4096];int n;while((n=in.read(buffer))!=-1){if(bytes.size()+n>8*1024*1024)throw new IOException("Resposta muito grande");bytes.write(buffer,0,n);}}
+            ByteArrayOutputStream bytes=new ByteArrayOutputStream();try(InputStream in=input){byte[] buffer=new byte[4096];int n;while((n=in.read(buffer))!=-1){if(bytes.size()+n>MAX_RESPONSE_BYTES)throw new IOException("Resposta excede o limite de 32 MiB");bytes.write(buffer,0,n);}}
             Map<String,Object> result=Data.parse(new String(bytes.toByteArray(),StandardCharsets.UTF_8));
             if(code>=400)throw new IOException(String.valueOf(result.get("error")));return result;
         }finally{connection.disconnect();}
