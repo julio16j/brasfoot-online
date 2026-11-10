@@ -35,11 +35,23 @@ public final class NativeTransferMarket {
     }
     public static void openSelected(JFrame owner,JDialog searchDialog,ah buyer,F player,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery){
         ah seller=player==null?null:player.fg();if(!canOpenSelected(buyer,player,seller))return;
-        JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,seller,buyer,false);panel.s(player);
+        JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,seller,buyer,false);selectPlayerRow(panel,player);panel.s(player);
         show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery);
     }
 
     static boolean canOpenSelected(ah buyer,F player,ah seller){return buyer!=null&&player!=null&&seller!=null;}
+
+    static boolean selectPlayerRow(a.iA panel,F player){
+        javax.swing.JTable table=(javax.swing.JTable)Data.get(panel,"zj");
+        for(int modelRow=0;modelRow<table.getModel().getRowCount();modelRow++){
+            Object value=table.getModel().getValueAt(modelRow,0);
+            if(value instanceof F&&((F)value).gD()==player.gD()){
+                int viewRow=table.convertRowIndexToView(modelRow);
+                if(viewRow>=0){table.setRowSelectionInterval(viewRow,viewRow);return true;}
+            }
+        }
+        return false;
+    }
 
     private static void show(JFrame owner,JDialog dialog,a.iA panel,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery){
         JButton buy=(JButton)Data.get(panel,"FN"),offer=(JButton)Data.get(panel,"MK"),loan=(JButton)Data.get(panel,"MJ");
