@@ -7,6 +7,7 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import best.F;
 
 /** Unit coverage for native offer confirmation and removal of the local-only double-click action. */
 public final class NativeTransferSearchTest {
@@ -38,6 +39,8 @@ public final class NativeTransferSearchTest {
 
         JTable sorted=new JTable(new DefaultTableModel(new Object[][]{{"A"},{"B"},{"C"}},new Object[]{"Player"}));sorted.setAutoCreateRowSorter(true);sorted.getRowSorter().toggleSortOrder(0);sorted.getRowSorter().toggleSortOrder(0);sorted.setRowSelectionInterval(0,0);
         check("C".equals(NativeTransferSearch.valueAtSelectedRow(sorted,0)),"Selected visual row must be converted by JTable exactly once after sorting");
+
+        F careerA=new F(),careerB=new F();careerA.setCr1(1);careerA.setCr2(2);careerB.setCr1(3);careerB.setCr2(4);check(NativeTransferSearch.compareCareerRatings(careerA,careerB)<0,"Career characteristic ordering follows the native rating-code order");DefaultTableModel careerModel=new DefaultTableModel(2,9);careerModel.setColumnIdentifiers(new Object[]{"P","","Nome","Time","L","F","Salário","Valor","Car."});careerModel.setValueAt(careerB,0,8);careerModel.setValueAt(careerA,1,8);JTable careerTable=new JTable(careerModel);careerTable.setAutoCreateRowSorter(true);NativeTransferSearch.installCareerColumnSorter(careerTable,1);careerTable.getRowSorter().toggleSortOrder(8);F firstCareer=(F)careerTable.getValueAt(0,8);check(firstCareer==careerA,"Sorted career column must retain and order the lower native rating identity first");check(NativeTransferSearch.compareCareerRatings(firstCareer,(F)careerTable.getValueAt(1,8))<=0,"Sorted career rating codes must be ascending");careerTable.setRowSelectionInterval(0,0);check(NativeTransferSearch.valueAtSelectedRow(careerTable,8)==firstCareer,"Selection after career-column sorting must resolve to the displayed player identity");
 
         Map<String,String> request=NativeTransferSearch.offerRequest(41,7,125000);
         check("offer".equals(request.get("action")),"Transfer must use the host offer operation");

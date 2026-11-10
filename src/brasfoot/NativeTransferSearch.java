@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedHashMap;
@@ -20,6 +21,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.table.TableRowSorter;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
@@ -94,7 +96,9 @@ public final class NativeTransferSearch {
     private static void checkbox(Object controls,String component,String key,Map<String,String> fields){if(((javax.swing.JCheckBox)Data.get(controls,component)).isSelected())fields.put(key,"true");}
 
     private static void runSearch(JDialog dialog,a.gx panel,JTable table,JButton button,Query query,ah buyer,int mode){Map<String,String> filters;try{filters=captureFilters(panel,mode);}catch(RuntimeException error){JOptionPane.showMessageDialog(dialog,error.getMessage(),"Procura",JOptionPane.WARNING_MESSAGE);return;}
-        JLabel count=(JLabel)Data.get(panel,"zh");button.setEnabled(false);count.setText("Buscando na carreira...");query.search(filters,result->{if(!dialog.isDisplayable())return;try{String expectedMode=mode==2?"individual":"general";if(!expectedMode.equals(result.get("mode")))throw new IllegalStateException("O modo de habilidades mudou; reabra a Procura");List<F> players=projectRows(Data.list(result.get("players")),buyer);Data.set(panel,"uK",new ArrayList<F>(players));Data.set(panel,"vp",new ArrayList<F>(players));Method refresh=panel.getClass().getDeclaredMethod(mode==2?"nE":"nF");refresh.setAccessible(true);refresh.invoke(panel);if(table.getRowCount()>0)table.setRowSelectionInterval(0,0);count.setText(countText(players.size()));}catch(Exception error){count.setText("Busca não atualizada");JOptionPane.showMessageDialog(dialog,error.getMessage(),"Procura",JOptionPane.WARNING_MESSAGE);}finally{button.setEnabled(true);}},error->{if(!dialog.isDisplayable())return;button.setEnabled(true);count.setText("Busca não atualizada");JOptionPane.showMessageDialog(dialog,error.getMessage(),"Procura",JOptionPane.WARNING_MESSAGE);});}
+        JLabel count=(JLabel)Data.get(panel,"zh");button.setEnabled(false);count.setText("Buscando na carreira...");query.search(filters,result->{if(!dialog.isDisplayable())return;try{String expectedMode=mode==2?"individual":"general";if(!expectedMode.equals(result.get("mode")))throw new IllegalStateException("O modo de habilidades mudou; reabra a Procura");List<F> players=projectRows(Data.list(result.get("players")),buyer);Data.set(panel,"uK",new ArrayList<F>(players));Data.set(panel,"vp",new ArrayList<F>(players));Method refresh=panel.getClass().getDeclaredMethod(mode==2?"nE":"nF");refresh.setAccessible(true);refresh.invoke(panel);installCareerColumnSorter(table,mode);if(table.getRowCount()>0)table.setRowSelectionInterval(0,0);count.setText(countText(players.size()));}catch(Exception error){count.setText("Busca não atualizada");JOptionPane.showMessageDialog(dialog,error.getMessage(),"Procura",JOptionPane.WARNING_MESSAGE);}finally{button.setEnabled(true);}},error->{if(!dialog.isDisplayable())return;button.setEnabled(true);count.setText("Busca não atualizada");JOptionPane.showMessageDialog(dialog,error.getMessage(),"Procura",JOptionPane.WARNING_MESSAGE);});}
+    static void installCareerColumnSorter(JTable table,int mode){if(!(table.getRowSorter() instanceof TableRowSorter))return;int column=mode==2?14:8;if(column>=table.getModel().getColumnCount())return;((TableRowSorter<?>)table.getRowSorter()).setComparator(column,new Comparator<Object>(){@Override public int compare(Object left,Object right){if(!(left instanceof F)||!(right instanceof F))return String.valueOf(left).compareToIgnoreCase(String.valueOf(right));return compareCareerRatings((F)left,(F)right);}});}
+    static int compareCareerRatings(F left,F right){int first=Integer.compare(left.getCr1(),right.getCr1());return first!=0?first:Integer.compare(left.getCr2(),right.getCr2());}
     private static String countText(int total){if(total==0)return "Nenhum jogador encontrado";if(total==1)return "1 jogador encontrado";return total+" jogadores encontrados";}
 
     static int parseNativePrice(String entered){
