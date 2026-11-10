@@ -284,7 +284,7 @@ public final class NativeClient {
     private void openNativeTransferSearch(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;
         int mode=c.a.SR.isHabilidadeIndividual()?2:1;
-        NativeTransferSearch.open(frame,owner.fg(),mode,this::submitNativeTransfer);
+        NativeTransferSearch.open(frame,owner.fg(),mode,this::submitNativeTransfer,this::submitNativeYouthPromotion);
     }
     private void openNativeTransferMarket(){
         al owner=visual.coach(coachId);if(owner==null || owner.fg()==null)return;

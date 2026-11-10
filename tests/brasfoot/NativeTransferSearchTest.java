@@ -2,6 +2,9 @@ package brasfoot;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -17,6 +20,13 @@ public final class NativeTransferSearchTest {
         check(NativeTransferSearch.isNativeOpenListener("a.gB$1"),"Nested listener's actual mixed-case class name must be recognized");
         check(!NativeTransferSearch.isNativeOpenListener("a.gy"),"Search button listener must remain untouched");
         check(!NativeTransferSearch.isNativeOpenListener("brasfoot.TransferListener"),"Online listeners must remain untouched");
+
+        AtomicInteger nativeEnter=new AtomicInteger(),onlineEnter=new AtomicInteger();JButton searchButton=new JButton();
+        searchButton.getActionMap().put("st",new AbstractAction(){@Override public void actionPerformed(java.awt.event.ActionEvent event){nativeEnter.incrementAndGet();}});
+        Action onlineSelection=new AbstractAction(){@Override public void actionPerformed(java.awt.event.ActionEvent event){onlineEnter.incrementAndGet();}};
+        NativeTransferSearch.replaceEnterAction(searchButton,onlineSelection);
+        searchButton.getActionMap().get("st").actionPerformed(new java.awt.event.ActionEvent(searchButton,java.awt.event.ActionEvent.ACTION_PERFORMED,"enter"));
+        check(nativeEnter.get()==0 && onlineEnter.get()==1,"Enter on Procurar must use the online selected-player route instead of local Times");
 
         check(NativeTransferSearch.parseNativePrice("125")==125000,"Native prices are entered in thousands");
         check(NativeTransferSearch.parseNativePrice(" 2 ")==2000,"Whitespace around native price should be accepted");

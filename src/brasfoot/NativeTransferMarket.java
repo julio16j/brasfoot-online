@@ -19,6 +19,18 @@ public final class NativeTransferMarket {
     public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
         JDialog dialog=new JDialog(owner,"Times",true);a.iA panel=new a.iA(dialog,buyer,buyer,false);
+        show(owner,dialog,panel,buyer,submit,youthPromotion);
+    }
+
+    /** Opens the visited seller's native Times window with the searched player selected. */
+    public static void openSelected(JFrame owner,JDialog searchDialog,ah buyer,F player,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion){
+        if(buyer==null || player==null || player.fg()==null || player.fg()==buyer)return;
+        ah seller=player.fg();
+        JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,buyer,seller,false);panel.s(player);
+        show(owner,dialog,panel,buyer,submit,youthPromotion);
+    }
+
+    private static void show(JFrame owner,JDialog dialog,a.iA panel,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion){
         JButton buy=(JButton)Data.get(panel,"FN"),offer=(JButton)Data.get(panel,"MK"),loan=(JButton)Data.get(panel,"MJ");
         replaceLocalHandler(buy,(event)->purchase(owner,dialog,panel,buyer,buy,submit));
         replaceLocalHandler(offer,(event)->makeOffer(owner,dialog,panel,buyer,submit));

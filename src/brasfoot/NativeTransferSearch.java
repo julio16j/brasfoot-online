@@ -10,7 +10,9 @@ import java.awt.event.MouseEvent;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -24,26 +26,28 @@ public final class NativeTransferSearch {
     public interface Submit { void send(Map<String,String> fields,Runnable success,Runnable failure); }
     private NativeTransferSearch() { }
 
-    public static void open(JFrame owner,ah buyer,int mode,Submit submit){
+    public static void open(JFrame owner,ah buyer,int mode,Submit submit){open(owner,buyer,mode,submit,null);}
+
+    public static void open(JFrame owner,ah buyer,int mode,Submit submit,NativeYouth.Promotion youthPromotion){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
         JDialog dialog=new JDialog(owner,"Procura de jogadores",true);
         a.gx panel=new a.gx(dialog,buyer,false,mode);
         JTable table=(JTable)Data.get(panel,"zj");
         for(java.awt.event.MouseListener listener:table.getMouseListeners())
             if(isNativeOpenListener(listener.getClass().getName()))table.removeMouseListener(listener);
-        table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(event.getClickCount()==2)offerSelected(owner,dialog,panel,table,buyer,submit);}});
-        AbstractAction offer=new AbstractAction(){@Override public void actionPerformed(ActionEvent event){offerSelected(owner,dialog,panel,table,buyer,submit);}};
-        panel.getActionMap().put("st",offer);table.getActionMap().put("st",offer);
+        table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(event.getClickCount()==2)offerSelected(owner,dialog,panel,table,buyer,submit,youthPromotion);}});
+        AbstractAction offer=new AbstractAction(){@Override public void actionPerformed(ActionEvent event){offerSelected(owner,dialog,panel,table,buyer,submit,youthPromotion);}};
+        replaceEnterAction(panel,offer);replaceEnterAction(table,offer);replaceEnterAction((JButton)Data.get(panel,"yY"),offer);
         dialog.add(panel);int width=mode==2?840:820,height=mode==2?670:620;
         dialog.setSize(width,height);dialog.setPreferredSize(new Dimension(width,height));dialog.setResizable(false);
         dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
     }
 
-    private static void offerSelected(JFrame owner,JDialog searchDialog,a.gx search,JTable table,ah buyer,Submit submit){
+    private static void offerSelected(JFrame owner,JDialog searchDialog,a.gx search,JTable table,ah buyer,Submit submit,NativeYouth.Promotion youthPromotion){
         int selected=table.getSelectedRow();if(selected<0)return;
         Object row=valueAtSelectedRow(table,0);if(!(row instanceof F))return;
         F player=(F)row;ah seller=player.fg();if(seller==null || seller==buyer){JOptionPane.showMessageDialog(searchDialog,"Selecione um jogador de outro clube.","Transferências",JOptionPane.INFORMATION_MESSAGE);return;}
-        showOffer(owner,searchDialog,player,buyer,submit);
+        NativeTransferMarket.openSelected(owner,searchDialog,buyer,player,submit,youthPromotion);
     }
 
     public static void showOffer(JFrame owner,JDialog parent,F player,ah buyer,Submit submit){
@@ -62,6 +66,8 @@ public final class NativeTransferSearch {
     }
 
     static boolean isNativeOpenListener(String className){if(className==null)return false;String normalized=className.toLowerCase(java.util.Locale.ROOT);return normalized.equals("a.gb")||normalized.startsWith("a.gb$");}
+
+    static void replaceEnterAction(JComponent component,Action action){component.getActionMap().put("st",action);}
 
     static int parseNativePrice(String entered){
         if(entered==null || !entered.trim().matches("[0-9]+"))throw new IllegalArgumentException("Informe um valor válido.");
