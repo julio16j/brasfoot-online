@@ -75,8 +75,7 @@ public final class NativeTransferMarket {
         ah club=academyClub(panel);if(club==null)return;button.setEnabled(false);
         query.load(club.lk(),result->{if(!times.isDisplayable())return;try{
             if(Data.number(result.get("clubId"))!=club.lk())throw new IllegalStateException("A agenda retornada pertence a outro clube");
-            javax.swing.JPanel agendaPanel=NativeCareerDialogs.agendaPanel(Data.list(result.get("fixtures")));
-            JDialog agenda=new JDialog(times,"Agenda - "+club.getNome(),true);agenda.add(agendaPanel);agenda.setSize(1000,480);agenda.setPreferredSize(new Dimension(1000,480));agenda.setResizable(true);agenda.setLocationRelativeTo(owner);agenda.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);agenda.setVisible(true);
+            NativeAgenda.open(owner,times,club,result,query);
         }catch(RuntimeException error){JOptionPane.showMessageDialog(times,error.getMessage(),"Agenda",JOptionPane.WARNING_MESSAGE);}finally{if(button.isDisplayable())button.setEnabled(true);}},error->{if(!times.isDisplayable())return;button.setEnabled(true);JOptionPane.showMessageDialog(times,"Não foi possível consultar a agenda deste clube: "+error.getMessage(),"Agenda",JOptionPane.WARNING_MESSAGE);});
     }
 

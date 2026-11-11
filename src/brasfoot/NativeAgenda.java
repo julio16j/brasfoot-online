@@ -1,0 +1,19 @@
+package brasfoot;
+import best.ah;import java.awt.*;import java.awt.event.*;import java.util.*;import javax.swing.*;
+/** A queried club agenda that keeps its last valid rows while refreshing. */
+public final class NativeAgenda {
+ private static final Map<JDialog,View> OPEN=new IdentityHashMap<JDialog,View>();private static long observedRevision=-1;
+ private NativeAgenda(){}
+ public static void open(JFrame owner,JDialog parent,ah club,Map<String,Object> snapshot,NativeTransferMarket.AgendaQuery query){
+  JDialog dialog=new JDialog(parent,"Agenda - "+club.getNome(),true);View view=new View(dialog,club.lk(),query);view.install(snapshot,null);JPanel footer=new JPanel(new FlowLayout(FlowLayout.LEFT));footer.add(view.message);footer.add(view.reload);view.root.add(footer,BorderLayout.SOUTH);view.reload.addActionListener(event->view.refresh());OPEN.put(dialog,view);dialog.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){OPEN.remove(dialog);}});dialog.setContentPane(view.root);dialog.setSize(1000,500);dialog.setMinimumSize(new Dimension(800,400));dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);if(observedRevision>=0&&view.revision>=0&&observedRevision!=view.revision)view.stale();dialog.setVisible(true);
+ }
+ public static void observeRevision(long revision){if(!SwingUtilities.isEventDispatchThread()){SwingUtilities.invokeLater(()->observeRevision(revision));return;}observedRevision=revision;for(View view:OPEN.values())if(view.revision>=0&&view.revision!=revision)view.stale();}
+ private static void onEdt(Runnable task){if(SwingUtilities.isEventDispatchThread())task.run();else SwingUtilities.invokeLater(task);}
+ private static final class View{
+  final JDialog dialog;final int clubId;final NativeTransferMarket.AgendaQuery query;final JPanel root=new JPanel(new BorderLayout());final JLabel message=new JLabel("Agenda atualizada");final JButton reload=new JButton("Atualizar");JPanel body;long revision=-1;
+  View(JDialog dialog,int clubId,NativeTransferMarket.AgendaQuery query){this.dialog=dialog;this.clubId=clubId;this.query=query;}
+  void stale(){message.setText("Dados desatualizados. Use Atualizar para consultar a carreira atual.");}
+  void install(Map<String,Object> snapshot,String selection){if(snapshot.get("clubId")==null||Data.number(snapshot.get("clubId"))!=clubId)throw new IllegalStateException("A resposta pertence a outro clube");JPanel next=NativeCareerDialogs.agendaPanel(Data.list(snapshot.get("fixtures")),selection);if(body!=null)root.remove(body);body=next;root.add(body,BorderLayout.CENTER);revision=snapshot.get("queryRevision") instanceof Number?Data.longNumber(snapshot.get("queryRevision")):-1;message.setText(Boolean.TRUE.equals(body.getClientProperty("agendaCompetitionMissing"))?"Competi\u00e7\u00e3o indispon\u00edvel; exibindo todos os jogos.":"Agenda atualizada");root.revalidate();root.repaint();}
+  void refresh(){if(query==null)return;String selected=NativeCareerDialogs.agendaCompetitionKey(body);reload.setEnabled(false);message.setText("Atualizando agenda...");try{query.load(clubId,result->onEdt(()->{if(!dialog.isDisplayable())return;try{if(!(result.get("queryRevision") instanceof Number)||(observedRevision>=0&&Data.longNumber(result.get("queryRevision"))!=observedRevision))throw new IllegalStateException("A carreira mudou durante a consulta; tente atualizar novamente");install(result,selected);}catch(RuntimeException error){message.setText("N\u00e3o foi poss\u00edvel atualizar: "+error.getMessage());}finally{reload.setEnabled(true);}}),error->onEdt(()->{if(!dialog.isDisplayable())return;reload.setEnabled(true);message.setText("N\u00e3o foi poss\u00edvel atualizar: "+error.getMessage());}));}catch(RuntimeException error){reload.setEnabled(true);message.setText("N\u00e3o foi poss\u00edvel atualizar: "+error.getMessage());}}
+ }
+}
