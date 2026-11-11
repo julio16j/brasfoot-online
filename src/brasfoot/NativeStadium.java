@@ -25,22 +25,22 @@ public final class NativeStadium {
     public static final class Quote {public final int cost;public final Calendar completion;private Quote(int cost,Calendar completion){this.cost=cost;this.completion=completion;}}
     private NativeStadium(){ }
 
-    public static void open(JFrame owner,ah club,int competitionType,Submit submit){openWithPriceSubmit(owner,club,competitionType,submit,(fields,success,failure)->submit.send(fields,success));}
-    public static JDialog openWithPriceSubmit(JFrame owner,ah club,int competitionType,Submit construction,PriceSubmit prices){
-        if(club==null || club.ev()==null)throw new IllegalStateException("Stadium information is unavailable");JDialog dialog=new JDialog(owner,"EstÃ¡dio â€” "+club.getNome(),true);a.cl panel=new a.cl(dialog,club.ev(),competitionType,club);
-        JButton expand=(JButton)Data.get(panel,"BY");for(ActionListener listener:expand.getActionListeners())expand.removeActionListener(listener);expand.addActionListener(event->openConstruction(dialog,panel,club.ev(),club,construction));StadiumPrices draft=new StadiumPrices(dialog,panel,club,prices);draft.bind();dialog.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){WindowState.unregister(dialog);}});dialog.add(panel);dialog.setSize(598,328);dialog.setPreferredSize(new Dimension(598,328));dialog.setResizable(false);dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);return dialog;
+    public static void open(JFrame owner,ah club,int competitionType,Submit submit){openWithPriceSubmit(owner,club,competitionType,(fields,success,failure)->submit.send(fields,success),(fields,success,failure)->submit.send(fields,success));}
+    public static JDialog openWithPriceSubmit(JFrame owner,ah club,int competitionType,PriceSubmit construction,PriceSubmit prices){
+        if(club==null || club.ev()==null)throw new IllegalStateException("Stadium information is unavailable");JDialog dialog=new JDialog(owner,"Estádio — "+club.getNome(),true);a.cl panel=new a.cl(dialog,club.ev(),competitionType,club);
+        JButton expand=(JButton)Data.get(panel,"BY");for(ActionListener listener:expand.getActionListeners())expand.removeActionListener(listener);expand.addActionListener(event->openConstruction(dialog,panel,club.ev(),club,construction));StadiumPrices draft=new StadiumPrices(dialog,panel,club,prices);draft.bind();dialog.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){WindowState.unregister(dialog);}});panel.setPreferredSize(new Dimension(600,330));dialog.add(panel);dialog.pack();dialog.setResizable(false);dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);return dialog;
     }
 
-    private static void openConstruction(JDialog parent,a.cl stadiumPanel,v stadium,ah club,Submit submit){
+    private static void openConstruction(JDialog parent,a.cl stadiumPanel,v stadium,ah club,PriceSubmit submit){
         JDialog dialog=new JDialog(parent,"Expansão do estádio",true);a.cq panel=new a.cq(dialog,stadium,club,stadiumPanel);
         JButton start=(JButton)Data.get(panel,"Cv");for(java.awt.event.ActionListener listener:start.getActionListeners())start.removeActionListener(listener);
         start.addActionListener(event->{Map<String,String> fields=new LinkedHashMap<String,String>();fields.put("action","stadium-expand");String[] keys={"CA","CB","CC","CD"};
             for(int i=0;i<keys.length;i++)fields.put("seats"+i,String.valueOf(((JSpinner)Data.get(panel,keys[i])).getValue()));
-            start.setEnabled(false);submit.send(fields,()->{dialog.dispose();stadiumPanel.oB();stadiumPanel.repaint();});
+            start.setEnabled(false);submit.send(fields,()->{dialog.dispose();stadiumPanel.oB();stadiumPanel.repaint();},failure->{start.setEnabled(true);if(dialog.isShowing())JOptionPane.showMessageDialog(dialog,failure.getMessage(),"Expansão do estádio",JOptionPane.ERROR_MESSAGE);});
         });
-        dialog.add(panel);dialog.setSize(438,360);dialog.setPreferredSize(new Dimension(438,360));dialog.setResizable(false);dialog.setLocationRelativeTo(parent);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
+        panel.setPreferredSize(new Dimension(438,360));dialog.add(panel);dialog.pack();dialog.setResizable(false);dialog.setLocationRelativeTo(parent);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);
     }
-    static void openConstructionPanel(JDialog parent,a.cl stadiumPanel,ah club,Submit submit){openConstruction(parent,stadiumPanel,club.ev(),club,submit);}
+    static void openConstructionPanel(JDialog parent,a.cl stadiumPanel,ah club,Submit submit){openConstruction(parent,stadiumPanel,club.ev(),club,(fields,success,failure)->submit.send(fields,success));}
 
     /** Ask the original Brasfoot expansion panel to validate and price a host-side request. */
     public static Quote quote(ah club,int[] additions){
