@@ -1,6 +1,6 @@
 # Áudio de eventos e transições online
 
-Status: requisitos abertos para PN-04; correcoes estaticas integradas em 09/11/2026; reproducao e validacao audivel pendentes. [Task e evidencias](../task-audio-eventos-repetidos.md). Nenhuma nova execucao sonora foi realizada.
+Status: requisitos abertos para PN-04; correcoes estaticas integradas em 09/11/2026; reproducao e validacao audivel pendentes. [Task e evidencias](../tasks/sem-prioridade/task-audio-eventos-repetidos.md). Nenhuma nova execucao sonora foi realizada.
 
 ## Referência nativa rastreada
 

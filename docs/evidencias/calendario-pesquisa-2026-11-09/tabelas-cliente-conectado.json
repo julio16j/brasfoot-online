@@ -1,0 +1,24 @@
+{
+  "viewerCoachId": 2172,
+  "phase": "PREPARING",
+  "standingsRows": 0,
+  "fixturesRows": 0,
+  "calendarDates": 1,
+  "competitionCount": 1,
+  "competitions": [
+    "Espanhol - La Liga"
+  ],
+  "roundsActionCompleted": true,
+  "fixturesRowsAfterRounds": 0,
+  "roundsVisible": true,
+  "groupCount": 0,
+  "captureType": "Swing printAll of actual connected dialog",
+  "hostCalendarRows": 40,
+  "hostTableCount": 1,
+  "hostTableTeams": [
+    20
+  ],
+  "phaseAfter": "PREPARING",
+  "roundUnchanged": true,
+  "packagedJar": true
+}

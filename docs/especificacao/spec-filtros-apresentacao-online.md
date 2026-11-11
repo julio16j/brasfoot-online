@@ -1,6 +1,6 @@
 # Filtros e agrupamento da apresentação de partidas
 
-Status: requisitos abertos de PN-05/PN-02/PN-11. Consumidores rastreados por código em 08/11/2026; sem execução de motor/interface ou teste nesta etapa. As seis opções de filtros continuam indisponíveis no catálogo online.
+Status: implementacao parcial em 11/11/2026. Os seis controles alteram o recorte host-backed; testes e aceite visual ainda nao foram executados. A spec permanece aberta para equivalencia nativa, retomada e cenarios de borda.
 
 ## Separar geração, simulação e apresentação
 
@@ -48,10 +48,18 @@ O host edita os filtros e publica valores confirmados e IDs de país/competiçã
 
 Separar identidade de rodada/data, competição e partida de suas posições nas listas. Mudar filtro, agrupar/desagrupar e recarregar janela não pode repetir sons/eventos, reiniciar relógio nem reconstruir rascunho de escalação. O host pode fornecer metadados suficientes para filtrar, mas deve manter a ocultação do resultado final IA até o momento apropriado.
 
-Decisões abertas: efeito imediato sobre apresentação em andamento versus próxima data; fallback quando nenhum grupo corresponde; sem clube/folga; último vínculo do técnico; e alcance da opção nomeada como histórico regional. Identificar adaptações em vez de anunciar equivalência pelo nome do checkbox.
+Decisoes desta entrega: alteracoes afetam imediatamente a apresentacao atual e todos os clientes recebem o recorte confirmado pelo host; simulacao e fixtures nao mudam. Se nenhum grupo passar nos filtros, mantem-se a partida propria; sem partida propria, exibe-se um fixture de fallback. Para regionais sem humanos, o codigo usa presenca humana atual no campeonato, nao contador de historico duravel; isso e uma adaptacao explicita. Cenarios de tecnico sem clube/ultimo vinculo e demais criterios continuam abertos.
 
 ## Aceite futuro
 
 Dois técnicos em países/competições diferentes; data só IA; folga com jogo de outro humano; país acompanhado sem humano; estadual agrupado/separado; técnico desempregado com clube anterior; tipos/regiões do mapa acima; alteração repetida sem repetir evento; reconexão/retomada com filtros mantidos. Comparar o conjunto de partidas simuladas antes/depois e provar que o filtro altera só a apresentação prevista. Nenhum desses critérios foi executado nesta etapa.
 
-Relacionados: [configurações](spec-configuracoes-online.md), [consultas históricas](spec-consultas-historicas-online.md), [áudio](spec-audio-eventos-online.md), [calendários](../task-calendarios.md) e [disponibilidade](spec-disponibilidade-jogadores-online.md).
+Relacionados: [configurações](spec-configuracoes-online.md), [consultas históricas](spec-consultas-historicas-online.md), [áudio](spec-audio-eventos-online.md), [calendários](../resolvidos/task-calendarios.md) e [disponibilidade](spec-disponibilidade-jogadores-online.md).
+
+
+
+## Entrega parcial de 11/11/2026
+
+A interface permite editar paises acompanhados e mover competicoes entre "Ver partidas" e "Ver so resultados". As seis chaves sao validadas, persistidas e publicadas pelo host. Mudancas atualizam a lista nativa na data corrente sem reconstruir o motor. Competicoes com confronto humano sao sempre preservadas; "so resultados" omite eventos e sons de competicoes sem humanos, mantendo o resultado do host. O agrupamento estadual usa o setter nativo. O recorte de partidas nao altera `GameAdapter.currentMatches()` nem os efeitos pos-data.
+
+Compilacao e empacotamento foram executados. Testes e validacao visual ficam para o usuario nesta rodada. Ver [registro de implementacao](../implementacoes/implementacao-filtros-apresentacao.md).

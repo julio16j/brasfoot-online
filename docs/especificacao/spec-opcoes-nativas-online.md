@@ -1,8 +1,8 @@
 # Especificação: Opções nativas como acesso às configurações online
 
-Investigação: 6 de novembro de 2026. Revisão: 7 de novembro de 2026. Status: implementada, aguardando validação do usuário. Ver [implementação e validação](../implementacao-opcoes-nativas-online.md). O texto abaixo preserva o contrato e o desenho técnico da correção.
+Investigação: 6 de novembro de 2026. Revisão: 7 de novembro de 2026. Status: implementada, aguardando validação do usuário. Ver [implementação e validação](../implementacoes/implementacao-opcoes-nativas-online.md). O texto abaixo preserva o contrato e o desenho técnico da correção.
 
-Origem: [task de Opções nativas](../task-opcoes-nativas-online.md). Contrato base: [spec das configurações online](spec-configuracoes-online.md). A [entrega anterior](../resolvidos/task-configuracoes-online.md) continua aceita quanto às opções suportadas e ao efeito de velocidade.
+Origem: [task de Opções nativas](../tasks/sem-prioridade/task-opcoes-nativas-online.md). Contrato base: [spec das configurações online](spec-configuracoes-online.md). A [entrega anterior](../resolvidos/task-configuracoes-online.md) continua aceita quanto às opções suportadas e ao efeito de velocidade.
 
 ## Problema confirmado
 
@@ -40,7 +40,7 @@ Consequência: construir o `fB` completo e remover os listeners depois é insufi
 4. O host continua a única autoridade, inclusive para áudio, tema e cores. Participantes podem consultar Preferências; fechar e consultar listas não são operações de edição.
 5. Interações não devem escrever `options.bcf`, modificar o motor local como confirmação da escolha nem chamar o navegador nativo para abrir uma segunda tela offline.
 6. Abrir ou fechar Preferências não pausa o motor, libera Pronto, altera escalação ou reinicia uma partida.
-7. A correção do áudio repetido pertence à [task de áudio](../task-audio-eventos-repetidos.md). Manter `soundsEnabled` coerente sem declarar esse defeito corrigido por esta entrega.
+7. A correção do áudio repetido pertence à [task de áudio](../tasks/sem-prioridade/task-audio-eventos-repetidos.md). Manter `soundsEnabled` coerente sem declarar esse defeito corrigido por esta entrega.
 
 ## Desenho proposto
 

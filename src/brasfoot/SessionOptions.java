@@ -42,13 +42,12 @@ public final class SessionOptions {
         add("windowThemeIndex","CorTema","Tema de cores das janelas","integer",4,false,false,"IMMEDIATE",null);
         add("playerListColorsEnabled","UsaCoresLista","Usar cores na lista de jogadores","boolean",1,false,false,"IMMEDIATE",null);
         add("playerListPalette","CoresLista","Paleta de jogadores","palette",5,false,false,"IMMEDIATE",null);
-        String filters="Precedência e projeção dos filtros nativos ainda não integradas";
-        add("groupStateCompetitions","VerEstaduaisAgrupados","Ver todos os estaduais agrupados","boolean",1,false,false,"IMMEDIATE",filters);
-        add("hideNonHumanNationalLeagues","IgnoraLigas","Ocultar ligas nacionais não humanas","boolean",1,false,false,"IMMEDIATE",filters);
-        add("hideStateRegionalOutsideBrazil","IgnoraEstadual","Ocultar estaduais/regionais fora do Brasil","boolean",1,false,false,"IMMEDIATE",filters);
-        add("hideRegionalsWithoutHumanHistory","RegionaisSemHumanos","Ocultar regionais sem histórico humano","boolean",1,true,true,"IMMEDIATE",filters);
-        add("watchedLeagueCountryIds",null,"Ligas por país","countries",0,false,false,"IMMEDIATE",filters);
-        add("nonHumanCompetitionPlayback","VerJint","Competições sem times humanos","competitions",21,false,false,"IMMEDIATE",filters);
+        add("groupStateCompetitions","VerEstaduaisAgrupados","Ver todos os estaduais agrupados","boolean",1,false,false,"IMMEDIATE",null);
+        add("hideNonHumanNationalLeagues","IgnoraLigas","Ocultar ligas nacionais não humanas","boolean",1,false,false,"IMMEDIATE",null);
+        add("hideStateRegionalOutsideBrazil","IgnoraEstadual","Ocultar estaduais/regionais fora do Brasil","boolean",1,false,false,"IMMEDIATE",null);
+        add("hideRegionalsWithoutHumanHistory","RegionaisSemHumanos","Ocultar regionais sem histórico humano","boolean",1,true,true,"IMMEDIATE",null);
+        add("watchedLeagueCountryIds",null,"Ligas por país","countries",0,false,false,"IMMEDIATE",null);
+        add("nonHumanCompetitionPlayback","VerJint","Competições sem times humanos","competitions",21,false,false,"IMMEDIATE",null);
     }
     private final long revision;
     private final Map<String,Object> values,pending;
@@ -59,6 +58,7 @@ public final class SessionOptions {
     public static SessionOptions load(Map<String,Object> saved){
         Map<String,Object> values=new LinkedHashMap<String,Object>();
         for(Adapter adapter:ADAPTERS.values())values.put(adapter.key,adapter.property==null?countrySelection():validate(adapter,adapter.read(c.a.vM())));
+        if(saved==null){values.put("humanSpeedIndex",Integer.valueOf(4));values.put("nonHumanSpeedIndex",Integer.valueOf(c.a.vL()?5:4));}
         Map<String,Object> pending=new LinkedHashMap<String,Object>();long revision=0;
         if(saved!=null){if(integer(saved.get("schemaVersion"),1)!=1)throw new IllegalArgumentException("Invalid options schema");revision=longInteger(saved.get("revision"));
             if(!(saved.get("values") instanceof Map) || !(saved.get("pendingValues") instanceof Map))throw new IllegalArgumentException("Invalid persisted session options");
@@ -78,6 +78,13 @@ public final class SessionOptions {
         if(adapter.kind.equals("countries")){if(!(value instanceof List))throw new IllegalArgumentException("Expected country IDs");SortedSet<Integer> ids=new TreeSet<Integer>();for(Object raw:(List<?>)value){int id=integer(raw,Integer.MAX_VALUE);boolean found=false;for(Object country:c.a.SR.N())if(countryId((best.Z)country)==id)found=true;if(!found || !ids.add(id))throw new IllegalArgumentException("Unknown or duplicate country ID");}return Collections.unmodifiableList(new ArrayList<Integer>(ids));}
         if(!(value instanceof Map))throw new IllegalArgumentException("Expected competition map");Map<String,Object> map=new LinkedHashMap<String,Object>();for(Map.Entry<?,?> entry:((Map<?,?>)value).entrySet()){String key=String.valueOf(entry.getKey());if(!key.matches("([0-9]|1[0-9]|20)") || !(entry.getValue() instanceof Boolean))throw new IllegalArgumentException("Unknown competition or invalid value");map.put(key,entry.getValue());}return Collections.unmodifiableMap(map);
     }
+    static int competitionPreferenceIndex(int type,int region){
+        if(type==2)return 8;if(type==3)return 9;if(type==4)return region>=0&&region<=5?region:-1;
+        if(type==6)return region==0?6:region==1?7:-1;if(type==12)return 14;if(type==10)return 10;
+        if(type==8)return 12;if(type==11)return 13;if(type==15)return 15;
+        if(type==7)return region==7?11:16;if(type==9)return 17;if(type==14)return 18;if(type==5)return 19;if(type==13)return 20;
+        return type==1?0:-1;
+    }
     // best.Z's stable native country ID, not the row number of b.A.
     static int countryId(best.Z country){return Data.number(Data.get(country,"pais"));}
     private static List<Integer> countrySelection(){List<Integer> ids=new ArrayList<Integer>();for(Object raw:c.a.SR.N()){best.Z country=(best.Z)raw;if(country.jr())ids.add(countryId(country));}Collections.sort(ids);return Collections.unmodifiableList(ids);}
@@ -93,7 +100,7 @@ public final class SessionOptions {
     }
     public SessionOptions activate(String boundary){Map<String,Object> next=new LinkedHashMap<String,Object>(values),waiting=new LinkedHashMap<String,Object>(pending);for(String key:pending.keySet())if(adapter(key).boundary.equals(boundary)){next.put(key,pending.get(key));waiting.remove(key);}return waiting.equals(pending)?this:new SessionOptions(revision+1,next,waiting,maxSpeed);}
     public void applyNative(){for(Adapter adapter:ADAPTERS.values())if(adapter.property!=null)adapter.apply(values.get(adapter.key));for(Object raw:c.a.SR.N()){best.Z country=(best.Z)raw;country.B(((List<?>)values.get("watchedLeagueCountryIds")).contains(countryId(country)));}if(!Boolean.TRUE.equals(values.get("soundsEnabled")))a.dV.qb();}
-    public static void project(Map<String,Object> snapshot){Map<String,Object> values=Data.map(snapshot.get("values"));for(Adapter adapter:ADAPTERS.values())if(adapter.property!=null && values.containsKey(adapter.key))adapter.apply(validate(adapter,values.get(adapter.key)));}
+    public static void project(Map<String,Object> snapshot){Map<String,Object> values=Data.map(snapshot.get("values"));for(Adapter adapter:ADAPTERS.values())if(adapter.property!=null && values.containsKey(adapter.key))adapter.apply(validate(adapter,values.get(adapter.key)));if(values.containsKey("watchedLeagueCountryIds"))for(Object raw:c.a.SR.N()){best.Z country=(best.Z)raw;country.B(((List<?>)values.get("watchedLeagueCountryIds")).contains(countryId(country)));}}
     public static long interval(int index,boolean humans){if(index<0 || index>5)throw new IllegalArgumentException("Invalid speed index");return (humans?best.aq.rz:best.aq.rA)[index];}
     public long interval(boolean humans,Long override){return override!=null?override:interval((Integer)values.get(humans?"humanSpeedIndex":"nonHumanSpeedIndex"),humans);}
     public Map<String,Object> persisted(){Map<String,Object> out=new LinkedHashMap<String,Object>();out.put("schemaVersion",1);out.put("revision",revision);out.put("values",values);out.put("pendingValues",pending);return out;}

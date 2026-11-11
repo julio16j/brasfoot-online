@@ -1,6 +1,6 @@
 # Papéis especiais na escalação online
 
-Status: integracao da preparacao PN-06 concluida; certificacao de efeitos e retomada parcial. Revisao de 09/11/2026. [Backlog](../task-paridade-nativa.md).
+Status: integracao da preparacao PN-06 concluida; certificacao de efeitos e retomada parcial. Revisao de 09/11/2026. [Backlog](../tasks/sem-prioridade/task-paridade-nativa.md).
 
 ## Origem e identidade nativa
 

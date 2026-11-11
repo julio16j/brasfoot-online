@@ -1,0 +1,13 @@
+{
+  "viewerCoachId": 2172,
+  "phase": "PREPARING",
+  "rows": 0,
+  "calendarDates": 1,
+  "filterCount": 1,
+  "calendarTitle": "Calend\u00e1rio - Real Madrid",
+  "captureType": "Swing printAll of actual connected dialog",
+  "hostCalendarRows": 40,
+  "phaseAfter": "PREPARING",
+  "roundUnchanged": true,
+  "packagedJar": true
+}

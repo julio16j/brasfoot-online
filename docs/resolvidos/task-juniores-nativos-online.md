@@ -1,8 +1,10 @@
 # Juniores nativos sem projeção autoritativa
 
-Status: problema especifico da projecao autoritativa da academia resolvido e integrado na `main`, 09/11/2026. Projecao, promocao, Pronto, rollback HTTP, janela aberta, concorrencia com editor e retomada validados. Ver [registro da implementacao](../implementacao-juniores-nativos-online.md).
+Status: problema especifico da projecao autoritativa da academia resolvido e integrado na `main`, 09/11/2026. Projecao, promocao, Pronto, rollback HTTP, janela aberta, concorrencia com editor e retomada validados. Ver [registro da implementacao](../implementacoes/implementacao-juniores-nativos-online.md).
 
-Requisitos detalhados: [spec da academia nativa](especificacao/spec-juniores-nativos-online.md).
+Requisitos detalhados: [spec da academia nativa](../especificacao/spec-juniores-nativos-online.md).
+
+Limite adicional identificado em 09/11: esta resolução cobre o acesso Juniores do dashboard integrado a NativeYouth. [Times→Academia](../tasks/sem-prioridade/task-academia-via-times-online.md) ainda constrói a.ds diretamente e mantém callbacks originais, conforme nova task aberta. Os testes preservados abaixo continuam válidos para o percurso principal; não certificam esse acesso secundário.
 
 ## Diagnóstico e execução
 
@@ -24,7 +26,7 @@ Dependências: contrato de gestão, revisão por técnico, projeção completa d
 
 ## Implementação PN-08 em branch isolada — 09/11/2026
 
-Implementados na branch `impl/juniores-nativos-v2`: projeção autoritativa de `ky()` com ID, país, lado, características, desenvolvimento e CPE; identidade preservada e academia nativa ligada ao comando `promote` do host. Dispensar, propor compra e definir apelido ficam explicitamente desativados por não haver contrato online equivalente. O registro [implementacao-juniores-nativos-online.md](implementacao-juniores-nativos-online.md) discrimina cenários, hashes e limites. A academia foi aberta e capturada em janela real; promoção foi exercitada contra host persistido e projetada em segundo cliente. Isso não encerra a task nem integra a branch.
+Implementados na branch `impl/juniores-nativos-v2`: projeção autoritativa de `ky()` com ID, país, lado, características, desenvolvimento e CPE; identidade preservada e academia nativa ligada ao comando `promote` do host. Dispensar, propor compra e definir apelido ficam explicitamente desativados por não haver contrato online equivalente. O registro [implementacao-juniores-nativos-online.md](../implementacoes/implementacao-juniores-nativos-online.md) discrimina cenários, hashes e limites. A academia foi aberta e capturada em janela real; promoção foi exercitada contra host persistido e projetada em segundo cliente. Isso não encerra a task nem integra a branch.
 
 Pendências de aceite: injeção de falha real de armazenamento durante promoção, retomada após reinício do host, atualização de uma janela já aberta e invalidação do rascunho de escalação/Pronto após promoção. O uso direto de juniores na escalação, compra de juniores e formação por aposentadoria continuam fora deste recorte.
 

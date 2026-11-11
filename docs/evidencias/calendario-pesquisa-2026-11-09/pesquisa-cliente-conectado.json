@@ -1,0 +1,21 @@
+{
+  "viewerCoachId": 2171,
+  "phase": "PREPARING",
+  "query": "Federico Chiesa",
+  "rows": 0,
+  "dialogTitle": "Procura de jogadores",
+  "nativePlayerIndex": 18572,
+  "nativeClubIndex": 778,
+  "calendarDates": 1,
+  "mouseListeners": [
+    "javax.swing.ToolTipManager",
+    "javax.swing.plaf.basic.BasicTableUI$Handler",
+    "a.gB",
+    "brasfoot.NativeTransferSearch$1"
+  ],
+  "captureType": "Swing printAll of actual connected dialog",
+  "hostCalendarRows": 53,
+  "phaseAfter": "PREPARING",
+  "roundUnchanged": true,
+  "packagedJar": true
+}

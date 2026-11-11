@@ -2,6 +2,7 @@ package brasfoot;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -15,7 +16,12 @@ public final class NativeMatchPanel extends a.dV {
     private static final long serialVersionUID=1L;
     private final Set<I> hiddenAttendance=Collections.newSetFromMap(new IdentityHashMap<I,Boolean>());
     private final Set<String> received=new HashSet<String>();
+    private final Map<I,String> rowKeys=new IdentityHashMap<I,String>();
     private final java.util.List<I> matches;
+    private Map<String,Object> competitionPlayback=Collections.emptyMap();
+    private Set<best.at> humanCompetitions=Collections.newSetFromMap(new IdentityHashMap<best.at,Boolean>());
+    private boolean groupedStates,suppressNextAudio;
+    private Integer supportedClubId;
     private boolean mute;
     private String lastStatus="NOT_STARTED";
     private boolean first=true;
@@ -25,18 +31,33 @@ public final class NativeMatchPanel extends a.dV {
     private final java.util.List<Integer> playedSounds=new ArrayList<Integer>();
     private static final java.util.List<javax.swing.Timer> pendingAudio=new ArrayList<javax.swing.Timer>();
     private static long audioTailMillis,audioGeneration;
-    private Consumer<I> lineupOpener;
-    public NativeMatchPanel(JFrame frame,java.util.List<I> matches) {
-        super(frame,720);this.matches=matches;
+    private BiConsumer<I,ah> lineupOpener;
+    private Consumer<I> defaultLineupOpener;
+    public NativeMatchPanel(JFrame frame,java.util.List<I> matches) {this(frame,matches,Collections.<String,Object>emptyMap());}
+    public NativeMatchPanel(JFrame frame,java.util.List<I> matches,Map<String,Object> settings) {
+        super(frame,720);this.matches=new ArrayList<I>(matches);presentationSettings(settings);
         ArrayList<best.at> competitions=new ArrayList<best.at>();
-        for(I match:matches)if(!competitions.contains(match.hy()))competitions.add(match.hy());
+        for(I match:this.matches)if(match.hy()!=null && !competitions.contains(match.hy()))competitions.add(match.hy());
         Y(competitions);
         if(GO!=null)GO.stop();
         disableLocalActions(this);
-        for(String key:new String[]{"Hp","Ho"}){JLabel team=(JLabel)Data.get(this,key);team.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));team.setToolTipText("Abrir escalação");team.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){if(!matches.isEmpty() && lineupOpener!=null)lineupOpener.accept(matches.get(0));}});}
-        JTable table=(JTable)Data.get(this,"Hs");table.setDefaultRenderer(components.v.class,new b.aG(){@Override public Component getTableCellRendererComponent(JTable grid,Object value,boolean selected,boolean focused,int row,int column){Component rendered=super.getTableCellRendererComponent(grid,value,selected,focused,row,column);if(column==0&&value instanceof components.v){I fixture=((components.v)value).tR();if(hiddenAttendance.contains(fixture))setText((fixture.ev()==null?fixture.ik():fixture.ev().dS())+" | --");}return rendered;}});table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){int row=table.rowAtPoint(event.getPoint());if(row<0 || row>=qi().size() || lineupOpener==null)return;I selected=((components.v)qi().get(row)).tR();if(selected!=null)lineupOpener.accept(selected);}});
+        for(String key:new String[]{"Hp","Ho"}){JLabel team=(JLabel)Data.get(this,key);team.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));team.setToolTipText("Abrir escala\u00e7\u00e3o");team.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){I match=featuredMatch();if(match!=null && lineupOpener!=null)lineupOpener.accept(match,key.equals("Hp")?match.hc():match.hd());}});}
+        JTable table=(JTable)Data.get(this,"Hs");table.setDefaultRenderer(components.v.class,new b.aG(){@Override public Component getTableCellRendererComponent(JTable grid,Object value,boolean selected,boolean focused,int row,int column){Component rendered=super.getTableCellRendererComponent(grid,value,selected,focused,row,column);if(column==0&&value instanceof components.v){I fixture=((components.v)value).tR();if(hiddenAttendance.contains(fixture))setText((fixture.ev()==null?fixture.ik():fixture.ev().dS())+" | --");}return rendered;}});table.addMouseListener(new MouseAdapter(){@Override public void mouseClicked(MouseEvent event){int row=table.rowAtPoint(event.getPoint());if(row<0 || row>=qi().size() || lineupOpener==null)return;I selected=((components.v)qi().get(row)).tR();if(selected!=null){if(defaultLineupOpener!=null)defaultLineupOpener.accept(selected);else if(lineupOpener!=null)lineupOpener.accept(selected,selected.hc());}}});
     }
-    public void lineupOpener(Consumer<I> opener){lineupOpener=opener;}
+    private I featuredMatch(){int index=Data.number(Data.get(this,"GW"));if(index>=0 && index<qi().size()){Object item=((components.v)qi().get(index)).tR();if(item instanceof I)return (I)item;}return matches.isEmpty()?null:matches.get(0);}
+    private void presentationSettings(Map<String,Object> values){competitionPlayback=values.containsKey("nonHumanCompetitionPlayback")?new LinkedHashMap<String,Object>(Data.map(values.get("nonHumanCompetitionPlayback"))):Collections.<String,Object>emptyMap();groupedStates=Boolean.TRUE.equals(values.get("groupStateCompetitions"));humanCompetitions.clear();for(I match:matches)if(match.hy()!=null && (Boolean.TRUE.equals(match.hc().jZ()) || Boolean.TRUE.equals(match.hd().jZ())))humanCompetitions.add(match.hy());}
+    public void presentation(java.util.List<I> next,Map<String,Object> values){
+        Set<I> wasResultsOnly=Collections.newSetFromMap(new IdentityHashMap<I,Boolean>());for(I match:matches)if(isResultsOnly(match))wasResultsOnly.add(match);
+        Map<String,Object> newPlayback=values.containsKey("nonHumanCompetitionPlayback")?Data.map(values.get("nonHumanCompetitionPlayback")):Collections.<String,Object>emptyMap();boolean playbackChanged=!competitionPlayback.equals(newPlayback);
+        boolean changed=matches.size()!=next.size();if(!changed)for(int i=0;i<matches.size();i++)if(matches.get(i).hy()!=next.get(i).hy()){changed=true;break;}
+        boolean regrouped=groupedStates!=Boolean.TRUE.equals(values.get("groupStateCompetitions"));presentationSettings(values);
+        if(playbackChanged)for(I match:matches)if(!wasResultsOnly.contains(match) && isResultsOnly(match)){String row=rowKeys.get(match);if(row!=null){final String prefix=row+":";received.removeIf(key->key.startsWith(prefix));}match.hE().clear();}
+        if(changed || regrouped || playbackChanged){matches.clear();matches.addAll(next);presentationSettings(values);ArrayList<best.at> competitions=new ArrayList<best.at>();for(I match:matches)if(match.hy()!=null && !competitions.contains(match.hy()))competitions.add(match.hy());Y(competitions);if(supportedClubId!=null)highlightClub(supportedClubId);}
+        suppressNextAudio=true;
+    }
+    private boolean isResultsOnly(I match){if(match.hy()==null || humanCompetitions.contains(match.hy()))return false;int index=SessionOptions.competitionPreferenceIndex(match.hy().b(),match.hy().el());if(index<0)return false;Object value=competitionPlayback.get(String.valueOf(index));return Boolean.FALSE.equals(value);}
+    public void matchLineupOpener(BiConsumer<I,ah> opener){lineupOpener=opener;}
+    public void lineupOpener(Consumer<I> opener){defaultLineupOpener=opener;}
     @Override public void oR(){if(GO!=null)GO.stop();}
     @Override public void qa(){ }
     @Override public void aa(boolean value){ }
@@ -55,7 +76,7 @@ public final class NativeMatchPanel extends a.dV {
             }
         }
     }
-    public void supportedClub(int id){highlightClub(id);}
+    public void supportedClub(int id){supportedClubId=id;highlightClub(id);}
     public void muted(boolean value){mute=value;c.a.SR.setUsaSons(!value);if(value){stopAudio();a.dV.qb();}}
     private void sound(int index){sounds.add(index);if(!mute){playedSounds.add(index);dk(index);}}
     private void delayedSound(int index){sounds.add(index);if(mute)return;long now=System.currentTimeMillis();audioTailMillis=Math.max(now+2000L,audioTailMillis+2000L);int delay=(int)Math.min(Integer.MAX_VALUE,audioTailMillis-now);long generation=audioGeneration;final javax.swing.Timer timer=new javax.swing.Timer(delay,event->{pendingAudio.remove((javax.swing.Timer)event.getSource());if(!mute && generation==audioGeneration && c.a.SR.isUsaSons()){playedSounds.add(index);dk(index);}if(pendingAudio.isEmpty())audioTailMillis=0L;});pendingAudio.add(timer);timer.setRepeats(false);timer.start();}
@@ -72,11 +93,11 @@ public final class NativeMatchPanel extends a.dV {
         Map<String,Object> live=Data.map(state.get("playback"));
         String status=(String)live.get("status");
         // The first payload is a baseline; its historical event effects must not play.
-        boolean replayEvents=!first;
+        boolean replayEvents=!first && !suppressNextAudio;suppressNextAudio=false;
         java.util.List<Object> rows=new ArrayList<Object>();
         for(I match:matches)for(Object raw:Data.list(live.get("matches"))){Map<String,Object> row=Data.map(raw);if(Data.number(row.get("homeId"))==match.hc().lk() && Data.number(row.get("awayId"))==match.hd().lk()){rows.add(row);break;}}
         for(int index=0;index<rows.size() && index<matches.size();index++){
-            Map<String,Object> row=Data.map(rows.get(index));I match=matches.get(index);
+            Map<String,Object> row=Data.map(rows.get(index));I match=matches.get(index);rowKeys.put(match,String.valueOf(row.get("id")));
             Data.set(match,"fB",Data.number(row.get("homeGoals")));Data.set(match,"fC",Data.number(row.get("awayGoals")));
             match.a(Boolean.TRUE.equals(row.get("played")));
             if(row.containsKey("attendance")){if(row.get("attendance")==null)hiddenAttendance.add(match);else hiddenAttendance.remove(match);Data.set(match,"fD",new int[]{row.get("attendance")==null?0:Data.number(row.get("attendance")),0,0,0});}
@@ -86,6 +107,7 @@ public final class NativeMatchPanel extends a.dV {
             if(wrapper==null)continue;
             Data.set(wrapper,"Pq",match.hu());Data.set(wrapper,"Pr",match.hw());
             wrapper.tW();
+            if(isResultsOnly(match))continue;
             for(Object raw:Data.list(row.get("events"))){
                 Map<String,Object> event=Data.map(raw);
                 if(event.get("clubId")==null)continue;

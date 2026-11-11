@@ -1,6 +1,6 @@
 # Especificação técnica: configurações nativas na sessão online
 
-Data: 6 de novembro de 2026. Status: entrega atual resolvida por aceite do usuário; cobertura do catálogo completo ainda parcial. Ver [aceite](../resolvidos/task-configuracoes-online.md) e [progresso e pendências](../implementacao-configuracoes-online.md).
+Data: 6 de novembro de 2026. Status: entrega atual resolvida por aceite do usuário; cobertura do catálogo completo ainda parcial. Ver [aceite](../resolvidos/task-configuracoes-online.md) e [progresso e pendências](../implementacoes/implementacao-configuracoes-online.md).
 
 ## Objetivo e escopo
 
@@ -12,7 +12,7 @@ Fazer o relógio autoritativo respeitar as velocidades nativas escolhidas pelo h
 
 Inclui todas as configurações disponíveis na tela nativa de opções (`a.fB`): simulação, gestão, salvamento, apresentação, som, cores e filtros. Todas seguem edição exclusiva do host, consulta pelos participantes, sincronização e persistência. Controles ainda sem integração permanecem sem edição, inclusive no host, até a entrega do efeito correspondente.
 
-Esta especificação fica em `docs/especificacao/spec-configuracoes-online.md` e abrange todas as configurações. As seções de relógio continuam detalhando a velocidade; o contrato comum abaixo se aplica ao restante das opções. O progresso e os limites da implementação estão em [implementacao-configuracoes-online.md](../implementacao-configuracoes-online.md).
+Esta especificação fica em `docs/especificacao/spec-configuracoes-online.md` e abrange todas as configurações. As seções de relógio continuam detalhando a velocidade; o contrato comum abaixo se aplica ao restante das opções. O progresso e os limites da implementação estão em [implementacao-configuracoes-online.md](../implementacoes/implementacao-configuracoes-online.md).
 
 ## Regras de negócio
 

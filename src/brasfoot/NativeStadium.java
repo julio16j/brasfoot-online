@@ -27,12 +27,12 @@ public final class NativeStadium {
 
     public static void open(JFrame owner,ah club,int competitionType,Submit submit){openWithPriceSubmit(owner,club,competitionType,(fields,success,failure)->submit.send(fields,success),(fields,success,failure)->submit.send(fields,success));}
     public static JDialog openWithPriceSubmit(JFrame owner,ah club,int competitionType,PriceSubmit construction,PriceSubmit prices){
-        if(club==null || club.ev()==null)throw new IllegalStateException("Stadium information is unavailable");JDialog dialog=new JDialog(owner,"Estádio — "+club.getNome(),true);a.cl panel=new a.cl(dialog,club.ev(),competitionType,club);
+        if(club==null || club.ev()==null)throw new IllegalStateException("Stadium information is unavailable");JDialog dialog=new JDialog(owner,"Estádio — "+club.getNome(),true);dialog.setUndecorated(true);a.cl panel=new a.cl(dialog,club.ev(),competitionType,club);
         JButton expand=(JButton)Data.get(panel,"BY");for(ActionListener listener:expand.getActionListeners())expand.removeActionListener(listener);expand.addActionListener(event->openConstruction(dialog,panel,club.ev(),club,construction));StadiumPrices draft=new StadiumPrices(dialog,panel,club,prices);draft.bind();dialog.addWindowListener(new WindowAdapter(){@Override public void windowClosed(WindowEvent event){WindowState.unregister(dialog);}});panel.setPreferredSize(new Dimension(600,330));dialog.add(panel);dialog.pack();dialog.setResizable(false);dialog.setLocationRelativeTo(owner);dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);dialog.setVisible(true);return dialog;
     }
 
     private static void openConstruction(JDialog parent,a.cl stadiumPanel,v stadium,ah club,PriceSubmit submit){
-        JDialog dialog=new JDialog(parent,"Expansão do estádio",true);a.cq panel=new a.cq(dialog,stadium,club,stadiumPanel);
+        JDialog dialog=new JDialog(parent,"Expansão do estádio",true);dialog.setUndecorated(true);a.cq panel=new a.cq(dialog,stadium,club,stadiumPanel);
         JButton start=(JButton)Data.get(panel,"Cv");for(java.awt.event.ActionListener listener:start.getActionListeners())start.removeActionListener(listener);
         start.addActionListener(event->{Map<String,String> fields=new LinkedHashMap<String,String>();fields.put("action","stadium-expand");String[] keys={"CA","CB","CC","CD"};
             for(int i=0;i<keys.length;i++)fields.put("seats"+i,String.valueOf(((JSpinner)Data.get(panel,keys[i])).getValue()));
@@ -57,9 +57,10 @@ public final class NativeStadium {
     static final class StadiumPrices {
         final JDialog dialog;final a.cl panel;final ah club;final PriceSubmit submit;final int[] draft=new int[4];final ChangeListener[] changes=new ChangeListener[4];final javax.swing.event.ChangeListener modeChange;boolean suggested,inFlight;
         StadiumPrices(JDialog dialog,a.cl panel,ah club,PriceSubmit submit){this.dialog=dialog;this.panel=panel;this.club=club;this.submit=submit;suggested=club.ev().dV();int[] prices=club.ev().dU();String[] keys={"Cl","Ci","Cj","Ck"};for(int i=0;i<4;i++)draft[i]=prices[i];modeChange=event->suggested=((JCheckBox)event.getSource()).isSelected();}
-        void bind(){String[] keys={"Cl","Ci","Cj","Ck"};for(int i=0;i<4;i++){final int index=i;JSpinner spinner=(JSpinner)Data.get(panel,keys[i]);spinner.setValue(draft[i]);changes[i]=event->draft[index]=((Number)((JSpinner)event.getSource()).getValue()).intValue();spinner.addChangeListener(changes[i]);}
-            JCheckBox mode=(JCheckBox)Data.get(panel,"Cb");mode.setSelected(suggested);mode.addChangeListener(modeChange);
-            JButton close=(JButton)Data.get(panel,"BZ");for(ActionListener listener:close.getActionListeners())close.removeActionListener(listener);close.addActionListener(event->confirm());WindowState.register(dialog,this);
+        void bind(){String[] keys={"Cl","Ci","Cj","Ck"};for(int i=0;i<4;i++){final int index=i;JSpinner spinner=(JSpinner)Data.get(panel,keys[i]);spinner.setValue(draft[i]);spinner.setToolTipText("Desmarque 'Usar sempre os preços sugeridos' para editar este setor.");changes[i]=event->draft[index]=((Number)((JSpinner)event.getSource()).getValue()).intValue();spinner.addChangeListener(changes[i]);}
+            JCheckBox mode=(JCheckBox)Data.get(panel,"Cb");mode.setSelected(suggested);mode.setToolTipText("Desmarque para liberar a edição manual dos quatro preços de ingressos.");mode.addChangeListener(modeChange);
+            ((JButton)Data.get(panel,"Ca")).setToolTipText("Preencher os valores sugeridos pelo Brasfoot.");
+            JButton close=(JButton)Data.get(panel,"BZ");close.setToolTipText("Salvar os preços no servidor e fechar.");for(ActionListener listener:close.getActionListeners())close.removeActionListener(listener);close.addActionListener(event->confirm());WindowState.register(dialog,this);
         }
         void snapshot(ah projected){if(projected==club || projected.ev()==null)return;int[] prices=projected.ev().dU();String[] keys={"Cl","Ci","Cj","Ck"};for(int i=0;i<4;i++){draft[i]=prices[i];((JSpinner)Data.get(panel,keys[i])).setValue(prices[i]);}suggested=projected.ev().dV();((JCheckBox)Data.get(panel,"Cb")).setSelected(suggested);}
         void confirm(){if(inFlight)return;for(int i=0;i<4;i++){Object value=((JSpinner)Data.get(panel,new String[]{"Cl","Ci","Cj","Ck"}[i])).getValue();draft[i]=((Number)value).intValue();}suggested=((JCheckBox)Data.get(panel,"Cb")).isSelected();Map<String,String> fields=SettingsRequest.fields(suggested,draft);

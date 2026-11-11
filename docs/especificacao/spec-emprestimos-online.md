@@ -1,6 +1,6 @@
 # Empréstimos de jogadores online
 
-Status: requisitos para PN-07, ainda sem implementação online. Revisado em 08/11/2026. [Backlog](../task-paridade-nativa.md); [relatório da auditoria](../estado-agente-requisitos.md).
+Status: requisitos para PN-07, ainda sem implementação online. Revisado em 08/11/2026. [Backlog](../tasks/sem-prioridade/task-paridade-nativa.md); [relatório da auditoria](../estado-agente-requisitos.md).
 
 ## Regra local e evidência
 
@@ -25,6 +25,18 @@ Comandos usam a fase/revisão de gestão e invalidam Pronto dos participantes af
 Validar limites com consultas e pedidos diretos; aprovação/recusa entre humanos; IA; concorrência de propostas; clube/jogador transferido; saldo e responsabilidades salariais; prazo e igualdade na data-limite; retorno com origem cheia e reexecução posterior; save/retomada em outra JVM; ofertas e contratos recuperados do mesmo checkpoint. Verificar listas nativas em dois clientes, controles sem callback local e pacote distribuído após integração.
 
 Ainda requer levantamento executado: quem paga salários e como aparecem os lançamentos; cancelamento nos dois sentidos; compra definitiva; múltiplos empréstimos e quatro recebidos; avisos e efeitos sobre escalação/atletas já usados. Não tratar os resultados do probe de modelo como aceite desses cenários. A implementação pode entregar recortes, mantendo cada fluxo restante explicitamente bloqueado e PN-07 aberta.
+
+## Paridade da entrada pelo painel Times — inspeção estática
+
+O consumidor do empréstimo à IA está alinhado: o painel nativo habilita `MJ` conforme `F.fz()` (desde que o atleta não esteja emprestado e o contexto não seja o clube do técnico); o wrapper instala a mesma ação remota e o host revalida vendedor, disponibilidade e flags antes de chamar `best.l.a(player,buyer)`. Esse consumidor verifica também elenco do destino, quatro contratos ativos e aceitação do atleta. A mensagem nativa fala em limite de 30, mas o código efetivamente testa `kc().size() >= 35`; registrar essa diferença entre texto e regra, sem reproduzi-la como outro limite.
+
+O defeito histórico de habilitação inicial foi corrigido: `NativeTransferMarket.show()` não força mais `loan.setEnabled(true)` e preserva o estado calculado por `a.iA.sG()` após a seleção do atleta. O registro da correção, teste Swing e rebuild está em [Estado inicial do botão de empréstimo](../implementacoes/implementacao-estado-emprestimo-times.md). Ao trocar de linha, `sG()` reaplica a regra. Isso fecha a divergência de enabled no código local e no JAR/ZIP citados pelo registro; não certifica o pacote produzido depois nem a mensagem contextual da ação.
+
+Para vendedor humano, `loan-request` registra consentimento pendente; isso é uma extensão multiplayer deliberada e não a decisão IA do motor local. A entrada visual permanece condicionada a `fz()` e clube de origem diferente; aceite/rejeição pertence ao técnico de origem e não pode mover o jogador antes do aceite. O wrapper mostra confirmação genérica depois do envio e rejeições HTTP passam por aviso genérico do cliente, em vez das mensagens/títulos locais de `a.iA.sz()`; mapear resultados nativos e manter a confirmação no contexto Empréstimo faz parte do aceite de interface. Evidência estática de 10/11/2026, sem executar o jogo nesta revisão.
+
+Fontes: `analysis/decompiled/a/iA.java:sG/sz`, `analysis/decompiled/best/l.java:a(F,ah)`, `src/brasfoot/NativeTransferMarket.show/requestLoan`, `src/brasfoot/CareerManagement.execute/respond/nativeLoanRefusal`, `NativeClient.command/showError`. Não repetir como falha a validação dos limites da IA, que já delega ao consumidor nativo.
+
+Lacuna de apresentação das solicitações humanas: a rota `loan-request` cria um contrato pendente `kind=LOAN`; o host persiste esse estado e revalida origem, destino, disponibilidade e resultado de `best.l.a` quando o vendedor aceita. Porém `NativeCareerDialogs` preenche a lista “Proposta” apenas com ID e nome do jogador e `describe()` também não expõe `kind`, clubes, valor ou situação. A mesma ação `respond` responde à compra e ao empréstimo; para pedido de empréstimo, o técnico vendedor não tem indicação de que aceitar moverá o atleta sem preço. Critério: identificar tipo, clube solicitante, jogador e status na lista/detalhes, confirmar explicitamente o efeito de aceitar empréstimo e manter a distinção de transferência; testar pedido pendente, aceite, recusa, expiração e recuperação após checkpoint. O comando atual mantém consentimento e transação separados corretamente, portanto a lacuna é de compreensão/apresentação, não autorização. Fontes `CareerManagement.snapshot/execute/respond`, `NativeCareerDialogs.managementPanel`; inspeção estática.
 
 ## Complemento estático — folha, retorno e cancelamento
 

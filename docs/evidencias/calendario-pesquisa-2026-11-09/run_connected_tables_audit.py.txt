@@ -1,0 +1,32 @@
+from pathlib import Path
+import subprocess,json,socket,time,re,urllib.request
+r=Path(__file__).parent;cfg=json.loads((r/'probe-config.json').read_text());cp=cfg['classpath'];java=cfg['java']
+p=subprocess.run([java,'-jar','F:/Projects/Brasfoot-online/tools/ecj-3.26.0.jar','-source','1.8','-target','1.8','-encoding','UTF-8','-cp',cp,'-d',str(r/'classes'),str(r/'src/brasfoot/AuditConnectedTables.java')],capture_output=True,text=True,timeout=45)
+assert p.returncode==0,(p.stdout,p.stderr)
+with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
+log=(r/'connected-tables-host.log').open('w',encoding='utf-8');host=subprocess.Popen([java,'-Dfile.encoding=UTF-8','-Djava.awt.headless=true','-javaagent:'+str(r/'host-ui-agent.jar'),'-cp',cp,'brasfoot.SessionHost','--root',str(r),'--career','--club-assets','corinthians_bra,realmadrid_esp','--bind','127.0.0.1','--port',str(port)],stdout=log,stderr=subprocess.STDOUT)
+try:
+ deadline=time.monotonic()+45
+ while True:
+  output=(r/'connected-tables-host.log').read_text(encoding='utf-8',errors='replace');m=re.search(r'^Host token: (\S+)',output,re.M)
+  if m:break
+  assert host.poll() is None,'Temporary host failed; inspect its local log'
+  assert time.monotonic()<deadline,'Temporary host startup timed out'
+  time.sleep(.1)
+ token=m[1];address='http://127.0.0.1:'+str(port)
+ def get(path):
+  with urllib.request.urlopen(urllib.request.Request(address+path,headers={'Authorization':'Bearer '+token}),timeout=15) as response:return json.load(response)
+ session=get('/session');guest=session['coaches'][1]['coachId']
+ import urllib.parse
+ data=urllib.parse.urlencode({'coachId':guest}).encode()
+ with urllib.request.urlopen(address+'/join',data,timeout=15) as response:token=json.load(response)['token']
+ before=get('/state');overview=get('/overview');result=subprocess.run([java,'-Dfile.encoding=UTF-8','-cp',cp,'brasfoot.AuditConnectedTables',str(r),address,token],capture_output=True,text=True,timeout=45)
+ print('clientExit',result.returncode);print(result.stdout);print(result.stderr[-1500:])
+ assert result.returncode==0,'Connected client diagnostic failed'
+ after=get('/state');report=json.loads((r/'connected-tables.json').read_text(encoding='utf-8'));report['hostCalendarRows']=len(overview['calendar']);report['hostTableCount']=len(overview['tables']);report['hostTableTeams']=[len(table['rows']) for table in overview['tables']];report['phaseAfter']=after['round']['phase'];report['roundUnchanged']=before['round']==after['round'];report['packagedJar']=True
+ (r/'connected-tables.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8');print(json.dumps(report,ensure_ascii=True))
+finally:
+ host.terminate()
+ try:host.wait(timeout=8)
+ except subprocess.TimeoutExpired:host.kill();host.wait()
+ log.close()

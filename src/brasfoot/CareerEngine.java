@@ -8,6 +8,7 @@ import java.util.*;
 /** Original career calendar and competition lifecycle, owned exclusively by the host. */
 public final class CareerEngine {
     private CareerEngine() { }
+    private static final int INITIAL_CAREER_YEAR=2026;
     static final Set<Integer> LEAGUE_COUNTRIES=Collections.unmodifiableSet(new HashSet<Integer>(Arrays.asList(29,97,65,104,3,72)));
     public static GameAdapter create(File root, String[] clubs) throws Exception {
         return create(root,clubs,null);
@@ -29,9 +30,9 @@ public final class CareerEngine {
         return createByAssets(root,assets,coachNames,null);
     }
     public static GameAdapter createByAssets(File root,String[] assets,String[] coachNames,int[] nationalities)throws Exception {
-        validateCount(assets.length);validateNames(assets.length,coachNames);Set<String> unique=new HashSet<String>();validateNationalities(assets.length,nationalities);
+        validateCount(assets.length);validateNames(assets.length,coachNames);Set<String> unique=new HashSet<String>();
         for(String asset:assets)if(asset==null || asset.trim().isEmpty() || !unique.add(asset.trim().toLowerCase(Locale.ROOT)))throw new IllegalArgumentException("Human club assets must be distinct and nonempty");
-        initializeWorld(root);List<String> selected=new ArrayList<String>();Collections.addAll(selected,assets);return startAssets(selected,coachNames,nationalities);
+        initializeWorld(root);validateNationalities(assets.length,nationalities);List<String> selected=new ArrayList<String>();Collections.addAll(selected,assets);return startAssets(selected,coachNames,nationalities);
     }
     private static void validateCount(int count){if(count<1 || count>16)throw new IllegalArgumentException("Choose between 1 and 16 human clubs");}
     private static void validateNames(int count,String[] coachNames){
@@ -57,10 +58,25 @@ public final class CareerEngine {
         Map<String,e.t> records=new LinkedHashMap<String,e.t>();
         for(String asset:assets){e.t found=null;for(Object raw:c.a.SR.bC){e.t record=(e.t)raw;if(record.getFileRef().equalsIgnoreCase(asset.trim())){if(found!=null)throw new IllegalArgumentException("Ambiguous club asset: "+asset);found=record;}}
             if(found==null)throw new IllegalArgumentException("Unknown club asset: "+asset);if(!LEAGUE_COUNTRIES.contains(found.getPais()))throw new IllegalArgumentException("Human club country is not enabled for online careers: "+found.getPais());records.put(asset.trim().toLowerCase(Locale.ROOT),found);}
-        setCountries(LEAGUE_COUNTRIES,false);generateCompetitions();List<ah> selected=new ArrayList<ah>();
+        c.a.SR.I(INITIAL_CAREER_YEAR);setCountries(LEAGUE_COUNTRIES,false);generateCompetitions();List<ah> selected=new ArrayList<ah>();
         for(String asset:assets){String key=asset.trim().toLowerCase(Locale.ROOT);e.t record=records.get(key);ah found=null;for(Object raw:c.a.SR.P()){ah club=(ah)raw;if(club.jY().equalsIgnoreCase(record.getFileRef())){found=club;break;}}if(found==null)throw new IllegalStateException("Selected club was not generated: "+asset);selected.add(found);}
         for(int index=0;index<selected.size();index++)selected.get(index).b(coachNames==null?"Técnico "+(index+1):coachNames[index].trim(),nationalities==null?selected.get(index).getPais():nationalities[index]);
         c.a.SR.az();prepare();return new GameAdapter(c.a.SR);
+    }
+    /** Skip opening calendar dates until at least one selected human coach can play. */
+    public static void advanceToFirstHumanFixture(GameAdapter game){
+        final int maxCalendarDays=400;
+        for(int skipped=0;skipped<maxCalendarDays;skipped++){
+            if(game.hasHumanMatch())return;
+            List<I> fixtures=game.currentMatches();
+            if(!fixtures.isEmpty()){
+                MatchPlayback playback=new MatchPlayback(fixtures,true);playback.begin();
+                while(!playback.tick())if("HALF_TIME".equals(playback.status()))playback.resumeSecondHalf();
+                if(!"FINISHED".equals(playback.status()))throw new IllegalStateException("Could not finish an opening date without human fixtures");
+            }else completeDate();
+            nextDate(game);
+        }
+        if(!game.hasHumanMatch())throw new IllegalStateException("No selected coach has a fixture within the first 400 calendar days");
     }
     private static void setCountries(Set<Integer> countries,boolean all){for(Object raw:c.a.SR.bF){best.O country=(best.O)raw;country.v(all||countries.contains(country.getPais()));}}
     private static void generateCompetitions(){try{Class.forName("best.p").getMethod("dg").invoke(null);}catch(Exception error){throw new IllegalStateException("Original competition generation failed",error);}}

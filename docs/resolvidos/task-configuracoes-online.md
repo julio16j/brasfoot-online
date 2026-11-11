@@ -2,11 +2,11 @@
 
 **Status atual: resolvida por aceite explícito do usuário em 6 de novembro de 2026.** O usuário confirmou que as configurações alteram a velocidade após o rebuild e solicitou marcar a configuração online como resolvida. O JAR e o ZIP foram reconstruídos com `python tools/package_client.py`. O encerramento se refere à entrega atual das opções suportadas; não declara implementadas as doze opções ainda bloqueadas do catálogo completo.
 
-Permanecem abertas e independentes a [task de integração do botão nativo Opções](../task-opcoes-nativas-online.md) e a [task do áudio repetido ou fora de contexto](../task-audio-eventos-repetidos.md). A confirmação da velocidade não constitui medição exata da duração dos minutos.
+Permanecem abertas e independentes a [task de integração do botão nativo Opções](../tasks/sem-prioridade/task-opcoes-nativas-online.md) e a [task do áudio repetido ou fora de contexto](../tasks/sem-prioridade/task-audio-eventos-repetidos.md). A confirmação da velocidade não constitui medição exata da duração dos minutos.
 
 Na reabertura anterior, os testes haviam recompilado os fontes em `build/classes`, mas o JAR de `dist/` usado por `Brasfoot-Online.cmd` ainda não havia sido reconstruído. Esse histórico permanece registrado para distinguir teste dos fontes de entrega do executável atualizado.
 
-As alterações da integração da velocidade passaram nos testes dos fontes. Filtros e outras configurações continuam parcialmente pendentes; consulte a [implementação das configurações](../implementacao-configuracoes-online.md) e a [especificação completa](../especificacao/spec-configuracoes-online.md). O custo de snapshots durante a carreira foi tratado também na [investigação do teste de carreira](task-teste-carreira.md). A investigação original abaixo foi preservada como histórico do código anterior às correções.
+As alterações da integração da velocidade passaram nos testes dos fontes. Filtros e outras configurações continuam parcialmente pendentes; consulte a [implementação das configurações](../implementacoes/implementacao-configuracoes-online.md) e a [especificação completa](../especificacao/spec-configuracoes-online.md). O custo de snapshots durante a carreira foi tratado também na [investigação do teste de carreira](task-teste-carreira.md). A investigação original abaixo foi preservada como histórico do código anterior às correções.
 
 Data: 6 de novembro de 2026. Relato: o tempo durante a simulação está muito lento. Escopo: inspeção do código local; sem medição da sessão em execução, alteração de velocidade ou novo teste de desempenho.
 
@@ -67,7 +67,7 @@ Para respeitar as duas opções nativas, a proposta adota `velocidadeNH` quando 
 
 Isso exige substituir o laço imediato de `kickoffIfReady` por avanço agendado nessas datas. Preservar o segundo tempo automático sem barreira humana, o processamento de fim da data e os checkpoints. Como `MatchPlayback.begin()` atualmente resolve jogos da IA antecipadamente, a implementação deve impedir que a apresentação publique resultados e eventos futuros antes do minuto correspondente; testar esse comportamento antes de anunciar compatibilidade com a velocidade nativa sem humanos.
 
-O processamento imediato de datas exclusivas da IA pode voltar como modo explícito separado. Não deve substituir silenciosamente a opção nativa selecionada. A futura automação de confirmações e avanços entre datas permanece no planejamento da [investigação dos calendários](../task-calendarios.md).
+O processamento imediato de datas exclusivas da IA pode voltar como modo explícito separado. Não deve substituir silenciosamente a opção nativa selecionada. A futura automação de confirmações e avanços entre datas permanece no planejamento da [investigação dos calendários](task-calendarios.md).
 
 ### 5. Persistência e entrega
 

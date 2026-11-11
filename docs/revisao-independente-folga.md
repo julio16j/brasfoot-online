@@ -14,6 +14,6 @@ O recorte está coerente com o critério 1 da task original nos cenários aprova
 
 ## Achado independente
 
-A captura de folga revela lesões fictícias em todos os atletas e prazo absurdo de contusão. O probe da principal confirmou a causa em `VisualModel`: [task de projeção de lesões](task-projecao-lesoes-online.md). Isso já existia antes do recorte de mensagem, que não corrige o estado médico. Manter problema separado e não anunciar correção completa da experiência de folga.
+A captura de folga revela lesões fictícias em todos os atletas e prazo absurdo de contusão. O probe da principal confirmou a causa em `VisualModel`: [task de projeção de lesões](tasks/sem-prioridade/task-projecao-lesoes-online.md). Isso já existia antes do recorte de mensagem, que não corrige o estado médico. Manter problema separado e não anunciar correção completa da experiência de folga.
 
 Não há integração à principal nem pacote combinado com Opções/treino por esta revisão. A task de escalação continua com automação de folgas e planejamento antecipado pendentes.

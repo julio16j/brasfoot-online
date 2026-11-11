@@ -1,0 +1,176 @@
+{
+  "jar": "dist/lib/kryo-4.0.2.jar",
+  "class": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig",
+  "methods": [
+    {
+      "method": "<init>()V",
+      "instructions": [
+        {
+          "offset": 1,
+          "opcode": "0xb7",
+          "detail": "java/lang/Object.<init>:()V"
+        },
+        {
+          "offset": 5,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 6,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.fieldsCanBeNull:Z"
+        },
+        {
+          "offset": 10,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 11,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.setFieldsAsAccessible:Z"
+        },
+        {
+          "offset": 15,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 16,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.ignoreSyntheticFields:Z"
+        },
+        {
+          "offset": 20,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 21,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.copyTransient:Z"
+        },
+        {
+          "offset": 25,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 26,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.serializeTransient:Z"
+        },
+        {
+          "offset": 30,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 31,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.optimizedGenerics:Z"
+        },
+        {
+          "offset": 35,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer$CachedFieldNameStrategy.DEFAULT:Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedFieldNameStrategy;"
+        },
+        {
+          "offset": 38,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.cachedFieldNameStrategy:Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedFieldNameStrategy;"
+        },
+        {
+          "offset": 42,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.unsafeAvailable:Z"
+        },
+        {
+          "offset": 48,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 52,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 53,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.useAsm:Z"
+        },
+        {
+          "offset": 56,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/minlog/Log.TRACE:Z"
+        },
+        {
+          "offset": 68,
+          "opcode": "0xb7",
+          "detail": "java/lang/StringBuilder.<init>:()V"
+        },
+        {
+          "offset": 73,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 77,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.useAsm:Z"
+        },
+        {
+          "offset": 80,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Z)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 83,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.toString:()Ljava/lang/String;"
+        },
+        {
+          "offset": 86,
+          "opcode": "0xb8",
+          "detail": "com/esotericsoftware/minlog/Log.trace:(Ljava/lang/String;Ljava/lang/String;)V"
+        },
+        {
+          "offset": 89,
+          "opcode": "0xb1",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "isCopyTransient()Z",
+      "instructions": [
+        {
+          "offset": 1,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.copyTransient:Z"
+        },
+        {
+          "offset": 4,
+          "opcode": "0xac",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "isSerializeTransient()Z",
+      "instructions": [
+        {
+          "offset": 1,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.serializeTransient:Z"
+        },
+        {
+          "offset": 4,
+          "opcode": "0xac",
+          "detail": "return"
+        }
+      ]
+    }
+  ]
+}

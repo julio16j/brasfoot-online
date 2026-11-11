@@ -25,7 +25,7 @@ Cada técnico pode alterar a escalação até confirmar Pronto. Durante os tempo
 
 ## Saves e recuperação
 
-Checkpoints Kryo ficam em `sessions/<id-da-sessão>/` no computador do host. Use **Retomar carreira** para selecionar a pasta da sessão. Uma partida interrompida volta à preparação a partir do checkpoint seguro, sem repetir resultados nem efeitos pós-jogo.
+Checkpoints Kryo ficam em `sessions/<técnico> - <clube> - <data e hora> - <id curto>/` no computador do host. Cada arquivo usa o nome do técnico host, o clube, a data e hora da atualização e uma sequência. Use **Retomar carreira** para selecionar a pasta da sessão. Uma partida interrompida volta à preparação a partir do checkpoint seguro, sem repetir resultados nem efeitos pós-jogo.
 
 Os tokens não são restaurados ao reiniciar o host; cada participante deve entrar novamente e receber outro token. Enquanto o host continua ativo, **Reconectar com token** permite recuperar a conexão. Fechar a janela do host encerra o servidor, mas preserva os checkpoints; fechar um cliente convidado não encerra a sessão.
 

@@ -1,0 +1,337 @@
+{
+  "catalog": {
+    "exit": 0,
+    "seconds": 8.29,
+    "data": {
+      "countries": [
+        {
+          "id": 0,
+          "label": "Afeganistão"
+        },
+        {
+          "id": 3,
+          "label": "Alemanha"
+        },
+        {
+          "id": 9,
+          "label": "Arábia Saudita"
+        },
+        {
+          "id": 11,
+          "label": "Argentina"
+        },
+        {
+          "id": 12,
+          "label": "Armênia"
+        },
+        {
+          "id": 15,
+          "label": "Áustria"
+        },
+        {
+          "id": 21,
+          "label": "Bélgica"
+        },
+        {
+          "id": 26,
+          "label": "Bolivia"
+        },
+        {
+          "id": 29,
+          "label": "Brasil"
+        },
+        {
+          "id": 31,
+          "label": "Bulgária"
+        },
+        {
+          "id": 38,
+          "label": "Canadá"
+        },
+        {
+          "id": 39,
+          "label": "Catar"
+        },
+        {
+          "id": 42,
+          "label": "Chile"
+        },
+        {
+          "id": 43,
+          "label": "China"
+        },
+        {
+          "id": 46,
+          "label": "Colômbia"
+        },
+        {
+          "id": 52,
+          "label": "Croácia"
+        },
+        {
+          "id": 54,
+          "label": "Dinamarca"
+        },
+        {
+          "id": 59,
+          "label": "Emirados Árabes"
+        },
+        {
+          "id": 60,
+          "label": "Equador"
+        },
+        {
+          "id": 62,
+          "label": "Escócia"
+        },
+        {
+          "id": 65,
+          "label": "Espanha"
+        },
+        {
+          "id": 68,
+          "label": "EUA"
+        },
+        {
+          "id": 72,
+          "label": "França"
+        },
+        {
+          "id": 78,
+          "label": "Grécia"
+        },
+        {
+          "id": 85,
+          "label": "Holanda"
+        },
+        {
+          "id": 97,
+          "label": "Inglaterra"
+        },
+        {
+          "id": 104,
+          "label": "Itália"
+        },
+        {
+          "id": 107,
+          "label": "Japão"
+        },
+        {
+          "id": 129,
+          "label": "Marrocos"
+        },
+        {
+          "id": 131,
+          "label": "México"
+        },
+        {
+          "id": 142,
+          "label": "Noruega"
+        },
+        {
+          "id": 150,
+          "label": "Paraguai"
+        },
+        {
+          "id": 151,
+          "label": "Peru"
+        },
+        {
+          "id": 152,
+          "label": "Polônia"
+        },
+        {
+          "id": 154,
+          "label": "Portugal"
+        },
+        {
+          "id": 162,
+          "label": "Rússia"
+        },
+        {
+          "id": 171,
+          "label": "Sérvia"
+        },
+        {
+          "id": 179,
+          "label": "Suécia"
+        },
+        {
+          "id": 180,
+          "label": "Suiça"
+        },
+        {
+          "id": 192,
+          "label": "Turquia"
+        },
+        {
+          "id": 193,
+          "label": "Ucrânia"
+        },
+        {
+          "id": 195,
+          "label": "Uruguai"
+        },
+        {
+          "id": 198,
+          "label": "Venezuela"
+        }
+      ],
+      "count": 43,
+      "result": "COMPLETED_DIAGNOSIS"
+    }
+  },
+  "brazil": {
+    "exit": 0,
+    "seconds": 6.81,
+    "data": {
+      "leagues": [
+        {
+          "id": 29,
+          "label": "Brasil",
+          "divisions": 4,
+          "nationalMatches": 950
+        }
+      ],
+      "coaches": [
+        {
+          "club": "Corinthians",
+          "calendarRows": 53,
+          "tableCount": 2
+        }
+      ],
+      "result": "COMPLETED_DIAGNOSIS"
+    }
+  },
+  "spain": {
+    "exit": 0,
+    "seconds": 5.61,
+    "data": {
+      "leagues": [
+        {
+          "id": 65,
+          "label": "Espanha",
+          "divisions": 4,
+          "nationalMatches": 2362
+        }
+      ],
+      "coaches": [
+        {
+          "club": "Real Madrid",
+          "calendarRows": 40,
+          "tableCount": 1
+        }
+      ],
+      "result": "COMPLETED_DIAGNOSIS"
+    }
+  },
+  "six": {
+    "exit": 0,
+    "seconds": 7.3,
+    "data": {
+      "leagues": [
+        {
+          "id": 3,
+          "label": "Alemanha",
+          "divisions": 4,
+          "nationalMatches": 1000
+        },
+        {
+          "id": 29,
+          "label": "Brasil",
+          "divisions": 4,
+          "nationalMatches": 950
+        },
+        {
+          "id": 65,
+          "label": "Espanha",
+          "divisions": 4,
+          "nationalMatches": 2362
+        },
+        {
+          "id": 72,
+          "label": "França",
+          "divisions": 4,
+          "nationalMatches": 926
+        },
+        {
+          "id": 97,
+          "label": "Inglaterra",
+          "divisions": 4,
+          "nationalMatches": 1628
+        },
+        {
+          "id": 104,
+          "label": "Itália",
+          "divisions": 4,
+          "nationalMatches": 1955
+        }
+      ],
+      "coaches": [
+        {
+          "club": "Corinthians",
+          "calendarRows": 53,
+          "tableCount": 2
+        },
+        {
+          "club": "Real Madrid",
+          "calendarRows": 40,
+          "tableCount": 1
+        },
+        {
+          "club": "Liverpool",
+          "calendarRows": 40,
+          "tableCount": 1
+        },
+        {
+          "club": "Juventus",
+          "calendarRows": 40,
+          "tableCount": 1
+        },
+        {
+          "club": "Bayern de Munique",
+          "calendarRows": 36,
+          "tableCount": 1
+        },
+        {
+          "club": "Paris Saint Germain",
+          "calendarRows": 36,
+          "tableCount": 1
+        }
+      ],
+      "result": "COMPLETED_DIAGNOSIS"
+    }
+  },
+  "search": {
+    "exit": 0,
+    "seconds": 8.78,
+    "data": {
+      "leagues": [
+        {
+          "id": 29,
+          "label": "Brasil",
+          "divisions": 4,
+          "nationalMatches": 950
+        }
+      ],
+      "coaches": [
+        {
+          "club": "Corinthians",
+          "calendarRows": 53,
+          "tableCount": 2
+        }
+      ],
+      "query": "Milos Kerkez",
+      "targetPlayerId": 35896,
+      "targetClubId": 8,
+      "nativePlayerIndex": 49809,
+      "nativeClubIndex": 2063,
+      "native-searchRows": 1,
+      "projectedPlayerIndex": 18504,
+      "projectedClubIndex": 776,
+      "targetClubProjected": false,
+      "projected-searchRows": 0,
+      "result": "COMPLETED_DIAGNOSIS"
+    }
+  }
+}

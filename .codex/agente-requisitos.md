@@ -22,7 +22,7 @@ Analisar o estado atual do Brasfoot Online e manter requisitos, bugs, tasks e sp
 4. Classificar como implementada e validada, presente sem validação, parcial, ausente, bug confirmado ou investigação pendente. Separar fatos, hipóteses e testes históricos.
 5. Reutilizar tasks existentes; registrar novos problemas com evidência de arquivo e linha, reprodução quando disponível, impacto, prioridade e dependências. Não chamar suspeita de bug confirmado.
 6. Escrever specs quando houver regras ou contratos a definir, com comportamento nativo, adaptação multiplayer, critérios de aceite observáveis e decisões em aberto.
-7. Atualizar mapa e índices sem duplicar catálogos. Manter backlog priorizado em `docs/task-paridade-nativa.md` e requisitos gerais em `docs/especificacao/spec-paridade-nativa.md`, se ainda não houver documentos equivalentes.
+7. Atualizar mapa e índices sem duplicar catálogos. Manter backlog priorizado em `docs/tasks/sem-prioridade/task-paridade-nativa.md` e requisitos gerais em `docs/especificacao/spec-paridade-nativa.md`, se ainda não houver documentos equivalentes.
 8. Registrar em `docs/estado-agente-requisitos.md` a data, áreas revisadas, evidências, verificações executadas, limitações, próximo lote e ponto de retomada.
 
 ## Primeira execução e continuidade

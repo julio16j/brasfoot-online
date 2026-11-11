@@ -61,8 +61,8 @@ Os testes Python ficam em `tools/tests/`. Os testes Java ficam em `tests/brasfoo
 
 O [índice da documentação](docs/README.md) reúne o [mapa da implementação](docs/mapa-implementacao.md), as pendências e o histórico de [problemas resolvidos](docs/resolvidos/README.md).
 
-As [configurações online](docs/especificacao/spec-configuracoes-online.md) têm edição exclusiva do host. Use o botão nativo **Opções → Preferências** ou **F3** para ajustar velocidades, som, cores, tema e abertura da escalação no intervalo. O botão adicional Configurações foi removido; veja a [implementação do acesso nativo](docs/implementacao-opcoes-nativas-online.md) e as [opções ainda bloqueadas](docs/implementacao-configuracoes-online.md). Validação específica: `python tools/tests/test_session_options.py`.
+As [configurações online](docs/especificacao/spec-configuracoes-online.md) têm edição exclusiva do host. Use o botão nativo **Opções → Preferências** ou **F3** para ajustar velocidades, som, cores, tema e abertura da escalação no intervalo. O botão adicional Configurações foi removido; veja a [implementação do acesso nativo](docs/implementacoes/implementacao-opcoes-nativas-online.md) e as [opções ainda bloqueadas](docs/implementacoes/implementacao-configuracoes-online.md). Validação específica: `python tools/tests/test_session_options.py`.
 
-A [investigação dos calendários de outras ligas](docs/task-calendarios.md) registra os problemas encontrados, os cenários exercitados e a ordem proposta de implementação. Para reproduzir o diagnóstico local, execute `python tools/investigate_calendars.py` após compilar o adaptador.
+A [investigação dos calendários de outras ligas](docs/tasks/alta-prioridade/task-calendarios.md) registra os problemas encontrados, os cenários exercitados e a ordem proposta de implementação. Para reproduzir o diagnóstico local, execute `python tools/investigate_calendars.py` após compilar o adaptador.
 
 O jogo original não é recompilado nem alterado. O pacote distribuível é produzido em `dist/` pelo script de empacotamento.

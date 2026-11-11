@@ -23,7 +23,7 @@ final class NativeOptionsPalette extends JDialog {
         confirm=(JButton)Data.get(panel,"zn");reset=(JButton)Data.get(panel,"zm");
         for(ActionListener listener:confirm.getActionListeners())confirm.removeActionListener(listener);
         confirm.addActionListener(event->confirmDraft());
-        JPanel footer=new JPanel(new BorderLayout());footer.add(notice);JButton close=new JButton("Fechar");close.addActionListener(event->dispose());footer.add(close,BorderLayout.SOUTH);add(footer,BorderLayout.SOUTH);
+        JPanel footer=new JPanel(new BorderLayout());footer.add(notice);add(footer,BorderLayout.SOUTH);
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"cancel");getRootPane().getActionMap().put("cancel",new AbstractAction(){public void actionPerformed(ActionEvent event){dispose();}});
         setSize(300,420);setLocationRelativeTo(owner);updateAuthority();
     }

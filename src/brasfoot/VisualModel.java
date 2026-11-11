@@ -14,9 +14,11 @@ public final class VisualModel {
     private final List<I> matches=new ArrayList<I>();
     private final Map<Integer,I> upcoming=new HashMap<Integer,I>();
     private final Map<String,f.a> competitions=new LinkedHashMap<String,f.a>();
+    private final Map<String,RemoteCompetition> remoteCompetitions=new LinkedHashMap<String,RemoteCompetition>();
     private final File root;
     public VisualModel(File root,Map<String,Object> state)throws Exception{
         this.root=root;new best.M(true);best.n.cU();c.a.SR=new best.f();c.a.afQ=new best.ay();
+        initializeNativeCompetitionSlots();
         c.a.SR.bs=false;rebuild(state);
     }
     public List<I> matches(){return matches;}
@@ -42,7 +44,7 @@ public final class VisualModel {
         if(game.containsKey("individualSkills"))c.a.SR.setHabilidadeIndividual(Boolean.TRUE.equals(game.get("individualSkills")));
         c.a.SR.R().clear();best.a day=new best.a();day.a().setTimeInMillis(Data.longNumber(game.get("dateMillis")));c.a.SR.R().add(day);c.a.SR.l(0);
         c.a.SR.k(Data.number(game.get("season")));c.a.SR.I(Data.number(game.get("year")));
-        matches.clear();competitions.clear();for(Object raw:Data.list(Data.map(state.get("playback")).get("matches")))competition(Data.map(raw));for(Object raw:Data.list(game.get("upcoming")))competition(Data.map(raw));
+        matches.clear();competitions.clear();remoteCompetitions.clear();for(Object raw:Data.list(Data.map(state.get("playback")).get("matches")))competition(Data.map(raw));for(Object raw:Data.list(game.get("upcoming")))competition(Data.map(raw));
         updateClubs(game);
         c.a.SR.M().clear();
         for(Object raw:Data.list(game.get("coaches"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("coachId"));
@@ -64,6 +66,45 @@ public final class VisualModel {
         update(state);
     }
     private f.a competition(Map<String,Object> row){String key=row.containsKey("competitionKey")?String.valueOf(row.get("competitionKey")):row.containsKey("competitionId")?"id:"+Data.number(row.get("competitionId")):"legacy:"+String.valueOf(row.get("competition"))+":"+Data.number(row.get("competitionType"));f.a result=competitions.get(key);if(result==null){result=new f.a();result.setNome((String)row.get("competition"));if(row.containsKey("competitionType"))Data.set(result,"tR",Data.number(row.get("competitionType")));if(row.containsKey("competitionId"))result.az(Data.number(row.get("competitionId")));competitions.put(key,result);}return result;}
+    public f.a remoteCompetition(String key){return remoteCompetitions.get(key);}
+    /** The original standings screen probes national-board slots before drawing league rows. */
+    private static void initializeNativeCompetitionSlots(){
+        if(c.a.SR.aF()==null)c.a.SR.a(new f.r());
+        if(c.a.SR.aH()==null)c.a.SR.a(new f.H());
+        if(c.a.SR.aI()==null)c.a.SR.a(new f.v());
+        if(c.a.SR.aK()==null)c.a.SR.a(new f.x());
+        if(c.a.SR.aL()==null)c.a.SR.a(new f.u());
+        if(c.a.SR.aO()==null)c.a.SR.a(new f.t());
+        if(c.a.SR.aP()==null)c.a.SR.a(new f.w());
+        if(c.a.SR.aQ()==null)c.a.SR.a(new f.y());
+    }
+    /** Rehydrates the read-only native calendar from the host without running any local match logic. */
+    public void projectCareerCalendar(Map<String,Object> catalog){
+        List<Object> source=Data.list(catalog.get("calendar")),tableRows=Data.list(catalog.get("tables"));Map<Integer,Integer> divisionCounts=new HashMap<Integer,Integer>();
+        for(Object raw:tableRows){Map<String,Object> row=Data.map(raw);int country=Data.number(row.get("country"));divisionCounts.put(country,Math.max(divisionCounts.containsKey(country)?divisionCounts.get(country):0,Data.number(row.get("division"))));}
+        for(Object raw:Data.list(catalog.get("clubs"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("clubId"));if(clubs.containsKey(id))continue;ah club=new ah();club.bX(id);Data.set(club,"dm",String.valueOf(row.get("club")));Data.set(club,"mV",row.get("asset")==null?null:String.valueOf(row.get("asset")));club.setPais(Data.number(row.get("country")));club.setDivisao(Data.number(row.get("division")));clubs.put(id,club);}
+        remoteCompetitions.clear();competitions.clear();c.a.SR.R().clear();Map<Long,Integer> dateIndexes=new LinkedHashMap<Long,Integer>();
+        Set<Long> dateValues=new TreeSet<Long>();for(Object raw:source)dateValues.add(Data.longNumber(Data.map(raw).get("dateMillis")));dateValues.add(Data.longNumber(Data.map(catalog).get("dateMillis")));
+        int currentIndex=0;long current=Data.longNumber(Data.map(catalog).get("dateMillis"));
+        for(Long millis:dateValues){best.a day=new best.a();day.a().setTimeInMillis(millis);day.a(1);int index=c.a.SR.R().size();c.a.SR.R().add(day);dateIndexes.put(millis,index);if(millis==current)currentIndex=index;}
+        for(Object raw:tableRows){Map<String,Object> row=Data.map(raw);String key=String.valueOf(row.get("competitionKey"));RemoteCompetition competition=new RemoteCompetition(row,divisionCounts.get(Data.number(row.get("country"))));remoteCompetitions.put(key,competition);competitions.put(key,competition);for(Object entry:Data.list(row.get("rows"))){Map<String,Object> standing=Data.map(entry);ah club=clubs.get(Data.number(standing.get("clubId")));if(club==null)continue;competition.table.yK().add(club);best.ak stats=new best.ak(club,competition.table);String[] statFields={"nT","T","bX","d","nK","nL"};String[] statKeys={"points","played","wins","losses","goalsFor","goalsAgainst"};for(int i=0;i<statFields.length;i++)Data.set(stats,statFields[i],Data.number(standing.get(statKeys[i])));List<Object> records=(List<Object>)Data.get(club,"no");records.removeIf(value->((best.ak)value).lC()==competition.table);records.add(stats);}}
+        for(Object raw:source){Map<String,Object> row=Data.map(raw);long millis=Data.longNumber(row.get("dateMillis"));int index=dateIndexes.get(millis);best.a day=(best.a)c.a.SR.R().get(index);String key=String.valueOf(row.get("competitionKey"));f.a comp=competitions.get(key);if(comp==null){comp=new f.a();comp.setNome(String.valueOf(row.get("competition")));comp.F(Data.number(row.get("competitionType")),0);if(row.get("competitionId") instanceof Number)comp.az(Data.number(row.get("competitionId")));competitions.put(key,comp);}day.a(comp);
+            ah home=clubs.get(Data.number(row.get("homeId"))),away=clubs.get(Data.number(row.get("awayId")));if(home==null||away==null)continue;f.s table=comp instanceof RemoteCompetition?((RemoteCompetition)comp).table:null;
+            I match=new I(table,Data.number(row.get("competitionType")),home,away,index,comp,null);if(row.get("phase")!=null)match.o(String.valueOf(row.get("phase")));if("played".equals(row.get("status"))){match.a(true);if(row.get("homeGoals") instanceof Number)Data.set(match,"fB",Data.number(row.get("homeGoals")));if(row.get("awayGoals") instanceof Number)Data.set(match,"fC",Data.number(row.get("awayGoals")));}
+            // The native I constructor attaches itself to the date and registers its table/category.
+        }
+        c.a.SR.l(currentIndex);c.a.SR.k(Data.number(catalog.get("season")));c.a.SR.I(Data.number(catalog.get("year")));
+    }
+    private final class RemoteCompetition extends f.a{
+        final f.s table;
+        RemoteCompetition(Map<String,Object> row,int divisions){String key=String.valueOf(row.get("competitionKey"));table=new f.s();table.setNome(String.valueOf(row.get("competition")));table.a(Data.number(row.get("competitionType")));Data.set(table,"divisao",Data.number(row.get("division")));Data.set(table,"nomeLiga",String.valueOf(row.get("competition")));Data.set(table,"nomeDivisao",String.valueOf(row.get("phase")));Data.set(table,"YY",this);Data.set(table,"RT",new RemoteCountry(Data.number(row.get("country")),divisions,Data.number(row.get("division")),Data.number(row.get("relegationCount")),Data.number(row.get("directRelegationCount"))));setNome(String.valueOf(row.get("competition")));F(Data.number(row.get("competitionType")),0);if(row.get("competitionId") instanceof Number)az(Data.number(row.get("competitionId")));remoteCompetitions.put(key,this);}
+        @Override public best.L[] mB(){return new best.L[]{table};}
+        @Override public java.util.ArrayList mC(){java.util.ArrayList options=new java.util.ArrayList();options.add(new components.y(new best.L[]{table},"Classificação"));return options;}
+    }
+    private static final class RemoteCountry extends best.Z{
+        RemoteCountry(int country,int divisions,int selectedDivision,int relegated,int direct){super(country);try{for(int division=1;division<=divisions;division++){Object config=Class.forName("f.B").getDeclaredConstructor().newInstance();Data.set(config,"KR",this);Data.set(config,"divisao",division);Data.set(config,"nRebaixados",division==selectedDivision?relegated:0);Data.set(config,"rebaixadosDireto",division==selectedDivision?direct:0);eb().add(config);}}catch(Exception error){throw new IllegalStateException("Original league configuration could not be projected",error);}}
+        @Override public components.al As(){return new components.al();}
+    }
     @SuppressWarnings("unchecked")
     private void updateClubs(Map<String,Object> game)throws Exception{
         for(Object raw:Data.list(game.get("visualClubs"))){Map<String,Object> row=Data.map(raw);int id=Data.number(row.get("clubId"));ah club=clubs.get(id);

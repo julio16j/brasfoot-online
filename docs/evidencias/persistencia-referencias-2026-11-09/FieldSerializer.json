@@ -1,0 +1,1101 @@
+{
+  "jar": "dist/lib/kryo-4.0.2.jar",
+  "class": "com/esotericsoftware/kryo/serializers/FieldSerializer",
+  "methods": [
+    {
+      "method": "<init>(Lcom/esotericsoftware/kryo/Kryo;Ljava/lang/Class;)V",
+      "instructions": [
+        {
+          "offset": 4,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.<init>:(Lcom/esotericsoftware/kryo/Kryo;Ljava/lang/Class;[Ljava/lang/Class;)V"
+        },
+        {
+          "offset": 7,
+          "opcode": "0xb1",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "<init>(Lcom/esotericsoftware/kryo/Kryo;Ljava/lang/Class;[Ljava/lang/Class;)V",
+      "instructions": [
+        {
+          "offset": 5,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getFieldSerializerConfig:()Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 8,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.clone:()Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 11,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.<init>:(Lcom/esotericsoftware/kryo/Kryo;Ljava/lang/Class;[Ljava/lang/Class;Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;)V"
+        },
+        {
+          "offset": 14,
+          "opcode": "0xb1",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "<init>(Lcom/esotericsoftware/kryo/Kryo;Ljava/lang/Class;[Ljava/lang/Class;Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;)V",
+      "instructions": [
+        {
+          "offset": 1,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/Serializer.<init>:()V"
+        },
+        {
+          "offset": 5,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 9,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.fields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 13,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 17,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.transientFields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 25,
+          "opcode": "0xb7",
+          "detail": "java/util/HashSet.<init>:()V"
+        },
+        {
+          "offset": 28,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.removedFields:Ljava/util/HashSet;"
+        },
+        {
+          "offset": 32,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 33,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.useMemRegions:Z"
+        },
+        {
+          "offset": 37,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 38,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.hasObjectFields:Z"
+        },
+        {
+          "offset": 42,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 43,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.varIntsEnabled:Z"
+        },
+        {
+          "offset": 46,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/minlog/Log.TRACE:Z"
+        },
+        {
+          "offset": 58,
+          "opcode": "0xb7",
+          "detail": "java/lang/StringBuilder.<init>:()V"
+        },
+        {
+          "offset": 63,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 67,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.varIntsEnabled:Z"
+        },
+        {
+          "offset": 70,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Z)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 73,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.toString:()Ljava/lang/String;"
+        },
+        {
+          "offset": 76,
+          "opcode": "0xb8",
+          "detail": "com/esotericsoftware/minlog/Log.trace:(Ljava/lang/String;Ljava/lang/String;)V"
+        },
+        {
+          "offset": 82,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 87,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.kryo:Lcom/esotericsoftware/kryo/Kryo;"
+        },
+        {
+          "offset": 92,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 97,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.generics:[Ljava/lang/Class;"
+        },
+        {
+          "offset": 102,
+          "opcode": "0xb6",
+          "detail": "java/lang/Class.getTypeParameters:()[Ljava/lang/reflect/TypeVariable;"
+        },
+        {
+          "offset": 105,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.typeParameters:[Ljava/lang/reflect/TypeVariable;"
+        },
+        {
+          "offset": 109,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.typeParameters:[Ljava/lang/reflect/TypeVariable;"
+        },
+        {
+          "offset": 116,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.typeParameters:[Ljava/lang/reflect/TypeVariable;"
+        },
+        {
+          "offset": 125,
+          "opcode": "0xb6",
+          "detail": "java/lang/Class.getComponentType:()Ljava/lang/Class;"
+        },
+        {
+          "offset": 128,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.componentType:Ljava/lang/Class;"
+        },
+        {
+          "offset": 136,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.componentType:Ljava/lang/Class;"
+        },
+        {
+          "offset": 145,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerGenericsUtil.<init>:(Lcom/esotericsoftware/kryo/serializers/FieldSerializer;)V"
+        },
+        {
+          "offset": 148,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsUtil:Lcom/esotericsoftware/kryo/serializers/FieldSerializerGenericsUtil;"
+        },
+        {
+          "offset": 153,
+          "opcode": "0xb8",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerUnsafeUtil$Factory.getInstance:(Lcom/esotericsoftware/kryo/serializers/FieldSerializer;)Lcom/esotericsoftware/kryo/serializers/FieldSerializerUnsafeUtil;"
+        },
+        {
+          "offset": 156,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.unsafeUtil:Lcom/esotericsoftware/kryo/serializers/FieldSerializerUnsafeUtil;"
+        },
+        {
+          "offset": 165,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerAnnotationsUtil.<init>:(Lcom/esotericsoftware/kryo/serializers/FieldSerializer;)V"
+        },
+        {
+          "offset": 168,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.annotationsUtil:Lcom/esotericsoftware/kryo/serializers/FieldSerializerAnnotationsUtil;"
+        },
+        {
+          "offset": 172,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.rebuildCachedFields:()V"
+        },
+        {
+          "offset": 175,
+          "opcode": "0xb1",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "rebuildCachedFields()V",
+      "instructions": [
+        {
+          "offset": 1,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 2,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.rebuildCachedFields:(Z)V"
+        },
+        {
+          "offset": 5,
+          "opcode": "0xb1",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "rebuildCachedFields(Z)V",
+      "instructions": [
+        {
+          "offset": 0,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/minlog/Log.TRACE:Z"
+        },
+        {
+          "offset": 7,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.generics:[Ljava/lang/Class;"
+        },
+        {
+          "offset": 19,
+          "opcode": "0xb7",
+          "detail": "java/lang/StringBuilder.<init>:()V"
+        },
+        {
+          "offset": 24,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 28,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.generics:[Ljava/lang/Class;"
+        },
+        {
+          "offset": 31,
+          "opcode": "0xb8",
+          "detail": "java/util/Arrays.toString:([Ljava/lang/Object;)Ljava/lang/String;"
+        },
+        {
+          "offset": 34,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 37,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.toString:()Ljava/lang/String;"
+        },
+        {
+          "offset": 40,
+          "opcode": "0xb8",
+          "detail": "com/esotericsoftware/minlog/Log.trace:(Ljava/lang/String;Ljava/lang/String;)V"
+        },
+        {
+          "offset": 44,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 47,
+          "opcode": "0xb6",
+          "detail": "java/lang/Class.isInterface:()Z"
+        },
+        {
+          "offset": 54,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 58,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.fields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 61,
+          "opcode": "0xb1",
+          "detail": "return"
+        },
+        {
+          "offset": 63,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 64,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.hasObjectFields:Z"
+        },
+        {
+          "offset": 68,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 71,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isOptimizedGenerics:()Z"
+        },
+        {
+          "offset": 78,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsUtil:Lcom/esotericsoftware/kryo/serializers/FieldSerializerGenericsUtil;"
+        },
+        {
+          "offset": 82,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 86,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.generics:[Ljava/lang/Class;"
+        },
+        {
+          "offset": 89,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerGenericsUtil.buildGenericsScope:(Ljava/lang/Class;[Ljava/lang/Class;)Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 95,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 99,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 106,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.kryo:Lcom/esotericsoftware/kryo/Kryo;"
+        },
+        {
+          "offset": 109,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 113,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 117,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 120,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/GenericsResolver.pushScope:(Ljava/lang/Class;Lcom/esotericsoftware/kryo/serializers/Generics;)V"
+        },
+        {
+          "offset": 127,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/util/IntArray.<init>:()V"
+        },
+        {
+          "offset": 140,
+          "opcode": "0xb7",
+          "detail": "java/util/ArrayList.<init>:()V"
+        },
+        {
+          "offset": 146,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 160,
+          "opcode": "0xb6",
+          "detail": "java/lang/Class.getDeclaredFields:()[Ljava/lang/reflect/Field;"
+        },
+        {
+          "offset": 179,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 198,
+          "opcode": "0xb6",
+          "detail": "java/lang/reflect/Field.getModifiers:()I"
+        },
+        {
+          "offset": 201,
+          "opcode": "0xb8",
+          "detail": "java/lang/reflect/Modifier.isStatic:(I)Z"
+        },
+        {
+          "offset": 214,
+          "opcode": "0xb9",
+          "detail": "java/util/List.add:(Ljava/lang/Object;)Z"
+        },
+        {
+          "offset": 228,
+          "opcode": "0xb6",
+          "detail": "java/lang/Class.getSuperclass:()Ljava/lang/Class;"
+        },
+        {
+          "offset": 237,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.kryo:Lcom/esotericsoftware/kryo/Kryo;"
+        },
+        {
+          "offset": 240,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getContext:()Lcom/esotericsoftware/kryo/util/ObjectMap;"
+        },
+        {
+          "offset": 246,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.useMemRegions:Z"
+        },
+        {
+          "offset": 253,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 256,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isUseAsm:()Z"
+        },
+        {
+          "offset": 262,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.unsafeAvailable:Z"
+        },
+        {
+          "offset": 268,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.sortFieldsByOffsetMethod:Ljava/lang/reflect/Method;"
+        },
+        {
+          "offset": 272,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 277,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 281,
+          "opcode": "0xb6",
+          "detail": "java/lang/reflect/Method.invoke:(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
+        },
+        {
+          "offset": 294,
+          "opcode": "0xb8",
+          "detail": "java/util/Arrays.asList:([Ljava/lang/Object;)Ljava/util/List;"
+        },
+        {
+          "offset": 312,
+          "opcode": "0xb7",
+          "detail": "java/lang/RuntimeException.<init>:(Ljava/lang/String;Ljava/lang/Throwable;)V"
+        },
+        {
+          "offset": 317,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 324,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.buildValidFields:(ZLjava/util/List;Lcom/esotericsoftware/kryo/util/ObjectMap;Lcom/esotericsoftware/kryo/util/IntArray;)Ljava/util/List;"
+        },
+        {
+          "offset": 329,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 336,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.buildValidFields:(ZLjava/util/List;Lcom/esotericsoftware/kryo/util/ObjectMap;Lcom/esotericsoftware/kryo/util/IntArray;)Ljava/util/List;"
+        },
+        {
+          "offset": 341,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 344,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isUseAsm:()Z"
+        },
+        {
+          "offset": 350,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/kryo/util/Util.IS_ANDROID:Z"
+        },
+        {
+          "offset": 357,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 360,
+          "opcode": "0xb6",
+          "detail": "java/lang/Class.getModifiers:()I"
+        },
+        {
+          "offset": 363,
+          "opcode": "0xb8",
+          "detail": "java/lang/reflect/Modifier.isPublic:(I)Z"
+        },
+        {
+          "offset": 371,
+          "opcode": "0x4",
+          "detail": "iconst 1"
+        },
+        {
+          "offset": 372,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/util/IntArray.indexOf:(I)I"
+        },
+        {
+          "offset": 375,
+          "opcode": "0x2",
+          "detail": "iconst -1"
+        },
+        {
+          "offset": 381,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 384,
+          "opcode": "0xb8",
+          "detail": "com/esotericsoftware/reflectasm/FieldAccess.get:(Ljava/lang/Class;)Lcom/esotericsoftware/reflectasm/FieldAccess;"
+        },
+        {
+          "offset": 387,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.access:Ljava/lang/Object;"
+        },
+        {
+          "offset": 400,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.fields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 405,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.buildValidFieldsFromCachedFields:([Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;Lcom/esotericsoftware/kryo/util/IntArray;)Ljava/util/List;"
+        },
+        {
+          "offset": 411,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.transientFields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 416,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.buildValidFieldsFromCachedFields:([Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;Lcom/esotericsoftware/kryo/util/IntArray;)Ljava/util/List;"
+        },
+        {
+          "offset": 425,
+          "opcode": "0xb9",
+          "detail": "java/util/List.size:()I"
+        },
+        {
+          "offset": 430,
+          "opcode": "0xb7",
+          "detail": "java/util/ArrayList.<init>:(I)V"
+        },
+        {
+          "offset": 440,
+          "opcode": "0xb9",
+          "detail": "java/util/List.size:()I"
+        },
+        {
+          "offset": 445,
+          "opcode": "0xb7",
+          "detail": "java/util/ArrayList.<init>:(I)V"
+        },
+        {
+          "offset": 456,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 457,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.createCachedFields:(Lcom/esotericsoftware/kryo/util/IntArray;Ljava/util/List;Ljava/util/List;I)V"
+        },
+        {
+          "offset": 467,
+          "opcode": "0xb9",
+          "detail": "java/util/List.size:()I"
+        },
+        {
+          "offset": 472,
+          "opcode": "0xb7",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.createCachedFields:(Lcom/esotericsoftware/kryo/util/IntArray;Ljava/util/List;Ljava/util/List;I)V"
+        },
+        {
+          "offset": 478,
+          "opcode": "0xb8",
+          "detail": "java/util/Collections.sort:(Ljava/util/List;Ljava/util/Comparator;)V"
+        },
+        {
+          "offset": 486,
+          "opcode": "0xb9",
+          "detail": "java/util/List.size:()I"
+        },
+        {
+          "offset": 494,
+          "opcode": "0xb9",
+          "detail": "java/util/List.toArray:([Ljava/lang/Object;)[Ljava/lang/Object;"
+        },
+        {
+          "offset": 502,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.fields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 508,
+          "opcode": "0xb8",
+          "detail": "java/util/Collections.sort:(Ljava/util/List;Ljava/util/Comparator;)V"
+        },
+        {
+          "offset": 516,
+          "opcode": "0xb9",
+          "detail": "java/util/List.size:()I"
+        },
+        {
+          "offset": 524,
+          "opcode": "0xb9",
+          "detail": "java/util/List.toArray:([Ljava/lang/Object;)[Ljava/lang/Object;"
+        },
+        {
+          "offset": 532,
+          "opcode": "0xb5",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.transientFields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 536,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.initializeCachedFields:()V"
+        },
+        {
+          "offset": 540,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 547,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.kryo:Lcom/esotericsoftware/kryo/Kryo;"
+        },
+        {
+          "offset": 550,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 553,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/GenericsResolver.popScope:()V"
+        },
+        {
+          "offset": 561,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.removedFields:Ljava/util/HashSet;"
+        },
+        {
+          "offset": 564,
+          "opcode": "0xb6",
+          "detail": "java/util/HashSet.iterator:()Ljava/util/Iterator;"
+        },
+        {
+          "offset": 571,
+          "opcode": "0xb9",
+          "detail": "java/util/Iterator.hasNext:()Z"
+        },
+        {
+          "offset": 581,
+          "opcode": "0xb9",
+          "detail": "java/util/Iterator.next:()Ljava/lang/Object;"
+        },
+        {
+          "offset": 594,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.removeField:(Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;)V"
+        },
+        {
+          "offset": 601,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.annotationsUtil:Lcom/esotericsoftware/kryo/serializers/FieldSerializerAnnotationsUtil;"
+        },
+        {
+          "offset": 605,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerAnnotationsUtil.processAnnotatedFields:(Lcom/esotericsoftware/kryo/serializers/FieldSerializer;)V"
+        },
+        {
+          "offset": 608,
+          "opcode": "0xb1",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "write(Lcom/esotericsoftware/kryo/Kryo;Lcom/esotericsoftware/kryo/io/Output;Ljava/lang/Object;)V",
+      "instructions": [
+        {
+          "offset": 0,
+          "opcode": "0xb2",
+          "detail": "com/esotericsoftware/minlog/Log.TRACE:Z"
+        },
+        {
+          "offset": 12,
+          "opcode": "0xb7",
+          "detail": "java/lang/StringBuilder.<init>:()V"
+        },
+        {
+          "offset": 17,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 21,
+          "opcode": "0xb6",
+          "detail": "java/lang/Object.getClass:()Ljava/lang/Class;"
+        },
+        {
+          "offset": 24,
+          "opcode": "0xb6",
+          "detail": "java/lang/Class.getName:()Ljava/lang/String;"
+        },
+        {
+          "offset": 27,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;"
+        },
+        {
+          "offset": 30,
+          "opcode": "0xb6",
+          "detail": "java/lang/StringBuilder.toString:()Ljava/lang/String;"
+        },
+        {
+          "offset": 33,
+          "opcode": "0xb8",
+          "detail": "com/esotericsoftware/minlog/Log.trace:(Ljava/lang/String;Ljava/lang/String;)V"
+        },
+        {
+          "offset": 37,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 40,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isOptimizedGenerics:()Z"
+        },
+        {
+          "offset": 47,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.typeParameters:[Ljava/lang/reflect/TypeVariable;"
+        },
+        {
+          "offset": 54,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.generics:[Ljava/lang/Class;"
+        },
+        {
+          "offset": 61,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.rebuildCachedFields:()V"
+        },
+        {
+          "offset": 65,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 72,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 76,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.type:Ljava/lang/Class;"
+        },
+        {
+          "offset": 80,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 83,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/GenericsResolver.pushScope:(Ljava/lang/Class;Lcom/esotericsoftware/kryo/serializers/Generics;)V"
+        },
+        {
+          "offset": 87,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.fields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 92,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 114,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer$CachedField.write:(Lcom/esotericsoftware/kryo/io/Output;Ljava/lang/Object;)V"
+        },
+        {
+          "offset": 124,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 127,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isSerializeTransient:()Z"
+        },
+        {
+          "offset": 133,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 137,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.transientFields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 151,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.transientFields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 159,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer$CachedField.write:(Lcom/esotericsoftware/kryo/io/Output;Ljava/lang/Object;)V"
+        },
+        {
+          "offset": 169,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 172,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isOptimizedGenerics:()Z"
+        },
+        {
+          "offset": 179,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 186,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 189,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/GenericsResolver.popScope:()V"
+        },
+        {
+          "offset": 192,
+          "opcode": "0xb1",
+          "detail": "return"
+        }
+      ]
+    },
+    {
+      "method": "read(Lcom/esotericsoftware/kryo/Kryo;Lcom/esotericsoftware/kryo/io/Input;Ljava/lang/Class;)Ljava/lang/Object;",
+      "instructions": [
+        {
+          "offset": 1,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 4,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isOptimizedGenerics:()Z"
+        },
+        {
+          "offset": 11,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.typeParameters:[Ljava/lang/reflect/TypeVariable;"
+        },
+        {
+          "offset": 18,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.generics:[Ljava/lang/Class;"
+        },
+        {
+          "offset": 25,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.rebuildCachedFields:()V"
+        },
+        {
+          "offset": 29,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 36,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 41,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 44,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/GenericsResolver.pushScope:(Ljava/lang/Class;Lcom/esotericsoftware/kryo/serializers/Generics;)V"
+        },
+        {
+          "offset": 51,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.create:(Lcom/esotericsoftware/kryo/Kryo;Lcom/esotericsoftware/kryo/io/Input;Ljava/lang/Class;)Ljava/lang/Object;"
+        },
+        {
+          "offset": 59,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.reference:(Ljava/lang/Object;)V"
+        },
+        {
+          "offset": 63,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.fields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 68,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 91,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer$CachedField.read:(Lcom/esotericsoftware/kryo/io/Input;Ljava/lang/Object;)V"
+        },
+        {
+          "offset": 101,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 104,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isSerializeTransient:()Z"
+        },
+        {
+          "offset": 110,
+          "opcode": "0x3",
+          "detail": "iconst 0"
+        },
+        {
+          "offset": 114,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.transientFields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 128,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.transientFields:[Lcom/esotericsoftware/kryo/serializers/FieldSerializer$CachedField;"
+        },
+        {
+          "offset": 137,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer$CachedField.read:(Lcom/esotericsoftware/kryo/io/Input;Ljava/lang/Object;)V"
+        },
+        {
+          "offset": 151,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 154,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isOptimizedGenerics:()Z"
+        },
+        {
+          "offset": 161,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 168,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 175,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 178,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/GenericsResolver.popScope:()V"
+        },
+        {
+          "offset": 187,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.config:Lcom/esotericsoftware/kryo/serializers/FieldSerializerConfig;"
+        },
+        {
+          "offset": 190,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializerConfig.isOptimizedGenerics:()Z"
+        },
+        {
+          "offset": 197,
+          "opcode": "0xb4",
+          "detail": "com/esotericsoftware/kryo/serializers/FieldSerializer.genericsScope:Lcom/esotericsoftware/kryo/serializers/Generics;"
+        },
+        {
+          "offset": 204,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 211,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/Kryo.getGenericsResolver:()Lcom/esotericsoftware/kryo/serializers/GenericsResolver;"
+        },
+        {
+          "offset": 214,
+          "opcode": "0xb6",
+          "detail": "com/esotericsoftware/kryo/serializers/GenericsResolver.popScope:()V"
+        }
+      ]
+    }
+  ]
+}

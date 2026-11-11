@@ -1,6 +1,6 @@
 # Paridade nativa da carreira multiplayer
 
-Status: requisitos gerais abertos, revisão de 08/11/2026. [Backlog único](../task-paridade-nativa.md); [inventário e evidências](../estado-agente-requisitos.md). Esta spec não certifica implementação.
+Status: requisitos gerais abertos, revisão de 08/11/2026. [Backlog único](../tasks/sem-prioridade/task-paridade-nativa.md); [inventário e evidências](../estado-agente-requisitos.md). Esta spec não certifica implementação.
 
 ## Referência e escopo
 
@@ -26,3 +26,5 @@ A certificação do launcher usa o JAR distribuído. Um teste unitário de negoc
 ## Decisões ainda abertas
 
 Definir suporte a seleções e regionais, empréstimos, leilões, capitão/batedores, juniores na escalação e táticas salvas conforme levantamento local, além da política de paradas de gestão durante automação das datas. A precedência do auxiliar sobre foco manual já foi rastreada e validada no [contrato de treino](spec-treino-auxiliar-online.md); preservar esse comportamento, com o limite de acesso pelo botão ainda registrado na task correspondente. Essas decisões não mudam as specs já existentes de [Opções](spec-opcoes-nativas-online.md), nem encerram as tasks de calendários, folga ou áudio.
+
+As outras frentes abertas e seu estado concreto estão no [backlog rastreável](../tasks/sem-prioridade/task-paridade-nativa.md). Em particular, calendário, Procura, persistência de referências, identidade do técnico, consultas históricas, ajustes ao vivo, finanças, pênaltis, estatísticas e Academia secundária têm tasks/specs específicas; critérios propostos nelas não significam implementação nem validação concluída.

@@ -1,8 +1,8 @@
 # Treino semanal e auxiliar online
 
-Limite de acesso identificado estaticamente após a integração: [modo individual e visibilidade do botão Id](../task-habilidades-individuais-online.md). O clique real no dashboard permanece pendente de validação; os testes anteriores abriram o diálogo por reflexão. A entrega funcional e as evidências abaixo continuam válidas no escopo exercitado.
+Limite de acesso identificado estaticamente após a integração: [modo individual e visibilidade do botão Id](../tasks/sem-prioridade/task-habilidades-individuais-online.md). O clique real no dashboard permanece pendente de validação; os testes anteriores abriram o diálogo por reflexão. A entrega funcional e as evidências abaixo continuam válidas no escopo exercitado.
 
-Revisão: 08/11/2026. Status atual: contrato implementado e tecnicamente validado na integração `fd4aa24f`, conforme [registro integrado](../integracao-main-2026-11-08.md) e [implementação completa](../implementacao-treino-auxiliar-completo.md). A [task](../task-treino-auxiliar-online.md) preserva limites e aceite. O diagnóstico e os probes iniciais abaixo são históricos; o bloqueio provisório foi substituído pelo auxiliar online completo.
+Revisão: 08/11/2026. Status atual: contrato implementado e tecnicamente validado na integração `fd4aa24f`, conforme [registro integrado](../integracao-main-2026-11-08.md) e [implementação completa](../implementacoes/implementacao-treino-auxiliar-completo.md). A [task](../tasks/sem-prioridade/task-treino-auxiliar-online.md) preserva limites e aceite. O diagnóstico e os probes iniciais abaixo são históricos; o bloqueio provisório foi substituído pelo auxiliar online completo.
 
 ## Consumidor nativo e precedência comprovada
 

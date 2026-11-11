@@ -1,6 +1,6 @@
 # Estado médico e disponibilidade dos jogadores
 
-Status: requisitos para [PN-12](../task-projecao-lesoes-online.md), implementação parcial em `main`, aceite final aberto. Revisão 08/11/2026. A fonte autoritativa permanece o host; não reconstituir estado médico a partir de `eligible`.
+Status: requisitos para [PN-12](../tasks/sem-prioridade/task-projecao-lesoes-online.md), implementação parcial em `main`, aceite final aberto. Revisão 08/11/2026. A fonte autoritativa permanece o host; não reconstituir estado médico a partir de `eligible`.
 
 ## Campos e regras nativas comprovadas no código local
 
@@ -44,4 +44,4 @@ Durante apresentação, snapshots congelados e projeções temporais da IA devem
 
 Evidência inicial: `AuditEligibility.java`/`result-eligibility.txt` reproduziram o bug na principal; a captura da [revisão da folga](../revisao-independente-folga.md) mostra o efeito gráfico. Novas execuções da implementação devem identificar branch/commit ou hash do JAR e registrar seus limites.
 
-Validação de diagnóstico posterior à integração: a [matriz PN-12](../task-projecao-lesoes-online.md) confirma separadamente lesão, contrato vencido e suspensão no JAR combinado, além de controle saudável e janela real. Probe de identidade confirma que o mapa por nome funde competições distintas e altera o tipo da primeira. O contrato precisa preservar a identidade de cada competição na lista de partidas, no próximo confronto e nos registros disciplinares; nome e tipo são atributos, não identificadores exclusivos. O efeito do contrato vencido deve ser corrigido com o campo exato, sem usar contagem truncada em dias como fonte autoritativa.
+Validação de diagnóstico posterior à integração: a [matriz PN-12](../tasks/sem-prioridade/task-projecao-lesoes-online.md) confirma separadamente lesão, contrato vencido e suspensão no JAR combinado, além de controle saudável e janela real. Probe de identidade confirma que o mapa por nome funde competições distintas e altera o tipo da primeira. O contrato precisa preservar a identidade de cada competição na lista de partidas, no próximo confronto e nos registros disciplinares; nome e tipo são atributos, não identificadores exclusivos. O efeito do contrato vencido deve ser corrigido com o campo exato, sem usar contagem truncada em dias como fonte autoritativa.

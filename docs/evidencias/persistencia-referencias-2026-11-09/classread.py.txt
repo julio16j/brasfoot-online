@@ -1,0 +1,53 @@
+import sys, struct, json
+from zipfile import ZipFile
+
+def inspect(jar,classname,selected):
+ b=ZipFile(jar).read(classname+'.class');p=8
+ def read(n):
+  nonlocal p
+  v=int.from_bytes(b[p:p+n],'big');p+=n;return v
+ cp=[None]*read(2);i=1
+ while i<len(cp):
+  t=read(1)
+  if t==1:
+   n=read(2);cp[i]=b[p:p+n].decode('utf8',errors='replace');p+=n
+  elif t in (3,4):p+=4
+  elif t in (5,6):p+=8;i+=1
+  elif t in (7,8,16,19,20):cp[i]=(t,read(2))
+  elif t in (9,10,11,12,17,18):cp[i]=(t,read(2),read(2))
+  elif t==15:p+=3
+  else:raise ValueError(t)
+  i+=1
+ def ref(index):
+  r=cp[index];nt=cp[r[2]];return cp[cp[r[1]][1]]+'.'+cp[nt[1]]+':'+cp[nt[2]]
+ p+=6;n=read(2);p+=2*n;result=[]
+ lengths={16:2,17:3,18:2,19:3,20:3,132:3,169:2,187:3,188:2,189:3,192:3,193:3,197:4,198:3,199:3,200:5,201:5,185:5,186:5}
+ for op in list(range(21,26))+list(range(54,59)):lengths[op]=2
+ for op in list(range(153,169))+list(range(178,185)):lengths[op]=3
+ for kind in ('fields','methods'):
+  for _ in range(read(2)):
+   flags=read(2);name=cp[read(2)];desc=cp[read(2)]
+   for _ in range(read(2)):
+    attr=cp[read(2)];n=read(4);start=p
+    if kind=='methods' and name in selected and attr=='Code':
+     p+=4;size=read(4);code=b[p:p+size];q=0;rows=[]
+     while q<len(code):
+      op=code[q];detail=None;length=lengths.get(op,1)
+      if op in range(178,186):detail=ref(struct.unpack_from('>H',code,q+1)[0])
+      elif op in range(2,9):detail='iconst '+str(op-3)
+      elif op in (108,110,134):detail={108:'idiv',110:'fdiv',134:'i2f'}[op]
+      elif op in (172,177):detail='return'
+      if detail:rows.append({'offset':q,'opcode':hex(op),'detail':detail})
+      if op in (170,171):
+       base=(q+4)&~3
+       if op==170:
+        low,high=struct.unpack_from('>ii',code,base+4);length=base-q+12+4*(high-low+1)
+       else:
+        pairs=struct.unpack_from('>i',code,base+4)[0];length=base-q+8+pairs*8
+      elif op==196:length=6 if code[q+1]==132 else 4
+      q+=length
+     if q!=len(code):raise ValueError('Instruction boundary mismatch')
+     result.append({'method':name+desc,'instructions':rows})
+    p=start+n
+ return {'jar':jar,'class':classname,'methods':result}
+if __name__=='__main__':print(json.dumps(inspect(sys.argv[1],sys.argv[2],sys.argv[3:]),ensure_ascii=False,indent=2))

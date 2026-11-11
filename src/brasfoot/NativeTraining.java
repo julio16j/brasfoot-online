@@ -17,7 +17,7 @@ public final class NativeTraining extends JDialog {
     private boolean assistant,pending,available=true;
 
     public NativeTraining(JFrame owner,ah club,Submit submit){
-        super(owner,"Treino — "+club.getNome(),true);this.submit=submit;clubId=club.lk();panel=new a.iQ(this,club);
+        super(owner,"Treino — "+club.getNome(),true);setUndecorated(true);this.submit=submit;clubId=club.lk();panel=new a.iQ(this,club);
         JCheckBox automatic=(JCheckBox)Data.get(panel,"MY");
         for(java.awt.event.ActionListener listener:automatic.getActionListeners())automatic.removeActionListener(listener);
         automatic.addActionListener(event->{if(!pending && available)send("training-assistant","enabled",String.valueOf(automatic.isSelected()));});

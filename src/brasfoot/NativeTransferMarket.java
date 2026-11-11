@@ -29,7 +29,7 @@ public final class NativeTransferMarket {
     }
     public static void open(JFrame owner,ah buyer,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery,AgendaQuery agendaQuery){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
-        JDialog dialog=new JDialog(owner,"Times",true);a.iA panel=new a.iA(dialog,buyer,buyer,false);
+        JDialog dialog=new JDialog(owner,"Times",true);dialog.setUndecorated(true);a.iA panel=new a.iA(dialog,buyer,buyer,false);
         show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery,agendaQuery);
     }
 
@@ -42,7 +42,7 @@ public final class NativeTransferMarket {
     }
     public static void openSelected(JFrame owner,JDialog searchDialog,ah buyer,F player,NativeTransferSearch.Submit submit,NativeYouth.Promotion youthPromotion,AcademyQuery academyQuery,AgendaQuery agendaQuery){
         ah seller=player==null?null:player.fg();if(!canOpenSelected(buyer,player,seller))return;
-        JDialog dialog=new JDialog(searchDialog,"Times",true);a.iA panel=new a.iA(dialog,seller,buyer,false);selectPlayerRow(panel,player);panel.s(player);
+        JDialog dialog=new JDialog(searchDialog,"Times",true);dialog.setUndecorated(true);a.iA panel=new a.iA(dialog,seller,buyer,false);selectPlayerRow(panel,player);panel.s(player);
         show(owner,dialog,panel,buyer,submit,youthPromotion,academyQuery,agendaQuery);
     }
 

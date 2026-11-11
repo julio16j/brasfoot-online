@@ -37,9 +37,9 @@ public class CalendarInvestigation {
   for(int i=0;i<assets.length;i++){assets[i]=selected.get(i).jY();names[i]="Diagnostic "+i;}
   GameAdapter game=CareerEngine.createByAssets(root,assets,names);
   Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("selection",args[1]);
-  List<Integer> active=new ArrayList<Integer>();
-  for(Object raw:c.a.SR.N())active.add(((Z)raw).jc());
-  result.put("generatedCountries",active);
+  List<Integer> catalogCountries=new ArrayList<Integer>();
+  for(Object raw:c.a.SR.N())catalogCountries.add(((Z)raw).jc());
+  result.put("catalogCountries",catalogCountries);
   List<Integer> enabled=new ArrayList<Integer>();
   for(Object raw:c.a.SR.bF){O country=(O)raw;if(country.iC())enabled.add(country.getPais());}
   result.put("enabledCountries",enabled);result.put("date",c.a.SR.T());

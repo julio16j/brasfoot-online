@@ -37,6 +37,8 @@ public final class NativePreparation {
         JButton scale=(JButton)Data.get(original,"HU");scale.setEnabled(true);scale.addActionListener(e->lineup.run());
         for(String field:fields){JButton button=(JButton)Data.get(original,field);button.setEnabled(true);button.setToolTipText(null);
             if(field.equals("HT")){button.setEnabled(false);button.setToolTipText("Edi\u00e7\u00e3o de cores do clube ainda n\u00e3o integrada ao host");}
+            else if(field.equals("HR"))button.addActionListener(e->menu.accept("Agenda"));
+            else if(field.equals("HS"))button.addActionListener(e->menu.accept("Tabelas"));
             else if(field.equals("HV"))button.addActionListener(e->menu.accept("Estádio"));
             else if(field.equals("yY"))button.addActionListener(e->menu.accept("Procura"));
             else if(field.equals("Ib"))button.addActionListener(e->menu.accept("Times"));

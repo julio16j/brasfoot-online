@@ -1,0 +1,7 @@
+# Estado inicial do botão de empréstimo em Times
+
+`NativeTransferMarket.show` habilitava o botão Empréstimo incondicionalmente depois de instalar o callback do host, substituindo o estado definido pela janela nativa para o jogador selecionado. O wrapper agora preserva o estado nativo: o botão só fica habilitado para jogador de outro clube que não esteja emprestado e tenha disponibilidade de empréstimo. A validação do callback continua conferindo essas condições antes de enviar.
+
+`NativePlayerSearchWindowTest` abre Times por duplo clique e Enter e compara o estado inicial do botão com o atleta exibido e seu clube. `python tools/build_adapter.py --test-transfer` e o teste gráfico passaram. O JAR e o ZIP foram reconstruídos.
+
+Revisão de paridade (10/11/2026): o commit `b3ece828` removeu o `loan.setEnabled(true)` incondicional em `NativeTransferMarket.show()`. Com `openSelected`, `panel.s(player)` calcula o estado por `a.iA.sG()` antes de `show`; o handler é substituído sem alterar `enabled`. Uma mudança real de linha continua recalculando a regra. Portanto a divergência de estado inicial registrada em versões anteriores foi corrigida no código e no pacote identificado nesta implementação; não deve permanecer como pendência ativa. Ver também [spec de empréstimos](../especificacao/spec-emprestimos-online.md).

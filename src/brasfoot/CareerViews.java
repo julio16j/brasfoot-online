@@ -23,6 +23,45 @@ public final class CareerViews {
         }
         Map<String,Object> result=new LinkedHashMap<String,Object>();result.put("clubId",clubId);result.put("club",club.getNome());result.put("fixtures",fixtures);return result;
     }
+    /** Complete, read-only calendar and domestic standings for the native client views. */
+    public static Map<String,Object> calendarCatalog(){
+        List<Object> fixtures=new ArrayList<Object>(),tables=new ArrayList<Object>();
+        Set<f.s> leagues=Collections.newSetFromMap(new IdentityHashMap<f.s,Boolean>());
+        List<Object> days=c.a.SR.R();
+        for(int dateIndex=0;dateIndex<days.size();dateIndex++){
+            best.a day=(best.a)days.get(dateIndex);
+            for(Object raw:day.h()){
+                I match=(I)raw;
+                Map<String,Object> row=new LinkedHashMap<String,Object>();
+                row.put("date",day.f());row.put("dateMillis",day.a().getTimeInMillis());row.put("dateIndex",dateIndex);row.put("status",match.e()?"played":"scheduled");
+                row.put("competition",match.hy()==null?"":match.hy().getNome());row.put("competitionKey",CompetitionIdentity.key(match.hy()));row.put("competitionId",match.hy()==null?-1:match.hy().gD());row.put("competitionType",match.hy()==null?0:match.hy().b());row.put("phase",match.hG());
+                row.put("home",match.hc().getNome());row.put("homeId",match.hc().lk());row.put("away",match.hd().getNome());row.put("awayId",match.hd().lk());row.put("result",confirmedResult(match));confirmedMatchFields(row,match);fixtures.add(row);
+                if(match.ht() instanceof f.s){f.s league=(f.s)match.ht();if(isSupportedDomesticLeague(league))leagues.add(league);}
+            }
+            for(Object competition:day.t())if(competition instanceof f.B&&((best.at)competition).b()==1){
+                best.L[] phases=((best.at)competition).mB();if(phases!=null)for(best.L phase:phases)if(phase instanceof f.s&&isSupportedDomesticLeague((f.s)phase))leagues.add((f.s)phase);
+            }
+        }
+        List<f.s> ordered=new ArrayList<f.s>(leagues);Collections.sort(ordered,(left,right)->{
+            int country=Integer.compare(left.iq()==null?-1:left.iq().jc(),right.iq()==null?-1:right.iq().jc());
+            if(country!=0)return country;int division=Integer.compare(left.getDivisao(),right.getDivisao());if(division!=0)return division;return String.valueOf(left.getNome()).compareTo(String.valueOf(right.getNome()));
+        });
+        for(f.s league:ordered){
+            Map<String,Object> table=new LinkedHashMap<String,Object>();best.at competition=league.yT();
+            table.put("competition",competition==null?league.getNome():competition.getNome());table.put("competitionKey",CompetitionIdentity.key(competition));table.put("competitionId",competition==null?-1:competition.gD());table.put("competitionType",competition==null?1:competition.b());table.put("country",league.iq()==null?-1:league.iq().jc());table.put("countryName",league.iq()==null?null:league.iq().jf());table.put("division",league.getDivisao());table.put("phase",league.io());table.put("relegationCount",league.getnRebaixados());table.put("directRelegationCount",league.getnRebaixados()-league.Bw());
+            List<Object> rows=new ArrayList<Object>();
+            for(Object teamRaw:league.yK()){
+                best.ah team=(best.ah)teamRaw;int[] stats=team.d(league);Map<String,Object> standing=new LinkedHashMap<String,Object>();standing.put("clubId",team.lk());standing.put("club",team.getNome());standing.put("position",league.Q(team));standing.put("group",0);
+                String[] keys={"points","played","wins","draws","losses","goalsFor","goalsAgainst","goalDifference"};for(int i=0;i<keys.length;i++)standing.put(keys[i],stats[i]);rows.add(standing);
+            }
+            table.put("rows",rows);List<Object> rounds=new ArrayList<Object>();Map<Long,List<Object>> byDate=new TreeMap<Long,List<Object>>();
+            for(int dateIndex=0;dateIndex<days.size();dateIndex++){best.a day=(best.a)days.get(dateIndex);for(Object raw:day.h()){I match=(I)raw;if(match.ht()!=league)continue;Map<String,Object> fixture=new LinkedHashMap<String,Object>();fixture.put("date",day.f());fixture.put("dateMillis",day.a().getTimeInMillis());fixture.put("dateIndex",dateIndex);fixture.put("status",match.e()?"played":"scheduled");fixture.put("home",match.hc().getNome());fixture.put("homeId",match.hc().lk());fixture.put("away",match.hd().getNome());fixture.put("awayId",match.hd().lk());fixture.put("result",confirmedResult(match));List<Object> same=byDate.get(day.a().getTimeInMillis());if(same==null){same=new ArrayList<Object>();byDate.put(day.a().getTimeInMillis(),same);}same.add(fixture);}}
+            int ordinal=1;for(Map.Entry<Long,List<Object>> entry:byDate.entrySet()){Map<String,Object> round=new LinkedHashMap<String,Object>();round.put("number",ordinal++);round.put("dateMillis",entry.getKey());round.put("fixtures",entry.getValue());rounds.add(round);}table.put("rounds",rounds);tables.add(table);
+        }
+        List<Object> clubs=new ArrayList<Object>();for(Object raw:c.a.SR.P()){best.ah club=(best.ah)raw;Map<String,Object> row=new LinkedHashMap<String,Object>();row.put("clubId",club.lk());row.put("club",club.getNome());row.put("asset",club.jY());row.put("country",club.getPais());row.put("division",club.getDivisao());clubs.add(row);}
+        Map<String,Object> response=new LinkedHashMap<String,Object>();response.put("calendar",fixtures);response.put("tables",tables);response.put("clubs",clubs);response.put("date",c.a.SR.T());response.put("dateMillis",c.a.SR.bb().getTimeInMillis());response.put("season",c.a.SR.H());response.put("year",c.a.SR.bb().get(Calendar.YEAR));return response;
+    }
+    private static boolean isSupportedDomesticLeague(f.s league){if(league.yT()==null||league.yT().b()!=1||league.iq()==null)return false;int country=league.iq().jc();return country==29||country==97||country==65||country==104||country==3||country==72;}
     private static void competitionFields(Map<String,Object> row,I match){best.at competition=match.hy();row.put("homeId",match.hc().lk());row.put("awayId",match.hd().lk());row.put("competitionId",competition==null?-1:competition.gD());row.put("competitionKey",CompetitionIdentity.key(competition));row.put("competitionType",competition==null?0:competition.b());row.put("competitionCountryName",competition==null||competition.iq()==null?null:competition.iq().jf());row.put("competitionDivision",competition==null?-1:competition.ip());}
     private static String confirmedResult(I match){if(!match.e())return "x";int[] penalties=match.hQ();return penalties[0]>=0&&penalties[1]>=0?match.hu()+" ("+penalties[0]+") x "+match.hw()+" ("+penalties[1]+")":match.hu()+" x "+match.hw();}
     private static void confirmedMatchFields(Map<String,Object> row,I match){row.put("attendance",match.e()?match.hU():null);row.put("revenue",match.e()?match.hN():null);boolean penalties=match.e()&&match.hQ()[0]>=0&&match.hQ()[1]>=0;row.put("penaltiesAvailable",penalties);row.put("homePenalties",penalties?match.hQ()[0]:null);row.put("awayPenalties",penalties?match.hQ()[1]:null);row.put("winnerClubId",match.e()&&match.hR()!=null?match.hR().lk():null);}

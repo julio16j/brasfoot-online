@@ -6,6 +6,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -28,6 +29,7 @@ public final class SessionHost {
     private final Set<Integer> claimed = new HashSet<Integer>();
     private final Path directory;
     private final String sessionId = UUID.randomUUID().toString();
+    private final int hostCoach;
     private final String hostToken;
     private final boolean demo;
     private long checkpoint;
@@ -50,7 +52,7 @@ public final class SessionHost {
     public SessionHost(GameAdapter game, Path root, int hostCoach, boolean demo, long tickMillis,Map<String,Object> recoveredRound,Map<String,Object> recoveredManagement,Map<String,Object> recoveredOptions) throws IOException {
         if (!game.coachIds().contains(hostCoach)) throw new IllegalArgumentException("Host coach must be a human in this career");
         if(tickMillis!=0 && (tickMillis<5 || tickMillis>10000))throw new IllegalArgumentException("tick-ms must be between 5 and 10000");
-        this.game = game; this.round = new RoundCoordinator(game.coachIds(), game); this.demo = demo;
+        this.game = game; this.round = new RoundCoordinator(game.coachIds(), game); this.demo = demo;this.hostCoach=hostCoach;
         this.management=new CareerManagement(game);
         if(recoveredManagement!=null)management.restoreState(recoveredManagement);
         this.tickOverrideMillis=tickMillis==0?null:tickMillis;this.playback=new MatchPlayback(game.currentMatches(),game.isCareer());
@@ -58,7 +60,9 @@ public final class SessionHost {
         if(playback.snapshot().get("status").equals("FINISHED"))round.restoreFinished();
         else for(best.I fixture:game.currentMatches())if(fixture.e() || fixture.hu()!=0 || fixture.hw()!=0 || !fixture.hE().isEmpty())throw new IllegalArgumentException("Checkpoint contains an interrupted date; use --resume with the session directory");
         if(recoveredRound!=null)round.restoreMetadata(recoveredRound);
-        directory = root.resolve(sessionId); Files.createDirectories(directory);
+        best.al host=(best.al)c.a.SR.y(hostCoach);String coachName=host==null?"Tecnico":host.dS(),clubName=host==null||host.fg()==null?"Sem clube":host.fg().getNome();
+        String folderName=savePart(coachName)+" - "+savePart(clubName)+" - "+updatedTimestamp()+" - "+sessionId.substring(0,8);
+        directory = root.resolve(folderName); Files.createDirectories(directory);
         hostToken = claim(hostCoach);
         persist();
     }
@@ -77,7 +81,9 @@ public final class SessionHost {
     }
     private void persist(SessionOptions candidate) throws IOException {
         long next = checkpoint + 1;
-        String saveName = String.format("career-%06d.s22", next);
+        best.al host=(best.al)c.a.SR.y(hostCoach);String coachName=host==null?"Tecnico":host.dS(),clubName=host==null||host.fg()==null?"Sem clube":host.fg().getNome();
+        String updated=updatedTimestamp();
+        String saveName = savePart(coachName)+" - "+savePart(clubName)+" - "+updated+" - "+String.format(Locale.ROOT,"%06d",next)+".s22";
         Path temporary = directory.resolve(saveName + ".tmp");
         try {
             game.saveLocal(temporary.toFile());
@@ -104,6 +110,8 @@ public final class SessionHost {
             throw new IOException("Host checkpoint failed; commands paused", error);
         }
     }
+    private static String updatedTimestamp(){return new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS",Locale.ROOT).format(new Date());}
+    private static String savePart(String value){String safe=value==null?"":value.trim().replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]","_").replaceAll("\\s+"," ").replaceAll("[. ]+$","");return safe.isEmpty()?"Desconhecido":safe;}
     private Map<String, Object> state(int viewerCoach) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("viewerCoachId", viewerCoach); result.put("demo", demo); result.put("simulationImplemented", true);
@@ -286,6 +294,7 @@ public final class SessionHost {
             if(path.equals("/players/search") && method.equals("POST")){if(presentationStart!=null && !playback.status().equals("FINISHED"))throw new IllegalStateException("Consulta de jogadores disponÃ­vel apÃ³s a apresentaÃ§Ã£o da data");Map<String,String> request=form(exchange);String expected=request.remove("queryRevision");String pageOffset=request.get("offset");if(expected==null&&pageOffset!=null&&!pageOffset.equals("0")){Map<String,Object> required=error("Continuation pages require queryRevision from the first page");required.put("code","QUERY_REVISION_REQUIRED");reply(exchange,400,required);return;}long revision=Data.longNumber(round.snapshot().get("revision"));if(expected!=null&&!expected.equals(String.valueOf(revision))){Map<String,Object> stale=error("A carreira mudou durante a pesquisa; faça a busca novamente");stale.put("code","SEARCH_STALE");reply(exchange,409,stale);return;}Map<String,Object> response=management.searchPlayers(coach,request);response.put("queryRevision",revision);reply(exchange,200,response);return;}
             if(path.equals("/club-academy") && method.equals("POST")){if(presentationStart!=null && !playback.status().equals("FINISHED"))throw new IllegalStateException("Consulta de juniores indispon\u00edvel durante a apresenta\u00e7\u00e3o da data");Map<String,String> request=form(exchange);Set<String> fields=new HashSet<String>(request.keySet());if(!fields.equals(Collections.singleton("clubId"))&&!fields.equals(new HashSet<String>(Arrays.asList("clubId","queryRevision"))))throw new IllegalArgumentException("Expected clubId and optional queryRevision");long revision=Data.longNumber(round.snapshot().get("revision"));String expected=request.get("queryRevision");if(expected!=null&&!expected.equals(String.valueOf(revision))){Map<String,Object> stale=error("The career changed while loading this academy; reopen it");stale.put("code","SEARCH_STALE");reply(exchange,409,stale);return;}Map<String,Object> response=management.academy(Integer.parseInt(required(request,"clubId")));response.put("queryRevision",revision);reply(exchange,200,response);return;}
             if(path.equals("/club-agenda") && method.equals("POST")){if(presentationStart!=null && !playback.status().equals("FINISHED"))throw new IllegalStateException("Agenda indispon\u00edvel durante a apresenta\u00e7\u00e3o da data");Map<String,String> request=form(exchange);if(!request.keySet().equals(new HashSet<String>(Arrays.asList("clubId","queryRevision"))))throw new IllegalArgumentException("Expected clubId and queryRevision");long revision=Data.longNumber(round.snapshot().get("revision"));String expected=required(request,"queryRevision");if(!expected.equals(String.valueOf(revision))){Map<String,Object> stale=error("The career changed while loading this agenda; reopen it");stale.put("code","SEARCH_STALE");reply(exchange,409,stale);return;}Map<String,Object> response=CareerViews.clubAgenda(Integer.parseInt(required(request,"clubId")));response.put("queryRevision",revision);reply(exchange,200,response);return;}
+            if(path.equals("/calendar-catalog") && method.equals("GET")){if(!game.isCareer())throw new IllegalStateException("Friendly session has no career calendar");if(presentationStart!=null&&!playback.status().equals("FINISHED"))throw new IllegalStateException("Calendario e tabelas indisponiveis durante a apresentacao da data");Map<String,Object> response=CareerViews.calendarCatalog();response.put("queryRevision",Data.longNumber(round.snapshot().get("revision")));reply(exchange,200,response);return;}
             if((path.equals("/overview") || path.equals("/management")) && method.equals("GET") && presentationStart!=null && !playback.status().equals("FINISHED"))throw new IllegalStateException("Consultas de gestÃ£o disponÃ­veis apÃ³s a apresentaÃ§Ã£o da data");
             if(path.equals("/management") && method.equals("GET")){reply(exchange,200,management.snapshot(coach));return;}
             if(path.equals("/overview") && method.equals("GET")){reply(exchange,200,CareerViews.snapshot(coach));return;}
@@ -382,7 +391,7 @@ public final class SessionHost {
             Map<String,Object> manifest=Data.parse(new String(Files.readAllBytes(previous.resolve("session.json")),StandardCharsets.UTF_8));
             String phase=(String)Data.map(manifest.get("round")).get("phase");
             String save=(String)manifest.get((phase.equals("RUNNING") || phase.equals("HALF_TIME") || phase.equals("FAILED") || phase.equals("WAITING_FOR_ENGINE"))?"roundStartSave":"save");
-            if(save==null || !save.matches("career-[0-9]+\\.s22"))throw new IllegalArgumentException("Session has no valid recovery checkpoint");
+            if(save==null || !save.matches("[^\\\\/:*?\"<>|\\p{Cntrl}]+\\.s22"))throw new IllegalArgumentException("Session has no valid recovery checkpoint");
             options.put("--save",previous.resolve(save).toString());
             recoveredRound=Data.map(manifest.get("round"));
             if(manifest.containsKey("sessionOptions"))recoveredOptions=Data.map(manifest.get("sessionOptions"));
@@ -397,6 +406,7 @@ public final class SessionHost {
             if(options.containsKey("--club-assets")){int[] nationalities=options.containsKey("--coach-nationalities")?indices(options.get("--coach-nationalities")):null;game=CareerEngine.createByAssets(root.toFile(),options.get("--club-assets").split(",",-1),names,nationalities);}
             else if(options.containsKey("--club-ids"))game=CareerEngine.create(root.toFile(),indices(options.get("--club-ids")),names);
             else game=CareerEngine.create(root.toFile(),options.getOrDefault("--clubs","Corinthians,Palmeiras,Santos,SÃ£o Paulo").split(","),names);
+            CareerEngine.advanceToFirstHumanFixture(game);
         } else if(demo)game=Fixture.create(root.resolve("game/Brasfoot22-23/teams/abcrn_bra.ban").toFile(),root.resolve("game/Brasfoot22-23/teams/corinthians_bra.ban").toFile());
         else game=GameAdapter.readLocalSave(new File(options.get("--save")));
         if(game.isCareer()){

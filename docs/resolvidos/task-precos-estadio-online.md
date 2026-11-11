@@ -1,6 +1,6 @@
 # Preços do estádio: confirmação e rascunho
 
-Status: aberta, P2 proposta, complemento PN-09. Diagnóstico estático de 08/11/2026, sem executar jogo, janela ou testes. Não altera a evidência histórica aprovada para obra de expansão.
+Status: concluida em 11/11/2026, conforme confirmacao do usuario. O teste da interface simulou a liberacao dos quatro campos, alteracao dos setores e envio pelo JAR distribuido.
 
 ## Fluxo nativo e adaptação
 
@@ -22,7 +22,7 @@ Definir a confirmação e o fechamento mantendo o painel nativo: o rascunho prec
 
 Aceite: alterar valores e fechar por X e pela moldura; alternar sugerido/manual e receber snapshot antes de confirmar; preencher sugestões; limites por setor; erro de autorização/revisão/gravação sem controles presos; dois clientes; reconexão/save/retomada; comprovar a receita no motor com os valores confirmados. Não confundir sugeridos por competição com tabela de preços manuais persistida. O contexto do próximo confronto em folga ainda requer validação, pois `upcoming` não publica competitionType.
 
-Relacionados: [matriz de gestão](validacao-gestao-nativa.md), [finanças](task-financas-nativas-online.md), [backlog](task-paridade-nativa.md) e [mapa](mapa-implementacao.md). Implementação e validação dinâmica pendentes.
+Relacionados: [matriz de gestão](../validacao-gestao-nativa.md), [finanças](../tasks/sem-prioridade/task-financas-nativas-online.md), [backlog](../tasks/sem-prioridade/task-paridade-nativa.md) e [mapa](../mapa-implementacao.md). Implementação e validação dinâmica pendentes.
 
 
 
@@ -33,3 +33,17 @@ Relacionados: [matriz de gestão](validacao-gestao-nativa.md), [finanças](task-
 Validacao: `NativeStadiumWindowTest` abriu o painel nativo real, cotou expansao e enviou preco manual confirmado contra `SessionHost` HTTP; `NativeStadiumPricesTest` verificou isolamento do rascunho; `test_stadium_transactions.py` aprovou checkpoint, conflito Ready (409), persistencia e retomada para precos e obra; `CareerManagementStadiumTest` aprovou cotacao nativa, debito, rejeicao de duplicacao e limites.
 
 Limites PN-09 restantes: saldo insuficiente e rollback por falha de armazenamento de obra/preco, mudanca concorrente em segundo cliente, confirmacao completa das sugestoes por competencia e receita de jogo apos precos manuais ainda nao foram exercitados neste recorte.
+
+
+## Reabertura - 11/11/2026
+
+Relato do usuario: a expansao funciona, mas os valores manuais dos ingressos Geral e dos demais setores nao podem ser editados. A task foi reaberta para investigar a interacao real no pacote usado; a validacao anterior nao encerra este relato.
+
+Na interface nativa, o modo inicial "Usar sempre os precos sugeridos" mantem os quatro campos desabilitados. E necessario desmarcar essa opcao para liberar Geral, Cadeiras inferiores, Cadeiras superiores e Camarotes. Foram adicionadas dicas nos quatro campos e no checkbox. O botao de sugestao continua preenchendo os valores sugeridos; X salva os valores no host.
+
+A validacao atual simula o clique no checkbox, verifica que os quatro campos habilitam, altera cada setor e confirma que os quatro valores chegam ao host e sao aplicados. O mesmo teste passou usando o JAR distribuido. A task permanece aberta ate o relato do usuario estar coberto; registrar o launcher e a versao em uso se o problema persistir.
+
+
+## Conclusao pelo usuario - 11/11/2026
+
+O usuario confirmou que a edicao dos precos esta resolvida e que abrira outra task se o problema voltar. A tela inicia no modo de precos sugeridos, que desabilita os quatro campos; desmarcar essa opcao libera Geral e os demais setores. O teste de janela comprovou a edicao manual dos quatro valores e sua confirmacao no host no JAR distribuido.

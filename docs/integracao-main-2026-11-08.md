@@ -42,12 +42,12 @@ Uma instância do jogo já aberta deve ser fechada e reaberta pelo launcher para
 
 ## Documentos de origem
 
-- [Entrega de folgas](implementacao-escalacao-folga.md).
-- [Entrega do auxiliar](implementacao-treino-auxiliar-completo.md).
-- [Opções nativas](implementacao-opcoes-nativas-online.md).
+- [Entrega de folgas](implementacoes/implementacao-escalacao-folga.md).
+- [Entrega do auxiliar](implementacoes/implementacao-treino-auxiliar-completo.md).
+- [Opções nativas](implementacoes/implementacao-opcoes-nativas-online.md).
 - [Revisão da folga](revisao-independente-folga.md).
 - [Revisão do auxiliar](revisao-independente-auxiliar-online.md).
-- [Backlog de paridade](task-paridade-nativa.md).
+- [Backlog de paridade](tasks/sem-prioridade/task-paridade-nativa.md).
 
 ## Limites preservados
 

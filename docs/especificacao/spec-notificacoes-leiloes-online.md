@@ -39,4 +39,4 @@ Decisões abertas de multiplayer: como avançar entre participantes, o que fazer
 - Leilões: geração, candidatos elegíveis, mínimo, lances/desistência, concorrência, comprador IA/humano/ausente, débito/crédito/elenco/contrato/histórico; falha/repetição/reconexão e save/retomada durante cada etapa.
 - Manter os três controles indisponíveis enquanto os consumidores não estiverem integrados; evidência do setter não encerra PN-05.
 
-Nenhum critério foi executado nesta etapa. Relacionados: [gestão](../validacao-gestao-nativa.md), [finanças](../task-financas-nativas-online.md), [renovação manual](../task-renovacao-contratos-online.md) e [backlog](../task-paridade-nativa.md).
+Nenhum critério foi executado nesta etapa. Relacionados: [gestão](../validacao-gestao-nativa.md), [finanças](../tasks/sem-prioridade/task-financas-nativas-online.md), [renovação manual](../tasks/sem-prioridade/task-renovacao-contratos-online.md) e [backlog](../tasks/sem-prioridade/task-paridade-nativa.md).

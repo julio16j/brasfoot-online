@@ -54,7 +54,7 @@ public final class NativeTransferSearch {
     }
     public static void open(JFrame owner,ah buyer,int mode,Submit submit,Query query,NativeYouth.Promotion youthPromotion,NativeTransferMarket.AcademyQuery academyQuery,NativeTransferMarket.AgendaQuery agendaQuery,List<Object> playingCountries){
         if(buyer==null)throw new IllegalStateException("Club is unavailable");
-        JDialog dialog=new JDialog(owner,"Procura de jogadores",true);
+        JDialog dialog=new JDialog(owner,"Procura de jogadores",true);dialog.setUndecorated(true);
         a.gx panel=new a.gx(dialog,buyer,false,mode);
         if(playingCountries!=null)installPlayingCountryOptions((components.O)Data.get(panel,"zi"),playingCountries);
         JTable table=(JTable)Data.get(panel,"zj");

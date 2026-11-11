@@ -1,0 +1,23 @@
+package brasfoot;
+import java.io.*;import java.nio.file.*;import java.util.*;import java.awt.*;import java.lang.reflect.*;import javax.swing.*;import javax.imageio.ImageIO;
+public class AuditConnectedCalendar {
+ static Object call(Object target,String name,Class<?>[] types,Object...args)throws Exception{Method m=target.getClass().getDeclaredMethod(name,types);m.setAccessible(true);return m.invoke(target,args);}
+ public static void main(String[] args)throws Exception{
+  Path root=Paths.get(args[0]);System.setProperty("user.dir",root.resolve("game/Brasfoot22-23").toString());UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+  final NativeClient[] client={null};SwingUtilities.invokeAndWait(()->{client[0]=new NativeClient(root);((JFrame)Data.get(client[0],"frame")).setVisible(true);});
+  call(client[0],"connect",new Class<?>[]{String.class,String.class},args[1],args[2]);
+  long deadline=System.currentTimeMillis()+15000;while(Data.get(client[0],"latest")==null && System.currentTimeMillis()<deadline)Thread.sleep(50);
+  if(Data.get(client[0],"latest")==null)throw new AssertionError("Connected screen never became ready");
+  Map<String,Object> result=new LinkedHashMap<String,Object>();Map<String,Object> latest=Data.map(Data.get(client[0],"latest"));result.put("viewerCoachId",latest.get("viewerCoachId"));result.put("phase",Data.map(latest.get("round")).get("phase"));
+  SwingUtilities.invokeAndWait(()->{
+   javax.swing.Timer timer=new javax.swing.Timer(300,null);timer.addActionListener(event->{try{for(Window w:Window.getWindows())if(w instanceof JDialog && w.isShowing()){
+    JDialog d=(JDialog)w;if(d.getContentPane().getComponentCount()==0 || !(d.getContentPane().getComponent(0) instanceof a.L))continue;
+    a.L panel=(a.L)d.getContentPane().getComponent(0);JTable table=(JTable)Data.get(panel,"vN");result.put("rows",table.getRowCount());result.put("calendarDates",c.a.SR.R().size());JComboBox combo=(JComboBox)Data.get(panel,"va");result.put("filterCount",combo.getItemCount());result.put("calendarTitle",((JLabel)Data.get(panel,"vf")).getText());
+    java.awt.image.BufferedImage image=new java.awt.image.BufferedImage(d.getWidth(),d.getHeight(),java.awt.image.BufferedImage.TYPE_INT_RGB);java.awt.Graphics2D graphics=image.createGraphics();d.printAll(graphics);graphics.dispose();ImageIO.write(image,"png",root.resolve("connected-calendar.png").toFile());result.put("captureType","Swing printAll of actual connected dialog");timer.stop();d.dispose();
+   }}catch(Exception error){timer.stop();error.printStackTrace();for(Window w:Window.getWindows())if(w instanceof JDialog)w.dispose();}});
+   timer.start();JPanel preparation=(JPanel)Data.get(client[0],"preparationPanel");((JButton)Data.get(preparation,"HR")).doClick();JPopupMenu popup=(JPopupMenu)Data.get(preparation,"Hx");boolean found=false;for(Component component:popup.getComponents())if(component instanceof JMenuItem && "Jogos do seu time".equals(((JMenuItem)component).getText())){popup.setVisible(false);found=true;((JMenuItem)component).doClick();break;}if(!found)throw new AssertionError("Native calendar menu missing");
+  });
+  SwingUtilities.invokeAndWait(()->{try{call(client[0],"close",new Class<?>[]{});}catch(Exception error){throw new RuntimeException(error);}});
+  Files.write(root.resolve("connected-calendar.json"),Json.write(result).getBytes("UTF-8"));System.out.println(Json.write(result));System.exit(0);
+ }
+}

@@ -1,0 +1,20 @@
+package brasfoot;
+import java.io.*;import java.util.*;import javax.swing.*;import java.awt.*;import java.awt.event.*;import best.ah;
+public class AuditSearchRouting {
+ public static void main(String[] args)throws Exception{
+  PrintStream original=System.out;System.setOut(new PrintStream(new File(args[0],"routing-native.log"),"UTF-8"));
+  GameAdapter game=CareerEngine.createByAssets(new File(args[0]),new String[]{"corinthians_bra"},null);new CareerManagement(game);
+  ah buyer=c.a.SR.y(game.coachIds().iterator().next()).fg();Map<String,Object> result=new LinkedHashMap<String,Object>();
+  SwingUtilities.invokeAndWait(()->{
+   javax.swing.Timer timer=new javax.swing.Timer(250,null);timer.addActionListener(event->{for(Window w:Window.getWindows())if(w instanceof JDialog && w.isShowing()){
+    JDialog d=(JDialog)w;if(d.getContentPane().getComponentCount()==0 || !(d.getContentPane().getComponent(0) instanceof a.gx))continue;
+    a.gx panel=(a.gx)d.getContentPane().getComponent(0);JTable table=(JTable)Data.get(panel,"zj");JButton search=(JButton)Data.get(panel,"yY");
+    java.util.List<String> listeners=new ArrayList<String>();for(MouseListener listener:table.getMouseListeners())listeners.add(listener.getClass().getName());result.put("tableMouseListeners",listeners);
+    result.put("panelEnterAction",panel.getActionMap().get("st").getClass().getName());result.put("tableEnterAction",table.getActionMap().get("st").getClass().getName());result.put("searchButtonEnterAction",search.getActionMap().get("st").getClass().getName());
+    result.put("matchesActualNativeListener",NativeTransferSearch.isNativeOpenListener("a.gB"));result.put("matchesLowercaseOtherClass",NativeTransferSearch.isNativeOpenListener("a.gb"));
+    timer.stop();d.dispose();
+   }});timer.start();NativeTransferSearch.open(null,buyer,1,(fields,ok,fail)->{throw new AssertionError("No transfer permitted in audit");});
+  });
+  String output=Json.write(result);try(Writer writer=new OutputStreamWriter(new FileOutputStream(new File(args[0],"search-routing.json")),"UTF-8")){writer.write(output);}original.println(output);System.exit(0);
+ }
+}
