@@ -23,7 +23,7 @@ No fim do primeiro tempo com partidas humanas, o relógio pausa. A tela editáve
 
 ## Jogar
 
-1. No Windows com Java 8, execute `Brasfoot-Online.cmd`.
+1. No Windows com Java 8, execute `Brasfoot-Online.exe` no pacote distribuído.
 2. O host escolhe **Carreira**, seleciona de 1 a 16 clubes na interface nativa e cria a sessão.
 3. Os demais jogadores informam o endereço e a porta do host, buscam os técnicos e entram em vagas livres.
 4. Cada técnico ajusta sua escalação na tela original e confirma **Pronto**. A data só começa quando todos confirmam.
